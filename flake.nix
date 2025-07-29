@@ -1,0 +1,54 @@
+{
+  description = "A Nix-flake-based Gleam development environment";
+
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+  outputs =
+    { self, nixpkgs }:
+    let
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      forEachSupportedSystem =
+        f:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          f {
+            pkgs = import nixpkgs {
+              inherit system;
+              config.allowUnfree = true;
+            };
+          }
+        );
+    in
+    {
+      devShells = forEachSupportedSystem (
+        { pkgs }:
+        {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              gleam
+              nixd
+              erlang_27
+              rebar3
+              nodejs
+              firefox
+              websocat
+              geckodriver
+              servo
+              chromium
+            ];
+
+            FIREFOX = "${pkgs.firefox}/bin/firefox";
+
+            JSONFORMAT = pkgs.writeShellScript "jsonfmt" ''
+              echo "$@" | ${pkgs.jfmt}/bin/jfmt
+            '';
+          };
+        }
+      );
+    };
+}
