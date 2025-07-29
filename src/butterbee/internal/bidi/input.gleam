@@ -267,7 +267,7 @@ pub fn perform_actions(
       ]),
     )
 
-  echo socket.send_request(socket, request)
+  socket.send_request(socket, request)
 
   driver
 }

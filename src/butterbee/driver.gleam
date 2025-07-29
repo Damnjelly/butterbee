@@ -35,6 +35,10 @@ pub fn new() -> WebDriver {
 
 pub fn goto(driver: WebDriver, url: String) -> WebDriver {
   let new_driver =
-    browsing_context.navigate(#(driver.socket, driver.context), url, None)
+    browsing_context.navigate(
+      #(driver.socket, driver.context),
+      url,
+      Some(browsing_context.Interactive),
+    )
   WebDriver(new_driver.0, new_driver.1)
 }

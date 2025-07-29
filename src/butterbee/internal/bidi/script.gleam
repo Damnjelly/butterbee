@@ -9,7 +9,9 @@
 ////
 //// https://w3c.github.io/webdriver-bidi/#module-script
 
+import butterbee/internal/bidi/browsing_context
 import butterbee/internal/decoders
+import butterbee/internal/socket
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 import gleam/json.{type Json}
@@ -214,4 +216,71 @@ fn node_properties_decoder() -> decode.Decoder(NodeProperties) {
     node_value:,
     shadow_root:,
   ))
+}
+
+pub type Target {
+  Context(ContextTarget)
+  //TODO: Realm(RealmTarget)
+}
+
+fn target_to_json(target: Target) -> Json {
+  case target {
+    Context(context_target) -> context_target_to_json(context_target)
+    //TODO: Realm(realm_target) -> realm_target_to_json(realm_target)
+  }
+}
+
+// TODO: pub type RealmTarget {
+//   RealmTarget(realm: Realm)
+// }
+
+pub type ContextTarget {
+  ContextTarget(
+    context: browsing_context.BrowsingContext,
+    sandbox: Option(String),
+  )
+}
+
+fn context_target_to_json(context_target: ContextTarget) -> Json {
+  let ContextTarget(context:, sandbox:) = context_target
+  let sandbox = case sandbox {
+    option.None -> []
+    Some(value) -> [#("sandbox", json.string(value))]
+  }
+  json.object(
+    [#("context", json.string(uuid.to_string(context.context)))]
+    |> list.append(sandbox),
+  )
+}
+
+pub type LocalValue {
+  Remote(RemoteReference)
+  //TODO: PrimitiveProtocol(PrimitiveProtocolValue)
+  //TODO: Channel(ChannelValue)
+  //TODO: ArrayLocal(ArrayLocalValue)
+  //TODO: DateLocal(DateLocalValue)
+  //TODO: MapLocal(MapLocalValue)
+  //TODO: ObjectLocal(ObjectLocalValue)
+  //TODO: RegExpLocal(RegExpLocalValue)
+  //TODO: SetLocal(SetLocalValue)
+}
+
+pub type CallFunctionParameters {
+  CallFunctionParameters(
+    function_declaration: String,
+    await_promise: Bool,
+    target: Option(Target),
+    arguments: Option(List(LocalValue)),
+    //TODO: result_ownership: Option(ResultOwnership),
+    //TODO: serialization_options: Option(SerializationOptions),
+    //TODO: this: Option(LocalValue),
+    //TODO: user_activation: Option(Bool),
+  )
+}
+
+pub fn call_function(
+  driver: #(socket.WebDriverSocket, browsing_context.BrowsingContext),
+  params: CallFunctionParameters,
+) -> a {
+  todo
 }
