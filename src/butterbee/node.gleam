@@ -11,7 +11,9 @@ import butterbee/query
 import gleam/bool
 import gleam/option.{None, Some}
 
-pub fn inner_text(driver_with_node: #(driver.WebDriver, query.Node)) -> String {
+pub fn inner_text(
+  driver_with_node: #(driver.WebDriver, query.Node),
+) -> #(driver.WebDriver, String) {
   let driver = driver_with_node.0
   let node = driver_with_node.1
 
@@ -51,5 +53,5 @@ pub fn inner_text(driver_with_node: #(driver.WebDriver, query.Node)) -> String {
     _ -> panic as "Expected primitive protocol"
   }
 
-  inner_text
+  #(driver, inner_text)
 }

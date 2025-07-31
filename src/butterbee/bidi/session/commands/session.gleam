@@ -1,4 +1,4 @@
-import butterbee/bidi/method.{New}
+import butterbee/bidi/method.{End, New}
 import butterbee/bidi/session/types/capabilities_request.{
   type CapabilitiesRequest, capabilities_request_to_json,
 }
@@ -9,6 +9,7 @@ import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode.{type Decoder}
 import gleam/http
 import gleam/http/request
+import gleam/json
 import gleam/list
 import youid/uuid
 
@@ -132,4 +133,12 @@ fn extensions_decoder() -> Decoder(Dict(String, Dynamic)) {
     |> dict.from_list()
 
   decode.success(extensions)
+}
+
+pub fn end(socket: socket.WebDriverSocket) -> Nil {
+  let request = socket.bidi_request(method.to_string(End), json.object([]))
+
+  socket.send_request(socket, request)
+
+  Nil
 }

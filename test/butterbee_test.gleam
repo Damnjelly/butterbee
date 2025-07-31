@@ -25,5 +25,6 @@ pub fn butterbee_test_test() {
     |> input.click()
     |> query.node(by.css("pre.log"))
     |> node.inner_text()
+    |> driver.end()
   assert text == "Hello, Joe!\n"
 }

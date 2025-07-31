@@ -66,3 +66,8 @@ pub fn wait(state: state, duration: Int) -> state {
   process.sleep(duration)
   state
 }
+
+pub fn end(driver_with_state: #(WebDriver, state)) -> state {
+  session.end({ driver_with_state.0 }.socket)
+  driver_with_state.1
+}
