@@ -16,7 +16,11 @@ import gleam/list
 import gleam/option.{None, Some}
 
 pub type WebDriver {
-  WebDriver(socket: WebDriverSocket, context: BrowsingContext)
+  WebDriver(
+    socket: WebDriverSocket,
+    context: BrowsingContext,
+    // config: config.ButterbeeConfig,
+  )
 }
 
 /// Start a new webdriver session connect to the browse session

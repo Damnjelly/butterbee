@@ -1,11 +1,11 @@
 import butterbee/by
 import butterbee/driver
 import butterbee/node
+import gleam/erlang/process
 import gleeunit
 
 import butterbee/input
 import butterbee/query
-import gleam/erlang/process
 import logging
 
 pub fn main() {
@@ -27,4 +27,11 @@ pub fn butterbee_test_test() {
     |> node.inner_text()
     |> driver.end()
   assert text == "Hello, Joe!\n"
+}
+
+pub fn timout_test() {
+  let _ =
+    driver.new()
+    |> driver.goto("https://gleam.run/")
+    |> query.node(by.css("pre.log"))
 }
