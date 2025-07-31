@@ -101,7 +101,7 @@ fn source_actions_to_json(source_actions: SourceActions) -> Json {
 
 pub type PointerSourceActions {
   PointerSourceActions(
-    id: Uuid,
+    id: String,
     parameters: Option(PointerParameters),
     actions: List(PointerSourceAction),
   )
@@ -119,7 +119,7 @@ fn pointer_source_actions_to_json(
   json.object(
     [
       #("type", json.string("pointer")),
-      #("id", json.string(uuid.to_string(id))),
+      #("id", json.string(id)),
       #("actions", json.array(actions, pointer_source_action_to_json)),
     ]
     |> list.append(parameters),

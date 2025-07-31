@@ -20,7 +20,7 @@ pub fn click(
       driver.socket,
       input.PerformActionsParameters(driver.context, [
         input.PointerSource(
-          input.PointerSourceActions(uuid.nil, None, [
+          input.PointerSourceActions("mouse", None, [
             input.PointerMove(input.PointerMoveAction(
               0,
               0,
