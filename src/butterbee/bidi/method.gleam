@@ -5,6 +5,8 @@ pub type Method {
   GetTree
   LocateNodes
   Navigate
+  // SCRIPT
+  CallFunction
   // INPUT 
   PerformActions
 }
@@ -17,6 +19,8 @@ pub fn to_string(command: Method) -> String {
     GetTree -> "browsingContext.getTree"
     LocateNodes -> "browsingContext.locateNodes"
     Navigate -> "browsingContext.navigate"
+    // SCRIPT
+    CallFunction -> "script.callFunction"
     // INPUT 
     PerformActions -> "input.performActions"
   }

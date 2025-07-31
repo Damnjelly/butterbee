@@ -62,7 +62,7 @@ pub fn goto(driver: WebDriver, url: String) -> WebDriver {
   WebDriver(new_driver.0, new_driver.1)
 }
 
-pub fn wait(a: a, duration: Int) -> a {
+pub fn wait(state: state, duration: Int) -> state {
   process.sleep(duration)
-  a
+  state
 }

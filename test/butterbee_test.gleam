@@ -1,5 +1,7 @@
 import butterbee/by
 import butterbee/driver
+import butterbee/node
+import gleeunit
 
 import butterbee/input
 import butterbee/query
@@ -8,9 +10,12 @@ import logging
 
 pub fn main() {
   logging.configure()
-  logging.set_level(logging.Info)
+  logging.set_level(logging.Debug)
   process.sleep(1000)
+  gleeunit.main()
+}
 
+pub fn butterbee_test_test() {
   let text =
     driver.new()
     |> driver.goto("https://gleam.run/")
@@ -19,7 +24,6 @@ pub fn main() {
     ))
     |> input.click()
     |> query.node(by.css("pre.log"))
-  // assert text == "Hello, Joe!"
-
-  process.sleep(1000)
+    |> node.inner_text()
+  assert text == "Hello, Joe!\n"
 }
