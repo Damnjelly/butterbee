@@ -1,9 +1,3 @@
-////
-//// ▗▄▄▄   ▄▄▄ ▄ ▄   ▄ ▗▞▀▚▖ ▄▄▄ 
-//// ▐▌  █ █    ▄ █   █ ▐▛▀▀▘█    
-//// ▐▌  █ █    █  ▀▄▀  ▝▚▄▄▖█    
-//// ▐▙▄▄▀      █                 
-////                                       
 //// The driver module contains high-level commands for interacting with the webdriver server
 
 import butterbee/bidi/browsing_context/commands/browsing_context.{

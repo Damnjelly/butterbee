@@ -1,9 +1,3 @@
-////
-////  ▗▄▄▖ ▄▄▄  ▗▞▀▘█  ▄ ▗▞▀▚▖▗▄▄▄▖
-//// ▐▌   █   █ ▝▚▄▖█▄▀  ▐▛▀▀▘  █  
-////  ▝▀▚▖▀▄▄▄▀     █ ▀▄ ▝▚▄▄▖  █  
-//// ▗▄▄▞▘          █  █        █  
-////                                       
 //// The socket module contains the websocket connection to the webdriver server
 
 import birl

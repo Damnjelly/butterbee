@@ -1,9 +1,3 @@
-////
-//// ▗▄▄▄  ▗▞▀▚▖▗▞▀▘ ▄▄▄     ▐▌▗▞▀▚▖ ▄▄▄ ▄▄▄ 
-//// ▐▌  █ ▐▛▀▀▘▝▚▄▖█   █    ▐▌▐▛▀▀▘█   ▀▄▄  
-//// ▐▌  █ ▝▚▄▄▖    ▀▄▄▄▀ ▗▞▀▜▌▝▚▄▄▖█   ▄▄▄▀ 
-//// ▐▙▄▄▀                ▝▚▄▟▌              
-////                                       
 //// Generic decoders and encoders for the webdriver bidi protocol
 
 import gleam/dynamic.{type Dynamic}
