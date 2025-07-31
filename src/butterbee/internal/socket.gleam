@@ -10,6 +10,7 @@ import birl
 import butterbee/internal/decoders
 import butterbee/internal/glam
 import glam/doc
+import gleam/dict
 import gleam/dynamic
 import gleam/dynamic/decode.{type Decoder}
 import gleam/erlang/process
@@ -46,7 +47,7 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
     "Connecting to WebDriver server at "
       <> request.to_uri(request) |> uri.to_string(),
   )
-  let state = process.new_subject()
+  let state = dict.new()
   let builder =
     stratus.websocket(
       request: request,
@@ -68,8 +69,12 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
 
             case result.result_type {
               Success -> {
-                process.send(state, msg)
-                stratus.continue(state)
+                let assert Ok(subject) = dict.get(state, result.id)
+                  as "Failed to find corresponding response"
+
+                process.send(subject, msg)
+
+                stratus.continue(state |> dict.drop([result.id]))
               }
               Error -> {
                 let assert Ok(result) = json.parse(msg, decode.dynamic)
@@ -85,6 +90,12 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
           }
           stratus.Binary(_) -> stratus.continue(state)
           stratus.User(SendCommand(subject, request)) -> {
+            let id_d = {
+              use id <- decode.field("id", decode.int)
+              decode.success(id)
+            }
+            let assert Ok(id) = json.parse(request, id_d)
+
             logging.log(
               logging.Debug,
               "------------------- Sending WebDriver Request -------------------
@@ -92,7 +103,8 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
             )
             let assert Ok(_) = stratus.send_text_message(conn, request)
               as "Failed to send webdriver request"
-            stratus.continue(subject)
+
+            stratus.continue(dict.insert(state, id, subject))
           }
           stratus.User(Close) -> {
             let assert Ok(_) = stratus.close(conn)
