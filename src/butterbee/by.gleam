@@ -1,23 +1,23 @@
-import butterbee/internal/bidi/browsing_context
+import butterbee/bidi/browsing_context/types/locator
 import gleam/option
 
 pub type By {
-  By(locator: browsing_context.Locator)
+  By(locator: locator.Locator)
 }
 
 pub fn xpath(value: String) -> By {
-  browsing_context.XPathLocator(value) |> By
+  locator.XPathLocator(value) |> By
 }
 
 pub fn css(value: String) -> By {
-  browsing_context.CssLocator(value) |> By
+  locator.CssLocator(value) |> By
 }
 
 pub fn inner_text(value: String) -> By {
-  browsing_context.InnerTextLocator(
+  locator.InnerTextLocator(
     value,
     option.None,
-    option.Some(browsing_context.Full),
+    option.Some(locator.Full),
     option.None,
   )
   |> By

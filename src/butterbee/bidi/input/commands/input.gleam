@@ -1,21 +1,86 @@
-////
-//// ▗▄▄▄▖▗▖  ▗▖▄▄▄▄  █  ▐▌▗▄▄▄▖
-////   █  ▐▛▚▖▐▌█   █ ▀▄▄▞▘  █  
-////   █  ▐▌ ▝▜▌█▄▄▄▀        █  
-//// ▗▄█▄▖▐▌  ▐▌█            █  
-////            ▀               
-////
-//// The input module contains functionality for simulated user input.
-
-import butterbee/internal/bidi/browsing_context
-import butterbee/internal/bidi/script
-import butterbee/internal/helper
+import butterbee/bidi/browsing_context/types/browsing_context.{
+  type BrowsingContext,
+}
+import butterbee/bidi/input/types/element_origin
+import butterbee/bidi/method.{PerformActions}
 import butterbee/internal/socket
-import gleam/dynamic/decode
-import gleam/json
+import gleam/json.{type Json}
 import gleam/list
 import gleam/option.{type Option}
 import youid/uuid.{type Uuid}
+
+///
+/// # [input.performActions](https://w3c.github.io/webdriver-bidi/#command-input-performActions)
+///
+/// The input.performActions command performs a specified sequence of user input actions.
+/// 
+/// ## Example
+///
+/// ```gleam
+/// let testdriver = #(webdriver.socket, webdriver.context)
+/// let testdriver =
+///   browsing_context.locate_nodes(
+///     testdriver,
+///     browsing_context.XPathLocator("/html/body/div[1]/div/div/div[2]/div/a"),
+///     None,
+///     None,
+///   )
+/// 
+/// let webdriver = testdriver.0
+/// let assert Ok(locator) = testdriver.1 |> list.first()
+/// let assert Some(locator_id) = locator.shared_id
+/// 
+/// input.perform_actions(#(webdriver.0, webdriver.1), [
+///   input.PointerSource(
+///     input.PointerSourceActions(uuid.nil, None, [
+///       input.PointerMove(input.PointerMoveAction(
+///         0,
+///         0,
+///         None,
+///         Some(
+///           input.Element(
+///             input.ElementOrigin(script.SharedReference(locator_id, None)),
+///           ),
+///         ),
+///       )),
+///       input.PointerDown(input.PointerDownAction(0)),
+///       input.PointerUp(input.PointerUpAction(0)),
+///     ]),
+///   ),
+/// ])
+/// ```
+///
+pub fn perform_actions(
+  socket: socket.WebDriverSocket,
+  params: PerformActionsParameters,
+) -> socket.WebDriverSocket {
+  let request =
+    socket.bidi_request(
+      method.to_string(PerformActions),
+      perform_actions_parameters_to_json(params),
+    )
+
+  socket.send_request(socket, request)
+
+  socket
+}
+
+pub type PerformActionsParameters {
+  PerformActionsParameters(
+    context: BrowsingContext,
+    actions: List(SourceActions),
+  )
+}
+
+fn perform_actions_parameters_to_json(
+  perform_actions_parameters: PerformActionsParameters,
+) -> Json {
+  let PerformActionsParameters(context:, actions:) = perform_actions_parameters
+  json.object([
+    #("context", json.string(uuid.to_string(context.context))),
+    #("actions", json.array(actions, source_actions_to_json)),
+  ])
+}
 
 pub type SourceActions {
   //TODO: NoneSourceActions(NoneSourceAction)
@@ -24,7 +89,7 @@ pub type SourceActions {
   //TODO: WheelSourceActions(WheelSourceAction)
 }
 
-fn source_actions_to_json(source_actions: SourceActions) -> json.Json {
+fn source_actions_to_json(source_actions: SourceActions) -> Json {
   case source_actions {
     //TODO: NoneSourceActions(none_source_action) -> todo
     PointerSource(pointer_source_actions) ->
@@ -44,7 +109,7 @@ pub type PointerSourceActions {
 
 fn pointer_source_actions_to_json(
   pointer_source_action: PointerSourceActions,
-) -> json.Json {
+) -> Json {
   let PointerSourceActions(id:, parameters:, actions:) = pointer_source_action
 
   let parameters = case parameters {
@@ -70,7 +135,7 @@ pub type PointerSourceAction {
 
 fn pointer_source_action_to_json(
   pointer_source_action: PointerSourceAction,
-) -> json.Json {
+) -> Json {
   case pointer_source_action {
     //TODO: Pause(pointer_pause_action) ->
     //   pointer_pause_action_to_json(pointer_pause_action)
@@ -89,9 +154,7 @@ pub type PointerDownAction {
   )
 }
 
-fn pointer_down_action_to_json(
-  pointer_down_action: PointerDownAction,
-) -> json.Json {
+fn pointer_down_action_to_json(pointer_down_action: PointerDownAction) -> Json {
   let PointerDownAction(button:) = pointer_down_action
   json.object([
     #("type", json.string("pointerDown")),
@@ -106,7 +169,7 @@ pub type PointerUpAction {
   )
 }
 
-fn pointer_up_action_to_json(pointer_up_action: PointerUpAction) -> json.Json {
+fn pointer_up_action_to_json(pointer_up_action: PointerUpAction) -> Json {
   let PointerUpAction(button:) = pointer_up_action
   json.object([
     #("type", json.string("pointerUp")),
@@ -124,9 +187,7 @@ pub type PointerMoveAction {
   )
 }
 
-fn pointer_move_action_to_json(
-  pointer_move_action: PointerMoveAction,
-) -> json.Json {
+fn pointer_move_action_to_json(pointer_move_action: PointerMoveAction) -> Json {
   let PointerMoveAction(x:, y:, duration:, origin:) = pointer_move_action
   let duration = case duration {
     option.None -> []
@@ -150,36 +211,23 @@ fn pointer_move_action_to_json(
 pub type Origin {
   Viewport
   Pointer
-  Element(ElementOrigin)
+  Element(element_origin.ElementOrigin)
 }
 
-fn origin_to_json(origin: Origin) -> json.Json {
+fn origin_to_json(origin: Origin) -> Json {
   case origin {
     Viewport -> json.string("viewport")
     Pointer -> json.string("pointer")
-    Element(element_origin) -> element_origin_to_json(element_origin)
+    Element(element_origin) ->
+      element_origin.element_origin_to_json(element_origin)
   }
-}
-
-pub type ElementOrigin {
-  ElementOrigin(element: script.SharedReference)
-}
-
-fn element_origin_to_json(element_origin: ElementOrigin) -> json.Json {
-  let ElementOrigin(element:) = element_origin
-  json.object([
-    #("type", json.string("element")),
-    #("element", script.shared_reference_to_json(element)),
-  ])
 }
 
 pub type PointerParameters {
   PointerParameters(pointer_type: Option(PointerType))
 }
 
-fn pointer_parameters_to_json(
-  pointer_parameters: PointerParameters,
-) -> json.Json {
+fn pointer_parameters_to_json(pointer_parameters: PointerParameters) -> Json {
   let PointerParameters(pointer_type:) = pointer_parameters
   json.object([
     #(
@@ -204,70 +252,4 @@ fn pointer_type_to_string(pointer_type: PointerType) -> String {
     Pen -> "pen"
     Touch -> "touch"
   }
-}
-
-type Methods {
-  PerformActions
-}
-
-fn method_to_string(command: Methods) -> String {
-  case command {
-    PerformActions -> "input.performActions"
-  }
-}
-
-/// Since this one is a bit more complicated, here is a minimal example of clicking on a button:
-///
-/// ```gleam
-///  let testdriver = #(webdriver.socket, webdriver.context)
-///  let testdriver =
-///    browsing_context.locate_nodes(
-///      testdriver,
-///      browsing_context.XPathLocator("/html/body/div[1]/div/div/div[2]/div/a"),
-///      None,
-///      None,
-///    )
-///  
-///  let webdriver = testdriver.0
-///  let assert Ok(locator) = testdriver.1 |> list.first()
-///  let assert Some(locator_id) = locator.shared_id
-///  
-///  input.perform_actions(#(webdriver.0, webdriver.1), [
-///    input.PointerSource(
-///      input.PointerSourceActions(uuid.nil, None, [
-///        input.PointerMove(input.PointerMoveAction(
-///          0,
-///          0,
-///          None,
-///          Some(
-///            input.Element(
-///              input.ElementOrigin(script.SharedReference(locator_id, None)),
-///            ),
-///          ),
-///        )),
-///        input.PointerDown(input.PointerDownAction(0)),
-///        input.PointerUp(input.PointerUpAction(0)),
-///      ]),
-///    ),
-///  ])
-/// ```
-pub fn perform_actions(
-  driver: #(socket.WebDriverSocket, browsing_context.BrowsingContext),
-  actions: List(SourceActions),
-) -> #(socket.WebDriverSocket, browsing_context.BrowsingContext) {
-  let socket = driver.0
-  let context = driver.1
-
-  let request =
-    socket.bidi_request(
-      method_to_string(PerformActions),
-      json.object([
-        #("context", json.string(uuid.to_string(context.context))),
-        #("actions", json.array(actions, source_actions_to_json)),
-      ]),
-    )
-
-  socket.send_request(socket, request)
-
-  driver
 }

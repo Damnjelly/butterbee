@@ -1,6 +1,7 @@
+import butterbee/bidi/input/commands/input
+import butterbee/bidi/input/types/element_origin
+import butterbee/bidi/script/types/remote_reference
 import butterbee/driver
-import butterbee/internal/bidi/input
-import butterbee/internal/bidi/script
 import butterbee/query
 import gleam/option.{None, Some}
 import youid/uuid
@@ -14,28 +15,31 @@ pub fn click(
   let assert Some(shared_id) = node.value.shared_id
     as "Node does not have a shared id"
 
-  let #(socket, context) =
-    input.perform_actions(#(driver.socket, driver.context), [
-      input.PointerSource(
-        input.PointerSourceActions(uuid.nil, None, [
-          input.PointerMove(input.PointerMoveAction(
-            0,
-            0,
-            option.None,
-            option.Some(
-              input.Element(
-                input.ElementOrigin(script.SharedReference(
-                  shared_id,
-                  option.None,
-                )),
+  let socket =
+    input.perform_actions(
+      driver.socket,
+      input.PerformActionsParameters(driver.context, [
+        input.PointerSource(
+          input.PointerSourceActions(uuid.nil, None, [
+            input.PointerMove(input.PointerMoveAction(
+              0,
+              0,
+              option.None,
+              option.Some(
+                input.Element(
+                  element_origin.ElementOrigin(remote_reference.SharedReference(
+                    shared_id,
+                    option.None,
+                  )),
+                ),
               ),
-            ),
-          )),
-          input.PointerDown(input.PointerDownAction(0)),
-          input.PointerUp(input.PointerUpAction(0)),
-        ]),
-      ),
-    ])
+            )),
+            input.PointerDown(input.PointerDownAction(0)),
+            input.PointerUp(input.PointerUpAction(0)),
+          ]),
+        ),
+      ]),
+    )
 
-  driver.WebDriver(socket, context)
+  driver.WebDriver(socket, driver.context)
 }

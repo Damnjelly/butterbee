@@ -1,16 +1,16 @@
+import butterbee/bidi/browsing_context/commands/browsing_context
+import butterbee/bidi/script/types/remote_value
 import butterbee/by.{type By}
 import butterbee/driver
-import butterbee/internal/bidi/browsing_context
-import butterbee/internal/bidi/script
 import gleam/list
 import gleam/option.{None}
 
 pub type Node {
-  Node(value: script.NodeRemoteValue)
+  Node(value: remote_value.NodeRemoteValue)
 }
 
-pub fn element(driver: driver.WebDriver, by: By) -> #(driver.WebDriver, Node) {
-  case elements(driver, by) {
+pub fn node(driver: driver.WebDriver, by: By) -> #(driver.WebDriver, Node) {
+  case nodes(driver, by) {
     #(webdriver, nodes) -> {
       let assert Ok(node) = list.first(nodes)
       #(webdriver, node)
@@ -18,22 +18,24 @@ pub fn element(driver: driver.WebDriver, by: By) -> #(driver.WebDriver, Node) {
   }
 }
 
-pub fn elements(
+pub fn nodes(
   driver: driver.WebDriver,
   by: By,
 ) -> #(driver.WebDriver, List(Node)) {
   let driver_with_nodes =
     browsing_context.locate_nodes(
-      #(driver.socket, driver.context),
-      by.locator,
-      None,
-      None,
+      driver.socket,
+      browsing_context.LocateNodesParameters(
+        driver.context,
+        by.locator,
+        None,
+        None,
+      ),
     )
 
-  let webdriver = driver.WebDriver(driver_with_nodes.0.0, driver_with_nodes.0.1)
   let nodes =
-    driver_with_nodes.1
+    { driver_with_nodes.1 }.nodes
     |> list.map(fn(node) { Node(node) })
 
-  #(webdriver, nodes)
+  #(driver, nodes)
 }

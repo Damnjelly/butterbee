@@ -1,5 +1,6 @@
 import butterbee/by
 import butterbee/driver
+
 import butterbee/input
 import butterbee/query
 import gleam/erlang/process
@@ -13,11 +14,11 @@ pub fn main() {
   let text =
     driver.new()
     |> driver.goto("https://gleam.run/")
-    |> query.element(by.xpath(
+    |> query.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
     |> input.click()
-    |> query.element(by.css("pre.log"))
+    |> query.node(by.css("pre.log"))
   // assert text == "Hello, Joe!"
 
   process.sleep(1000)
