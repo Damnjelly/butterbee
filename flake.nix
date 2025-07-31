@@ -41,12 +41,6 @@
               servo
               chromium
             ];
-
-            FIREFOX = "${pkgs.firefox}/bin/firefox";
-
-            JSONFORMAT = pkgs.writeShellScript "jsonfmt" ''
-              echo "$@" | ${pkgs.jfmt}/bin/jfmt
-            '';
           };
         }
       );
