@@ -15,7 +15,7 @@ pub fn main() {
   gleeunit.main()
 }
 
-pub fn butterbee_test_test() {
+pub fn minimal_example_test() {
   let text =
     driver.new()
     |> driver.goto("https://gleam.run/")
