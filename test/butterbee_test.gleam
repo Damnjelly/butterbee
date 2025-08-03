@@ -28,10 +28,3 @@ pub fn minimal_example_test() {
     |> driver.end()
   assert text == "Hello, Joe!\n"
 }
-
-pub fn timout_test() {
-  let _ =
-    driver.new()
-    |> driver.goto("https://gleam.run/")
-    |> query.node(by.css("pre.log"))
-}

@@ -16,7 +16,7 @@ import gleam/uri
 import logging
 import stratus
 
-const request_timeout = 1000
+const request_timeout = 5000
 
 pub type Msg {
   SendCommand(subject: process.Subject(String), request: String)

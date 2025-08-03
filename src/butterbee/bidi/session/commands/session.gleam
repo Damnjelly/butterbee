@@ -93,7 +93,7 @@ pub type Capabilities {
   )
 }
 
-fn capabilities_decoder() -> Decoder(Capabilities) {
+pub fn capabilities_decoder() -> Decoder(Capabilities) {
   use accept_insecure_certs <- decode.field("acceptInsecureCerts", decode.bool)
   use browser_name <- decode.field("browserName", decode.string)
   use browser_version <- decode.field("browserVersion", decode.string)

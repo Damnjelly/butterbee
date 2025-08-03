@@ -10,6 +10,7 @@ import butterbee/bidi/browsing_context/types/readiness_state
 import butterbee/bidi/session/commands/session
 import butterbee/bidi/session/types/capabilities_request.{CapabilitiesRequest}
 import butterbee/bidi/session/types/capability_request.{CapabilityRequest}
+import butterbee/internal/config
 import butterbee/internal/socket.{type WebDriverSocket}
 import gleam/erlang/process
 import gleam/list
@@ -25,6 +26,7 @@ pub type WebDriver {
 
 /// Start a new webdriver session connect to the browse session
 pub fn new() -> WebDriver {
+  config.parse_config("butterbee.toml")
   let session =
     session.new(CapabilitiesRequest(
       Some(CapabilityRequest(None, None, None, None, [])),

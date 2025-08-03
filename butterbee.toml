@@ -1,0 +1,21 @@
+[Capabilities]
+
+always_match = {
+  accept_insecure_certs = false,
+  browser_name = "firefox",
+  browser_version = "141.0",
+  platform_name = "linux",
+}
+
+first_match = [
+  { accept_insecure_certs = true, browser_name = "firefox", browser_version = "141.0", platform_name = "linux" },
+  { accept_insecure_certs = false, browser_name = "chrome", browser_version = "100.0", platform_name = "linux" },
+]
+
+[Browsers.firefox]
+host = "127.0.0.1"
+port_range = [9222, 9232]
+
+[Browsers.chrome]
+host = "127.0.0.1"
+port_range = [9233, 9243]
