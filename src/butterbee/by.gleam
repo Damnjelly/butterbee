@@ -1,24 +1,23 @@
-import butterbee/bidi/browsing_context/types/locator
+////
+//// The by module contains functions to specify locators for use with the query module
+//// 
+
+import butterbee/bidi/browsing_context/types/locator.{type Locator}
 import gleam/option
 
-pub type By {
-  By(locator: locator.Locator)
+pub fn xpath(value: String) -> Locator {
+  locator.XPathLocator(value)
 }
 
-pub fn xpath(value: String) -> By {
-  locator.XPathLocator(value) |> By
+pub fn css(value: String) -> Locator {
+  locator.CssLocator(value)
 }
 
-pub fn css(value: String) -> By {
-  locator.CssLocator(value) |> By
-}
-
-pub fn inner_text(value: String) -> By {
+pub fn inner_text(value: String) -> Locator {
   locator.InnerTextLocator(
     value,
     option.None,
     option.Some(locator.Full),
     option.None,
   )
-  |> By
 }

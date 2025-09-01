@@ -4,20 +4,29 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "run",
+            "type": "shell",
+            "command": "gleam run"
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "gleam test"
+        }, 
+        {
             "label": "firefox",
             "type": "shell",
+            "command": "sh -c 'firefox --headless --remote-debugging-port & sleep 0.5; gleam test'"
+        }, 
+        {
+            "label": "firefox headed",
+            "type": "shell",
+            "command": "sh -c 'firefox --remote-debugging-port & sleep 0.5; gleam test'"
+        }, 
+        {
+            "label": "firefox no sleep",
+            "type": "shell",
             "command": "sh -c 'firefox --remote-debugging-port & gleam test'"
-        },
-        {
-            "label": "servo",
-            "type": "shell",
-            "command": "sh -c 'servo --webdriver=9222 --headless & gleam test'"
-        },
-        {
-            "label": "chromium",
-            "type": "shell",
-            "command": "sh -c 'chromium --remote-debugging-port=9222 & gleam test'"
-        },
-        
+        }
     ]
 }

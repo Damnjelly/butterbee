@@ -2,68 +2,10 @@ import butterbee/bidi/browsing_context/types/browsing_context.{
   type BrowsingContext,
 }
 import butterbee/bidi/input/types/element_origin
-import butterbee/bidi/method.{PerformActions}
-import butterbee/internal/socket
 import gleam/json.{type Json}
 import gleam/list
 import gleam/option.{type Option}
-import youid/uuid.{type Uuid}
-
-///
-/// # [input.performActions](https://w3c.github.io/webdriver-bidi/#command-input-performActions)
-///
-/// The input.performActions command performs a specified sequence of user input actions.
-/// 
-/// ## Example
-///
-/// ```gleam
-/// let testdriver = #(webdriver.socket, webdriver.context)
-/// let testdriver =
-///   browsing_context.locate_nodes(
-///     testdriver,
-///     browsing_context.XPathLocator("/html/body/div[1]/div/div/div[2]/div/a"),
-///     None,
-///     None,
-///   )
-/// 
-/// let webdriver = testdriver.0
-/// let assert Ok(locator) = testdriver.1 |> list.first()
-/// let assert Some(locator_id) = locator.shared_id
-/// 
-/// input.perform_actions(#(webdriver.0, webdriver.1), [
-///   input.PointerSource(
-///     input.PointerSourceActions(uuid.nil, None, [
-///       input.PointerMove(input.PointerMoveAction(
-///         0,
-///         0,
-///         None,
-///         Some(
-///           input.Element(
-///             input.ElementOrigin(script.SharedReference(locator_id, None)),
-///           ),
-///         ),
-///       )),
-///       input.PointerDown(input.PointerDownAction(0)),
-///       input.PointerUp(input.PointerUpAction(0)),
-///     ]),
-///   ),
-/// ])
-/// ```
-///
-pub fn perform_actions(
-  socket: socket.WebDriverSocket,
-  params: PerformActionsParameters,
-) -> socket.WebDriverSocket {
-  let request =
-    socket.bidi_request(
-      method.to_string(PerformActions),
-      perform_actions_parameters_to_json(params),
-    )
-
-  socket.send_request(socket, request)
-
-  socket
-}
+import youid/uuid
 
 pub type PerformActionsParameters {
   PerformActionsParameters(
@@ -72,7 +14,7 @@ pub type PerformActionsParameters {
   )
 }
 
-fn perform_actions_parameters_to_json(
+pub fn perform_actions_parameters_to_json(
   perform_actions_parameters: PerformActionsParameters,
 ) -> Json {
   let PerformActionsParameters(context:, actions:) = perform_actions_parameters
@@ -83,19 +25,45 @@ fn perform_actions_parameters_to_json(
 }
 
 pub type SourceActions {
-  //TODO: NoneSourceActions(NoneSourceAction)
+  //TODO: NoneSource(NoneSourceActions)
+  KeySource(KeySourceActions)
   PointerSource(PointerSourceActions)
-  //TODO: KeySourceActions(KeySourceAction)
-  //TODO: WheelSourceActions(WheelSourceAction)
+  //TODO: WheelSource(WheelSourceActions)
 }
 
 fn source_actions_to_json(source_actions: SourceActions) -> Json {
   case source_actions {
-    //TODO: NoneSourceActions(none_source_action) -> todo
+    //TODO: NoneSource(none_source_action) -> todo
+    KeySource(key_source_actions) ->
+      key_source_actions_to_json(key_source_actions)
     PointerSource(pointer_source_actions) ->
       pointer_source_actions_to_json(pointer_source_actions)
-    //TODO: KeySourceActions(key_source_action) -> todo
-    //TODO: WheelSourceActions(wheel_source_action) -> todo
+    //TODO: WheelSource(wheel_source_action) -> todo
+  }
+}
+
+pub type KeySourceActions {
+  KeySourceActions(id: String, actions: List(KeySourceAction))
+}
+
+fn key_source_actions_to_json(key_source_actions: KeySourceActions) -> Json {
+  let KeySourceActions(id:, actions:) = key_source_actions
+  json.object([
+    #("type", json.string("key")),
+    #("id", json.string(id)),
+    #("actions", json.array(actions, key_source_action_to_json)),
+  ])
+}
+
+pub type KeySourceAction {
+  KeyDown(KeyDownAction)
+  KeyUp(KeyUpAction)
+}
+
+fn key_source_action_to_json(key_source_action: KeySourceAction) -> Json {
+  case key_source_action {
+    KeyDown(key_down_action) -> key_down_action_to_json(key_down_action)
+    KeyUp(key_up_action) -> key_up_action_to_json(key_up_action)
   }
 }
 
@@ -126,6 +94,37 @@ fn pointer_source_actions_to_json(
   )
 }
 
+pub type PointerType {
+  Mouse
+  Pen
+  Touch
+}
+
+fn pointer_type_to_string(pointer_type: PointerType) -> String {
+  case pointer_type {
+    Mouse -> "mouse"
+    Pen -> "pen"
+    Touch -> "touch"
+  }
+}
+
+pub type PointerParameters {
+  PointerParameters(pointer_type: Option(PointerType))
+}
+
+fn pointer_parameters_to_json(pointer_parameters: PointerParameters) -> Json {
+  let PointerParameters(pointer_type:) = pointer_parameters
+  json.object([
+    #(
+      "pointerType",
+      json.string(case pointer_type {
+        option.None -> pointer_type_to_string(Mouse)
+        option.Some(value) -> pointer_type_to_string(value)
+      }),
+    ),
+  ])
+}
+
 pub type PointerSourceAction {
   //TODO: Pause(PointerPauseAction)
   PointerDown(PointerDownAction)
@@ -147,19 +146,25 @@ fn pointer_source_action_to_json(
   }
 }
 
-pub type PointerDownAction {
-  PointerDownAction(
-    button: Int,
-    //TODO: common_properties: PointerCommonProperties
-  )
+pub type KeyDownAction {
+  KeyDownAction(value: String)
 }
 
-fn pointer_down_action_to_json(pointer_down_action: PointerDownAction) -> Json {
-  let PointerDownAction(button:) = pointer_down_action
+fn key_down_action_to_json(key_down_action: KeyDownAction) -> Json {
+  let KeyDownAction(value:) = key_down_action
   json.object([
-    #("type", json.string("pointerDown")),
-    #("button", json.int(button)),
+    #("type", json.string("keyDown")),
+    #("value", json.string(value)),
   ])
+}
+
+pub type KeyUpAction {
+  KeyUpAction(value: String)
+}
+
+fn key_up_action_to_json(key_up_action: KeyUpAction) -> Json {
+  let KeyUpAction(value:) = key_up_action
+  json.object([#("type", json.string("keyUp")), #("value", json.string(value))])
 }
 
 pub type PointerUpAction {
@@ -173,6 +178,21 @@ fn pointer_up_action_to_json(pointer_up_action: PointerUpAction) -> Json {
   let PointerUpAction(button:) = pointer_up_action
   json.object([
     #("type", json.string("pointerUp")),
+    #("button", json.int(button)),
+  ])
+}
+
+pub type PointerDownAction {
+  PointerDownAction(
+    button: Int,
+    //TODO: common_properties: PointerCommonProperties
+  )
+}
+
+fn pointer_down_action_to_json(pointer_down_action: PointerDownAction) -> Json {
+  let PointerDownAction(button:) = pointer_down_action
+  json.object([
+    #("type", json.string("pointerDown")),
     #("button", json.int(button)),
   ])
 }
@@ -220,36 +240,5 @@ fn origin_to_json(origin: Origin) -> Json {
     Pointer -> json.string("pointer")
     Element(element_origin) ->
       element_origin.element_origin_to_json(element_origin)
-  }
-}
-
-pub type PointerParameters {
-  PointerParameters(pointer_type: Option(PointerType))
-}
-
-fn pointer_parameters_to_json(pointer_parameters: PointerParameters) -> Json {
-  let PointerParameters(pointer_type:) = pointer_parameters
-  json.object([
-    #(
-      "pointerType",
-      json.string(case pointer_type {
-        option.None -> pointer_type_to_string(Mouse)
-        option.Some(value) -> pointer_type_to_string(value)
-      }),
-    ),
-  ])
-}
-
-pub type PointerType {
-  Mouse
-  Pen
-  Touch
-}
-
-fn pointer_type_to_string(pointer_type: PointerType) -> String {
-  case pointer_type {
-    Mouse -> "mouse"
-    Pen -> "pen"
-    Touch -> "touch"
   }
 }

@@ -16,6 +16,10 @@ pub fn capabilities_request_to_json(
   capabilities_request: CapabilitiesRequest,
 ) -> Json {
   let CapabilitiesRequest(always_match:, first_match:) = capabilities_request
+  let always_match = case always_match {
+    None -> []
+    Some(value) -> [#("always_match", capability_request_to_json(value))]
+  }
   let first_match = case first_match {
     None -> []
     Some(value) -> [
@@ -27,12 +31,8 @@ pub fn capabilities_request_to_json(
     #(
       "capabilities",
       json.object(
-        [
-          #("always_match", case always_match {
-            None -> json.null()
-            Some(value) -> capability_request_to_json(value)
-          }),
-        ]
+        []
+        |> list.append(always_match)
         |> list.append(first_match),
       ),
     ),

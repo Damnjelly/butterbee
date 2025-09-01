@@ -81,7 +81,10 @@ fn dynamic_to_typed_json(dyn: Dynamic) -> TypedJson {
         Ok(dict_val) -> {
           dict_val
           |> dict.to_list
-          |> list.map(fn(pair) { #(pair.0, dynamic_to_typed_json(pair.1)) })
+          |> list.map(fn(pair) {
+            let #(key, value) = pair
+            #(key, dynamic_to_typed_json(value))
+          })
           |> Object
         }
         Error(_) -> Null

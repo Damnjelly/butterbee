@@ -1,4 +1,4 @@
-import butterbee/bidi/script/commands/script
+import butterbee/bidi/script/commands/call_function
 import butterbee/bidi/script/types/local_value
 import butterbee/bidi/script/types/primitive_protocol_value.{
   BigInt, Boolean, Null, Number, String, Undefined,
@@ -6,16 +6,31 @@ import butterbee/bidi/script/types/primitive_protocol_value.{
 import butterbee/bidi/script/types/remote_reference
 import butterbee/bidi/script/types/remote_value
 import butterbee/bidi/script/types/target
+import butterbee/commands/script
 import butterbee/driver
 import butterbee/query
 import gleam/bool
 import gleam/option.{None, Some}
 
+///
+/// Returns the inner text of the node.
+/// 
+/// # Example
+///
+/// This example finds the first node matching the css selector `a.logo` and returns its inner text:
+///
+/// ```gleam
+/// let example =
+///   driver.new()
+///   |> driver.goto("https://gleam.run/")
+///   |> query.node(by.css("a.logo"))
+///   |> nodes.inner_text()
+/// ```
+///
 pub fn inner_text(
   driver_with_node: #(driver.WebDriver, query.Node),
 ) -> #(driver.WebDriver, String) {
-  let driver = driver_with_node.0
-  let node = driver_with_node.1
+  let #(driver, node) = driver_with_node
 
   let assert Some(shared_id) = node.value.shared_id
     as "Node does not have a shared id"
@@ -23,7 +38,7 @@ pub fn inner_text(
   let result =
     script.call_function(
       driver.socket,
-      script.CallFunctionParameters(
+      call_function.CallFunctionParameters(
         function_declaration: "function(node) { return node.innerText; }",
         await_promise: False,
         target: target.Context(target.ContextTarget(driver.context, None)),
@@ -38,7 +53,9 @@ pub fn inner_text(
       ),
     )
 
-  let remote_value = result.result.result
+  let assert Ok(evaluate_result) = result
+
+  let remote_value = evaluate_result.result.result
   let inner_text = case remote_value {
     remote_value.PrimitiveProtocol(value) -> {
       case value {
@@ -54,4 +71,25 @@ pub fn inner_text(
   }
 
   #(driver, inner_text)
+}
+
+/// 
+/// Returns the inner texts of the nodes.
+/// 
+/// # Example
+///
+/// This example finds all nodes matching the css selector `a.logo` and returns their inner texts:
+///
+/// ```gleam
+/// let example =
+///   driver.new()
+///   |> driver.goto("https://gleam.run/")
+///   |> query.nodes(by.css("a.logo"))
+///   |> nodes.inner_texts()
+/// ```
+///
+pub fn inner_texts(
+  driver_with_nodes: #(driver.WebDriver, List(query.Node)),
+) -> #(driver.WebDriver, List(String)) {
+  todo
 }

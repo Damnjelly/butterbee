@@ -4,9 +4,8 @@ import butterbee/bidi/script/types/primitive_protocol_value.{
 }
 import butterbee/internal/decoders
 import gleam/dict
-import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode.{type Decoder}
-import gleam/option.{type Option, None, Some}
+import gleam/option.{type Option, None}
 import logging
 import youid/uuid.{type Uuid}
 

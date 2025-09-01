@@ -1,11 +1,8 @@
 //// The socket module contains the websocket connection to the webdriver server
 
-import birl
-import butterbee/internal/decoders
+import butterbee/bidi/definition
 import butterbee/internal/glam
-import glam/doc
 import gleam/dict
-import gleam/dynamic
 import gleam/dynamic/decode.{type Decoder}
 import gleam/erlang/process
 import gleam/http/request.{type Request}
@@ -19,13 +16,8 @@ import stratus
 const request_timeout = 5000
 
 pub type Msg {
-  SendCommand(subject: process.Subject(String), request: String)
+  SendCommand(subject: process.Subject(Result(String, String)), request: String)
   Close
-}
-
-pub type ResultType {
-  Success
-  Error
 }
 
 pub type WebDriverSocket {
@@ -35,87 +27,72 @@ pub type WebDriverSocket {
 }
 
 pub fn new(request: Request(String)) -> WebDriverSocket {
-  // TODO: change state to a Dict(id: Int, subject: process.Subject(String))
   logging.log(
     logging.Debug,
     "Connecting to WebDriver server at "
       <> request.to_uri(request) |> uri.to_string(),
   )
   let state = dict.new()
-  let builder =
-    stratus.websocket(
-      request: request,
-      init: fn() { #(state, None) },
-      loop: fn(state, msg, conn) {
-        case msg {
-          stratus.Text(msg) -> {
-            // TODO: match msg.id with the id in the state
 
-            logging.log(
-              logging.Debug,
-              "------------------- Received WebDriver Response -------------------
-"
-                <> glam.pretty_json(msg),
-            )
-
-            let assert Ok(result) = json.parse(msg, success_result_decoder())
-              as "Failed to parse webdriver response"
-
-            case result.result_type {
-              Success -> {
-                let assert Ok(subject) = dict.get(state, result.id)
-                  as "Failed to find corresponding response"
-
-                process.send(subject, msg)
-
-                stratus.continue(state |> dict.drop([result.id]))
-              }
-              Error -> {
-                let assert Ok(result) = json.parse(msg, decode.dynamic)
-                  as "Failed to parse webdriver error response"
-
-                let assert Ok(result) =
-                  decode.run(result, error_result_decoder())
-
-                let error_msg = result.error <> ", " <> result.message
-                panic as error_msg
-              }
+  let assert Ok(subject) =
+    stratus.new(request, state)
+    |> stratus.on_message(fn(state, msg, conn) {
+      case msg {
+        stratus.Text(msg) -> {
+          logging.log(
+            logging.Debug,
+            "------------------- Received WebDriver Response -------------------
+" <> glam.pretty_json(msg),
+          )
+          let assert Ok(result) = json.parse(msg, definition.message_decoder())
+            as "Failed to parse webdriver response"
+          case result {
+            definition.Success -> {
+              let assert Ok(id) = json.parse(msg, id_decoder())
+              let assert Ok(subject) = dict.get(state, id)
+                as "Failed to find corresponding response"
+              process.send(subject, Ok(msg))
+              stratus.continue(state |> dict.drop([id]))
             }
-          }
-          stratus.Binary(_) -> stratus.continue(state)
-          stratus.User(SendCommand(subject, request)) -> {
-            let id_d = {
-              use id <- decode.field("id", decode.int)
-              decode.success(id)
+            definition.Error -> {
+              let assert Ok(id) = json.parse(msg, id_decoder())
+              let assert Ok(subject) = dict.get(state, id)
+                as "Failed to find corresponding response"
+              process.send(subject, Error(msg))
+              stratus.continue(state |> dict.drop([id]))
             }
-            let assert Ok(id) = json.parse(request, id_d)
-
-            logging.log(
-              logging.Debug,
-              "------------------- Sending WebDriver Request -------------------
-" <> glam.pretty_json(request),
-            )
-            let assert Ok(_) = stratus.send_text_message(conn, request)
-              as "Failed to send webdriver request"
-
-            stratus.continue(dict.insert(state, id, subject))
-          }
-          stratus.User(Close) -> {
-            let assert Ok(_) = stratus.close(conn)
-            stratus.stop()
           }
         }
-      },
-    )
-    |> stratus.on_close(fn(state) {
-      echo state
-      Nil
+        stratus.Binary(_) -> stratus.continue(state)
+        stratus.User(SendCommand(subject, request)) -> {
+          let id_d = {
+            use id <- decode.field("id", decode.int)
+            decode.success(id)
+          }
+          let assert Ok(id) = json.parse(request, id_d)
+          logging.log(
+            logging.Debug,
+            "------------------- Sending WebDriver Request -------------------
+" <> glam.pretty_json(request),
+          )
+          let assert Ok(_) = stratus.send_text_message(conn, request)
+            as "Failed to send webdriver request"
+          stratus.continue(dict.insert(state, id, subject))
+        }
+        stratus.User(Close) -> {
+          let assert Ok(_) = stratus.close(conn)
+          stratus.stop()
+        }
+      }
     })
-
-  let assert Ok(subject) = stratus.initialize(builder)
-    as "Failed to initialize websocket connection"
+    |> stratus.start
 
   WebDriverSocket(subject)
+}
+
+fn id_decoder() -> Decoder(Int) {
+  use id <- decode.field("id", decode.int)
+  decode.success(id)
 }
 
 /// Close the websocket connection
@@ -126,50 +103,28 @@ pub fn close(socket: WebDriverSocket) {
 
 /// Send a request to the webdriver server
 /// Returns the result from the server as a dynamic
-pub fn send_request(socket: WebDriverSocket, request: Json) -> dynamic.Dynamic {
-  let assert Ok(result) =
+pub fn send_request(
+  socket: WebDriverSocket,
+  request: Json,
+  command: definition.CommandData,
+) -> Result(definition.CommandResponse, definition.ErrorResponse) {
+  let result =
     process.call(socket.actor.data, request_timeout, fn(subject) {
       stratus.to_user_message(SendCommand(subject, json.to_string(request)))
     })
-    |> json.parse(decoders.result())
 
-  result
-}
+  case result {
+    Ok(result) -> {
+      let assert Ok(result) =
+        json.parse(result, definition.command_response_decoder(command))
 
-pub fn bidi_request(method: String, params: Json) -> Json {
-  // TODO: change id to a randomized Int
-  json.object([
-    #("id", json.int(birl.utc_now() |> birl.to_unix_micro())),
-    #("method", json.string(method)),
-    #("params", params),
-  ])
-}
+      Ok(result)
+    }
+    Error(error) -> {
+      let assert Ok(error) =
+        json.parse(error, definition.error_response_decoder())
 
-type SuccessResult {
-  SuccessResult(result_type: ResultType, result: dynamic.Dynamic, id: Int)
-}
-
-fn success_result_decoder() -> Decoder(SuccessResult) {
-  use result_type <- decode.field("type", decode.string)
-  use result <- decode.field("result", decode.dynamic)
-  use id <- decode.field("id", decode.int)
-
-  let result_type = case result_type {
-    "success" -> Success
-    "error" -> Error
-    _ -> panic as "Unknown webdriver response type"
+      Error(error)
+    }
   }
-
-  decode.success(SuccessResult(result_type:, result:, id:))
-}
-
-type ErrorResult {
-  ErrorResult(error: String, message: String, stacktrace: String)
-}
-
-fn error_result_decoder() -> Decoder(ErrorResult) {
-  use error <- decode.field("error", decode.string)
-  use message <- decode.field("message", decode.string)
-  use stacktrace <- decode.field("stacktrace", decode.string)
-  decode.success(ErrorResult(error:, message:, stacktrace:))
 }

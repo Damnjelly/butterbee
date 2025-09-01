@@ -29,18 +29,25 @@
         { pkgs }:
         {
           default = pkgs.mkShell {
-            packages = with pkgs; [
-              gleam
-              nixd
-              erlang_27
-              rebar3
-              nodejs
-              firefox
-              websocat
-              geckodriver
-              servo
-              chromium
-            ];
+            packages = let 
+              dependencies = with pkgs; [
+                erlang_27
+                rebar3
+              ];
+
+              runtimeDependencies = with pkgs; [
+                firefox
+                servo
+                chromium
+              ];
+
+              devDependencies = with pkgs; [
+                gleam
+                beamMinimal27Packages.erlang-ls
+                nixd
+                nixfmt
+              ];
+            in dependencies ++ runtimeDependencies ++ devDependencies;
           };
         }
       );
