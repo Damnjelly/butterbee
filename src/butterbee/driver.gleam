@@ -141,10 +141,6 @@ pub fn wait(state: state, duration: Int) -> state {
   state
 }
 
-pub fn wait_for_node(state: state, selector: String) -> WebDriver {
-  todo
-}
-
 ///
 /// Closes the webdriver session, closes the browser, and returns the value of the last function called
 /// 
