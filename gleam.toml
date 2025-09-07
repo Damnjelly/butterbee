@@ -18,7 +18,7 @@ gleam_erlang = ">= 1.2.0 and < 2.0.0"
 shellout = ">= 1.7.0 and < 2.0.0"
 gleam_otp = ">= 1.0.0 and < 2.0.0"
 envoy = ">= 1.0.2 and < 2.0.0"
-stratus = { git = "https://github.com/rawhat/stratus.git", ref = "main" }
+stratus = { git = "https://github.com/rawhat/stratus.git", ref = "a7f6db2716862aebd842bfcf0216b28b9d92079c" }
 # stratus = ">= 1.0.2 and < 2.0.0"
 gleam_http = ">= 4.1.1 and < 5.0.0"
 gleam_json = ">= 3.0.2 and < 4.0.0"

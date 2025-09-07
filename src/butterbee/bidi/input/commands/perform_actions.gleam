@@ -19,7 +19,7 @@ pub fn perform_actions_parameters_to_json(
 ) -> Json {
   let PerformActionsParameters(context:, actions:) = perform_actions_parameters
   json.object([
-    #("context", json.string(uuid.to_string(context.context))),
+    #("context", json.string(uuid.to_string(context.id))),
     #("actions", json.array(actions, source_actions_to_json)),
   ])
 }

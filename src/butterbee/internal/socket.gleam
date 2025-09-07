@@ -2,6 +2,7 @@
 
 import butterbee/bidi/definition
 import butterbee/internal/glam
+import butterbee/internal/retry
 import gleam/dict
 import gleam/dynamic/decode.{type Decoder}
 import gleam/erlang/process
@@ -9,6 +10,7 @@ import gleam/http/request.{type Request}
 import gleam/json.{type Json}
 import gleam/option.{None}
 import gleam/otp/actor
+import gleam/result
 import gleam/uri
 import logging
 import stratus
@@ -34,7 +36,7 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
   )
   let state = dict.new()
 
-  let assert Ok(subject) =
+  let subject =
     stratus.new(request, state)
     |> stratus.on_message(fn(state, msg, conn) {
       case msg {
@@ -85,7 +87,15 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
         }
       }
     })
-    |> stratus.start
+
+  let assert Ok(subject) =
+    retry.until_ok(fn() { stratus.start(subject) }, fn(result) {
+      case result {
+        Ok(_) -> Ok(subject)
+        Error(_) -> Error("Failed to connect to webdriver server")
+      }
+    })
+    as "Failed to connect to webdriver server"
 
   WebDriverSocket(subject)
 }

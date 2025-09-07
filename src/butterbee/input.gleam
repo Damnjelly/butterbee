@@ -4,15 +4,19 @@ import butterbee/bidi/input/types/element_origin
 import butterbee/bidi/script/types/remote_reference
 import butterbee/commands/input
 import butterbee/driver
+import butterbee/internal/lib
 import butterbee/internal/retry
 import butterbee/query
+import gleam/bool
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/result
 import gleam/string
 import logging
 
 ///
 /// Perfoms a click on the given node
+/// Will panic if the node list has more than one element
 /// 
 /// # Example
 ///
@@ -26,9 +30,12 @@ import logging
 /// ```
 ///
 pub fn click(
-  driver_with_node: #(driver.WebDriver, query.Node),
+  driver_with_node: #(driver.WebDriver, List(query.Node)),
 ) -> driver.WebDriver {
   let #(driver, node) = driver_with_node
+
+  let assert Ok(node) = lib.single_element(node)
+    as "List of nodes has more than one element, expected exactly one"
 
   let assert Some(shared_id) = node.value.shared_id
     as "Node does not have a shared id"
@@ -79,6 +86,7 @@ pub fn click(
 
 ///
 /// Enters the given keys into the browser
+/// This function expects a list of nodes, but will panic if the list has more than one element
 /// 
 /// # Example
 ///
@@ -92,17 +100,20 @@ pub fn click(
 /// ```
 ///
 pub fn enter_keys(
-  driver_with_node: #(driver.WebDriver, query.Node),
+  driver_with_node: #(driver.WebDriver, List(query.Node)),
   keys: String,
 ) -> driver.WebDriver {
-  let #(driver, node) = driver_with_node
+  let #(driver, node_list) = driver_with_node
 
-  let assert Some(shared_id) = node.value.shared_id
+  let assert Ok(node) = lib.single_element(node_list)
+    as "List of nodes has more than one element, expected exactly one"
+
+  let assert Some(_shared_id) = node.value.shared_id
     as "Node does not have a shared id"
 
   let key_list = string.split(keys, "")
 
-  let _ = click(driver_with_node)
+  let _ = click(#(driver, node_list))
 
   input.perform_actions(
     driver.socket,

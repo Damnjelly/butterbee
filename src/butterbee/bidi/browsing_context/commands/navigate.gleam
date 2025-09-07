@@ -38,7 +38,7 @@ pub fn navigate_parameters_to_json(
 
   json.object(
     [
-      #("context", json.string(uuid.to_string(context.context))),
+      #("context", json.string(uuid.to_string(context.id))),
       #("url", json.string(url)),
     ]
     |> list.append(wait),

@@ -5,6 +5,7 @@ import butterbee/key
 import butterbee/nodes
 import gleam/erlang/process
 import gleam/list
+import gleam/string
 import gleeunit
 
 import butterbee/input
@@ -44,7 +45,18 @@ pub fn enter_keys_test() {
     |> query.refine(by.css("h2.package-name"))
     |> nodes.inner_texts()
     |> driver.close()
-  assert package_names |> list.contains("gleam_stdlib\n")
+
+  let trimmed_package_names =
+    package_names
+    |> list.map(fn(package_name) {
+      let assert Ok(p) = string.split(package_name, "@") |> list.first()
+        as "No package name found"
+      p
+    })
+
+  echo trimmed_package_names
+
+  assert trimmed_package_names |> list.contains("gleam_stdlib")
 }
 
 pub fn code_comment_driver_wait_test() {
@@ -64,5 +76,5 @@ pub fn code_comment_driver_close_test() {
     |> query.node(by.css("a.logo"))
     |> nodes.inner_text()
     |> driver.close()
-  assert example == "gleam"
+  assert example == "Gleam"
 }

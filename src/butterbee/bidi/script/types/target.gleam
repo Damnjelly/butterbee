@@ -34,7 +34,7 @@ pub fn context_target_to_json(context_target: ContextTarget) -> Json {
     Some(value) -> [#("sandbox", json.string(value))]
   }
   json.object(
-    [#("context", json.string(uuid.to_string(context.context)))]
+    [#("context", json.string(uuid.to_string(context.id)))]
     |> list.append(sandbox),
   )
 }

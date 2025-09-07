@@ -11,6 +11,7 @@ import butterbee/commands/browser
 import butterbee/commands/browsing_context
 import butterbee/commands/session
 import butterbee/internal/config
+import butterbee/internal/lib
 import butterbee/internal/runner
 import butterbee/internal/socket.{type WebDriverSocket}
 import gleam/erlang/process
@@ -66,14 +67,14 @@ fn abstract_new(path path: String) -> WebDriver {
 
   let assert Ok(_) = response
 
-  let assert Ok(browsing_tree) =
+  let assert Ok(info_list) =
     browsing_context.get_tree(socket, get_tree.GetTreeParameters(Some(1), None))
 
-  let context = case list.length(browsing_tree.contexts) {
+  let context = case list.length(info_list.contexts.list) {
     1 -> {
-      let assert Ok(context) = list.first(browsing_tree.contexts)
+      let assert Ok(info) = list.first(info_list.contexts.list)
         as "Found no browsing contexts"
-      context
+      info.context
     }
     _ -> panic as "Found more than one, or zero, browsing contexts"
   }
@@ -82,7 +83,16 @@ fn abstract_new(path path: String) -> WebDriver {
 }
 
 pub fn get_url(driver: WebDriver) -> #(WebDriver, String) {
-  todo
+  let assert Ok(get_tree_result) =
+    browsing_context.get_tree(
+      driver.socket,
+      get_tree.GetTreeParameters(None, None),
+    )
+
+  let assert Ok(info) = lib.single_element(get_tree_result.contexts.list)
+    as "Found more than one, or zero, browsing contexts"
+
+  #(driver, info.url)
 }
 
 ///

@@ -1,6 +1,7 @@
 import butterbee/bidi/browsing_context/types/browsing_context.{
   type BrowsingContext, browsing_context_decoder,
 }
+import butterbee/bidi/browsing_context/types/info
 import gleam/dynamic/decode
 import gleam/json.{type Json}
 import gleam/option.{type Option, None, Some}
@@ -26,13 +27,10 @@ pub fn get_tree_parameters_to_json(
 }
 
 pub type GetTreeResult {
-  GetTreeResult(contexts: List(BrowsingContext))
+  GetTreeResult(contexts: info.InfoList)
 }
 
 pub fn get_tree_result_decoder() -> decode.Decoder(GetTreeResult) {
-  use contexts <- decode.field(
-    "contexts",
-    decode.list(browsing_context_decoder()),
-  )
+  use contexts <- decode.field("contexts", info.info_list_decoder())
   decode.success(GetTreeResult(contexts:))
 }

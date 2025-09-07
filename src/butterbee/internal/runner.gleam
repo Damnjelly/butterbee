@@ -149,6 +149,7 @@ fn start_browser(
     let assert Ok(_) = simplifile.delete(profile_dir)
       as "Failed to delete profile directory"
 
+    // Wait a bit before deleting the port file
     process.sleep(1000)
 
     let port = "/tmp/butterbee/used_ports/" <> port

@@ -1,5 +1,9 @@
+import butterbee/bidi/browsing_context/commands/get_tree
+import butterbee/bidi/browsing_context/types/info
+import butterbee/bidi/definition
 import gleam/erlang/process
 import gleam/http/request
+import gleam/json
 import logging
 import simplifile
 import stratus
@@ -11,26 +15,37 @@ pub fn init() {
   simplifile.delete("/tmp/butterbee")
 }
 
-pub fn main() {
-  logging.configure()
-  logging.set_level(logging.Debug)
-  let assert Ok(req) = request.to("http://localhost:3000")
-  let builder =
-    stratus.new(req, Nil)
-    |> stratus.on_message(fn(state, msg, _conn) {
-      case msg {
-        stratus.Text(msg) -> {
-          logging.log(logging.Info, "Got a message: " <> msg)
-          stratus.continue(state)
-        }
-        stratus.Binary(_msg) -> stratus.continue(state)
-        stratus.User(_) -> {
-          stratus.stop()
-        }
+const get_treee = "{
+  id: 1757269990460208,
+  result: {
+    contexts: [
+      {
+        children: [  ],
+        clientWindow: \"2795b6e9-de94-4112-bbc5-7a3115f0eb4f\",
+        context: \"39266702-f679-4505-a6f4-dc91c07f4bb8\",
+        originalOpener: null,
+        parent: null,
+        url: \"about:home\",
+        userContext: \"default\"
       }
-    })
-    |> stratus.start
-    |> echo
+    ]
+  },
+  type: \"success\"
+}"
 
-  process.sleep(100)
+fn test_json() -> String {
+  json.object([
+    #("children", json.array([], json.object)),
+    #("clientWindow", json.string("2795b6e9-de94-4112-bbc5-7a3115f0eb4f")),
+    #("context", json.string("39266702-f679-4505-a6f4-dc91c07f4bb8")),
+    #("originalOpener", json.null()),
+    #("parent", json.null()),
+    #("url", json.string("about:home")),
+    #("userContext", json.string("default")),
+  ])
+  |> json.to_string()
+}
+
+pub fn main() {
+  echo json.parse(test_json(), info.info_decoder())
 }
