@@ -21,7 +21,7 @@ pub fn main() {
 }
 
 pub fn minimal_example_test() {
-  let text =
+  let output =
     driver.new()
     |> driver.goto("https://gleam.run/")
     |> query.node(by.xpath(
@@ -31,7 +31,7 @@ pub fn minimal_example_test() {
     |> query.node(by.css("pre.log"))
     |> nodes.inner_text()
     |> driver.close()
-  assert text == "Hello, Joe!\n"
+  assert output == "Hello, Joe!\n"
 }
 
 pub fn enter_keys_test() {
