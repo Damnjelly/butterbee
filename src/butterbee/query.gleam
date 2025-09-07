@@ -16,7 +16,7 @@ pub type Node {
 ///
 /// Finds a node matching the given locator, if multiple nodes are found, the first node is returned.
 /// Will retry for a configurable amount of time to find a node.
-/// Panics if no node is found after the retries.
+/// Panics if no node is found after retrying for the configured amount of time.
 /// 
 /// # Example
 ///
@@ -44,7 +44,7 @@ pub fn node(
 ///
 /// Finds all nodes matching the given locator.
 /// Will retry for a configurable amount of time to find all nodes.
-/// Panics if no nodes are found after the retries.
+/// Panics if no nodes are found after retrying for the configured amount of time.
 /// 
 /// # Example
 ///

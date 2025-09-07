@@ -11,6 +11,20 @@ import gleam/option.{None, Some}
 import gleam/string
 import logging
 
+///
+/// Perfoms a click on the given node
+/// 
+/// # Example
+///
+/// This example perfoms a click on the node with the css selector `a.logo`:
+///
+/// ```gleam
+/// let example = driver.new()
+///   |> driver.goto("https://gleam.run/")
+///   |> query.node(by.css("a.logo"))
+///   |> input.click()
+/// ```
+///
 pub fn click(
   driver_with_node: #(driver.WebDriver, query.Node),
 ) -> driver.WebDriver {
@@ -63,6 +77,20 @@ pub fn click(
   driver
 }
 
+///
+/// Enters the given keys into the browser
+/// 
+/// # Example
+///
+/// This example enters the text "gleam" into the node with the css selector `a.logo`:
+///
+/// ```gleam
+/// let example = driver.new()
+///   |> driver.goto("https://gleam.run/")
+///   |> query.node(by.css("a.logo"))
+///   |> input.enter_keys("gleam")
+/// ```
+///
 pub fn enter_keys(
   driver_with_node: #(driver.WebDriver, query.Node),
   keys: String,

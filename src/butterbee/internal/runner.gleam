@@ -121,7 +121,7 @@ fn start_browser(
         "-no-first-run",
         "-no-default-browser-check",
         "-no-remote",
-        "-headless",
+        // "-headless",
         "-profile " <> profile,
       ])
     }

@@ -1,5 +1,5 @@
 ////
-//// The by module contains functions to specify locators for use with the query module
+//// The by module contains functions to specify the type of locator to use to query for webelements
 //// 
 
 import butterbee/bidi/browsing_context/types/locator.{type Locator}

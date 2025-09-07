@@ -47,16 +47,8 @@ pub fn new_with_config(path: String) -> WebDriver {
 }
 
 ///
-/// Start a new webdriver session connect to the browser session, using the default config
+/// Start a new webdriver session connect to the browser session, using the config located in root of the project
 /// 
-/// # Example
-///
-/// This example starts a new webdriver session, connects to the browser session, and returns the webdriver session:
-///
-/// ```gleam
-/// let example = driver.new()
-/// ```
-///
 pub fn new() -> WebDriver {
   abstract_new(path: "butterbee.toml")
 }
