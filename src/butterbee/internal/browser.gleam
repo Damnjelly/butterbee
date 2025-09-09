@@ -1,55 +1,59 @@
-import gleam/dynamic.{type Dynamic}
-import gleam/dynamic/decode
+import butterbee/internal/config/browser_config
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
-import gleam/list
-import gleam/option.{type Option, None}
-
-pub const default_host = "127.0.0.1"
-
-pub const default_port_range = #(9222, 9232)
+import gleam/option.{type Option, None, Some}
 
 pub type Browser {
   Browser(
+    browser_type: browser_config.BrowserType,
     host: String,
     port_range: #(Int, Int),
     port: Option(Int),
-    profile_dir: Option(String),
-    profile_name: Option(String),
-    browser_type: BrowserType,
     extra_flags: Option(List(String)),
+    request: Option(Request(String)),
   )
 }
 
-pub type BrowserType {
-  Firefox
-  Chrome
-}
-
-pub fn browser_type_decoder() -> decode.Decoder(BrowserType) {
-  use browser_type <- decode.then(decode.string)
-  case browser_type {
-    "firefox" -> decode.success(Firefox)
-    "chrome" -> decode.success(Chrome)
-    _ -> decode.failure(Firefox, "Browser type not supported: " <> browser_type)
-  }
-}
+// Browser Builders
 
 pub fn default() -> Browser {
   Browser(
-    host: default_host,
-    port_range: default_port_range,
-    port: None,
-    profile_dir: None,
-    profile_name: None,
-    browser_type: Firefox,
+    browser_type: browser_config.default_browser_type(),
+    host: browser_config.default_host,
+    port_range: browser_config.default_port_range,
     extra_flags: None,
+    request: None,
+    port: None,
   )
 }
 
-pub fn get_request(port: Int, browser: Browser) -> Request(String) {
-  // TODO: randomize/increment ports
+pub fn from_config(
+  browser_to_run: browser_config.BrowserType,
+  browser_config: browser_config.BrowserConfig,
+) -> Browser {
+  Browser(
+    browser_type: browser_to_run,
+    host: browser_config.host,
+    port_range: browser_config.port_range,
+    extra_flags: Some(browser_config.extra_flags),
+    request: None,
+    port: None,
+  )
+}
 
+pub fn with_extra_flags(browser: Browser, extra_flags: List(String)) -> Browser {
+  Browser(..browser, extra_flags: Some(extra_flags))
+}
+
+pub fn with_request(browser: Browser, request: Request(String)) -> Browser {
+  Browser(..browser, request: Some(request))
+}
+
+pub fn with_port(browser: Browser, port: Int) -> Browser {
+  Browser(..browser, port: Some(port))
+}
+
+pub fn get_request(port: Int, browser: Browser) -> Request(String) {
   request.new()
   |> request.set_host(browser.host)
   |> request.set_port(port)

@@ -5,12 +5,12 @@ data_dir = "/tmp/butterbee"
 
 [Capabilities]
 
-# always_match = {
-#   acceptInsecureCerts = false,
-#   browserName = "firefox",
-#   browserVersion = "141.0",
-#   platformName = "linux",
-# }
+always_match = {
+  acceptInsecureCerts = false,
+  browserName = "firefox",
+  browserVersion = "141.0",
+  platformName = "linux",
+}
 
 [Browsers.firefox]
 
@@ -18,8 +18,8 @@ flags = ["-headless", "--no-remote", "--no-first-run"]
 host = "127.0.0.1"
 port_range = [9222, 9242]
 
-[Browsers.chrome]
-
-flags = []
-host = "127.0.0.1"
-port_range = [9243, 9263]
+# [Browsers.chrome]
+#
+# flags = []
+# host = "127.0.0.1"
+# port_range = [9243, 9263]

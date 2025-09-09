@@ -10,15 +10,16 @@ import butterbee/bidi/session/types/capabilities_request
 import butterbee/commands/browser
 import butterbee/commands/browsing_context
 import butterbee/commands/session
-import butterbee/internal/config/butterbee_config
 import butterbee/internal/config/capabilities_config
+import butterbee/internal/config/config
 import butterbee/internal/lib
-import butterbee/internal/runner
+import butterbee/internal/runner/runner
 import butterbee/internal/socket.{type WebDriverSocket}
 import gleam/erlang/process
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
+import logging
 
 ///
 /// Represents a webdriver session
@@ -30,7 +31,7 @@ pub type WebDriver {
     /// The browsing context of the webdriver session
     context: BrowsingContext,
     /// The config used during the webdriver session
-    config: butterbee_config.ButterbeeConfig,
+    config: config.ButterbeeConfig,
   )
 }
 
@@ -38,11 +39,12 @@ pub type WebDriver {
 /// Start a new webdriver session connect to the browser session, using the butterbee.toml file located in the root of the project
 /// 
 pub fn new() -> WebDriver {
-  let path =
-    butterbee_config.parse_config("butterbee.toml")
-    |> result.unwrap(butterbee_config.default())
-
-  new_with_config(path)
+  config.parse_config("butterbee.toml")
+  |> result.unwrap({
+    logging.log(logging.Error, "Failed to parse butterbee.toml")
+    config.default()
+  })
+  |> new_with_config
 }
 
 ///
@@ -57,22 +59,25 @@ pub fn new() -> WebDriver {
 /// ```
 ///
 pub fn new_with_config_path(path: String) -> WebDriver {
-  let path =
-    butterbee_config.parse_config(path)
-    |> result.unwrap(butterbee_config.default())
-
-  new_with_config(path)
+  config.parse_config(path)
+  |> result.unwrap({
+    logging.log(logging.Error, "Failed to parse butterbee.toml")
+    config.default()
+  })
+  |> new_with_config
 }
 
 ///
 /// Start a new webdriver session connect to the browser session, using the ButterbeeConfig type
 ///
-pub fn new_with_config(config: butterbee_config.ButterbeeConfig) -> WebDriver {
-  let assert Ok(request) = runner.start(config.driver_config)
+pub fn new_with_config(config: config.ButterbeeConfig) -> WebDriver {
+  let assert Ok(browser) = runner.new(config)
 
   let capabilities =
     config.capabilities
     |> option.unwrap(capabilities_config.default())
+
+  let assert Some(request) = browser.request
 
   let #(socket, response) = session.new(request, capabilities)
 

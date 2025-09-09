@@ -14,12 +14,14 @@ pub type CapabilitiesRequest {
 }
 
 pub fn capabilities_request_decoder() -> decode.Decoder(CapabilitiesRequest) {
-  use always_match <- decode.field(
-    "alwaysMatch",
+  use always_match <- decode.optional_field(
+    "always_match",
+    None,
     decode.optional(capability_request_decoder()),
   )
-  use first_match <- decode.field(
-    "firstMatch",
+  use first_match <- decode.optional_field(
+    "first_match",
+    None,
     decode.optional(decode.list(capability_request_decoder())),
   )
   decode.success(CapabilitiesRequest(always_match:, first_match:))

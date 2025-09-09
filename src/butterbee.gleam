@@ -1,3 +1,4 @@
+import butterbee/driver
 import logging
 import simplifile
 
@@ -8,4 +9,8 @@ pub fn init() {
   let _ = simplifile.delete("/tmp/butterbee")
 
   Nil
+}
+
+pub fn main() {
+  driver.new()
 }

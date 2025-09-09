@@ -6,6 +6,7 @@ import logging
 
 const max_wait_time = 20_000
 
+/// Retry a function until it returns a result that satisfies a condition that returns a Result
 pub fn until_ok(
   retry_function: fn() -> result,
   condition: fn(result) -> Result(a, b),
@@ -13,36 +14,7 @@ pub fn until_ok(
   result_loop(retry_function, condition, birl.now(), 1)
 }
 
-fn result_loop(
-  retry_function: fn() -> result,
-  condition: fn(result) -> Result(a, b),
-  time_started: birl.Time,
-  attempts: Int,
-) -> result {
-  let a = retry_function()
-  case condition(a) {
-    Ok(_) -> a
-    Error(_) ->
-      case
-        // If time has passed, return the result
-        birl.add(time_started, duration.milli_seconds(max_wait_time))
-        |> birl.has_occured()
-      {
-        True -> {
-          logging.log(logging.Warning, "Retry timed out")
-          a
-        }
-        False -> {
-          wait_on_attempts(attempts)
-
-          log_attempts(attempts)
-
-          result_loop(retry_function, condition, time_started, attempts + 1)
-        }
-      }
-  }
-}
-
+/// Retry a function until it returns a result that satisfies a condition that returns a Bool
 pub fn until_true(
   retry_function: fn() -> result,
   condition: fn(result) -> Bool,
@@ -50,16 +22,19 @@ pub fn until_true(
   bool_loop(retry_function, condition, birl.now(), 1)
 }
 
-fn bool_loop(
+// Generic retry loop that handles the common logic
+fn retry_loop(
   retry_function: fn() -> result,
-  condition: fn(result) -> Bool,
+  should_continue: fn(result) -> Bool,
   time_started: birl.Time,
   attempts: Int,
 ) -> result {
   let a = retry_function()
-  case condition(a) {
-    True -> a
-    False ->
+  case should_continue(a) {
+    False -> a
+    // Success condition met
+    True ->
+      // Need to retry
       case
         // If time has passed, return the result
         birl.add(time_started, duration.milli_seconds(max_wait_time))
@@ -71,13 +46,54 @@ fn bool_loop(
         }
         False -> {
           wait_on_attempts(attempts)
-
           log_attempts(attempts)
-
-          bool_loop(retry_function, condition, time_started, attempts + 1)
+          retry_loop(
+            retry_function,
+            should_continue,
+            time_started,
+            attempts + 1,
+          )
         }
       }
   }
+}
+
+// Wrapper for Result-based conditions
+fn result_loop(
+  retry_function: fn() -> result,
+  condition: fn(result) -> Result(a, b),
+  time_started: birl.Time,
+  attempts: Int,
+) -> result {
+  retry_loop(
+    retry_function,
+    fn(r) {
+      case condition(r) {
+        Ok(_) -> False
+        // Success, don't continue
+        Error(_) -> True
+        // Error, continue retrying
+      }
+    },
+    time_started,
+    attempts,
+  )
+}
+
+// Wrapper for Bool-based conditions
+fn bool_loop(
+  retry_function: fn() -> result,
+  condition: fn(result) -> Bool,
+  time_started: birl.Time,
+  attempts: Int,
+) -> result {
+  retry_loop(
+    retry_function,
+    fn(r) { !condition(r) },
+    // Invert because True means success, False means retry
+    time_started,
+    attempts,
+  )
 }
 
 fn wait_on_attempts(attempts: Int) -> Nil {
@@ -98,7 +114,12 @@ fn log_attempts(attempts: Int) -> Nil {
   )
 }
 
+/// Increment a value until a condition is met
 pub fn incremented(value: Int, condition: fn(Int) -> Bool) -> Int {
+  incremented_loop(value, condition)
+}
+
+fn incremented_loop(value: Int, condition: fn(Int) -> Bool) -> Int {
   case condition(value) {
     True -> value
     False -> incremented(value + 1, condition)

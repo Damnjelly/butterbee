@@ -26,11 +26,11 @@ pub type TypedJson {
 pub fn pretty_json(json msg: String) -> String {
   let assert Ok(json) = json.parse(msg, decode.dynamic)
 
-  json_to_doc(json)
+  dynamic_to_doc(json)
   |> doc.to_string(line_length)
 }
 
-fn json_to_doc(json: Dynamic) -> Document {
+pub fn dynamic_to_doc(json: Dynamic) -> Document {
   dynamic_to_typed_json(json)
   |> typed_json_to_doc
 }

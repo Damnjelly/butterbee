@@ -3,11 +3,14 @@ import butterbee/by
 import butterbee/driver
 import butterbee/nodes
 import gleeunit
+import logging
 
 import butterbee/input
 import butterbee/query
 
 pub fn main() {
+  logging.configure()
+  logging.set_level(logging.Debug)
   butterbee.init()
   gleeunit.main()
 }
