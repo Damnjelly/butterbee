@@ -1,0 +1,60 @@
+import butterbee/bidi/session/types/capabilities_request.{
+  type CapabilitiesRequest, capabilities_request_decoder,
+}
+import butterbee/internal/config/browser_config
+import butterbee/internal/config/driver_config.{driver_config_decoder}
+import butterbee/internal/lib
+import gleam/dynamic/decode
+import gleam/option.{type Option, None, Some}
+import gleam/result
+import simplifile
+import tom
+
+pub type ButterbeeConfig {
+  ButterbeeConfig(
+    driver_config: driver_config.DriverConfig,
+    capabilities: Option(CapabilitiesRequest),
+    browser_config: Option(browser_config.BrowsersConfig),
+  )
+}
+
+fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
+  use driver_config <- decode.field("Driver", driver_config_decoder())
+  use capabilities <- decode.field(
+    "Capabilities",
+    decode.optional(capabilities_request_decoder()),
+  )
+  use browser_config <- decode.field(
+    "Browser",
+    decode.optional(browser_config.browser_config_decoder()),
+  )
+  decode.success(ButterbeeConfig(driver_config:, capabilities:, browser_config:))
+}
+
+pub fn default() -> ButterbeeConfig {
+  ButterbeeConfig(driver_config.default(), None, None)
+}
+
+pub type Error {
+  ReadError(simplifile.FileError)
+  ParseError(tom.ParseError)
+  DecodeError(List(decode.DecodeError))
+}
+
+pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
+  use path <- result.try({
+    simplifile.read(path) |> result.map_error(ReadError)
+  })
+
+  use config <- result.try({ tom.parse(path) |> result.map_error(ParseError) })
+
+  let config = lib.toml_to_dynamic(tom.Table(config))
+
+  use config <- result.try({
+    decode.run(config, butterbee_config_decoder())
+    |> result.map_error(DecodeError)
+  })
+
+  echo config
+  Ok(config)
+}

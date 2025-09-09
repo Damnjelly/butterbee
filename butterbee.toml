@@ -14,6 +14,12 @@ data_dir = "/tmp/butterbee"
 
 [Browsers.firefox]
 
-# TODO: doesn't work
+flags = ["-headless", "--no-remote", "--no-first-run"]
 host = "127.0.0.1"
 port_range = [9222, 9242]
+
+[Browsers.chrome]
+
+flags = []
+host = "127.0.0.1"
+port_range = [9243, 9263]

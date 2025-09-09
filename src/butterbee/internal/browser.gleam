@@ -1,5 +1,8 @@
+import gleam/dynamic.{type Dynamic}
+import gleam/dynamic/decode
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
+import gleam/list
 import gleam/option.{type Option, None}
 
 pub const default_host = "127.0.0.1"
@@ -14,12 +17,22 @@ pub type Browser {
     profile_dir: Option(String),
     profile_name: Option(String),
     browser_type: BrowserType,
+    extra_flags: Option(List(String)),
   )
 }
 
 pub type BrowserType {
   Firefox
   Chrome
+}
+
+pub fn browser_type_decoder() -> decode.Decoder(BrowserType) {
+  use browser_type <- decode.then(decode.string)
+  case browser_type {
+    "firefox" -> decode.success(Firefox)
+    "chrome" -> decode.success(Chrome)
+    _ -> decode.failure(Firefox, "Browser type not supported: " <> browser_type)
+  }
 }
 
 pub fn default() -> Browser {
@@ -30,6 +43,7 @@ pub fn default() -> Browser {
     profile_dir: None,
     profile_name: None,
     browser_type: Firefox,
+    extra_flags: None,
   )
 }
 

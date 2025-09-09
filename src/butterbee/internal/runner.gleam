@@ -1,5 +1,6 @@
 import butterbee/internal/browser.{type Browser, Browser}
-import butterbee/internal/config
+import butterbee/internal/config/butterbee_config
+import butterbee/internal/config/driver_config
 import butterbee/internal/retry
 import gleam/erlang/process
 import gleam/http/request.{type Request}
@@ -13,26 +14,29 @@ import shellout
 import simplifile
 import youid/uuid
 
-pub fn start(config: config.DriverConfig) -> Result(Request(String), String) {
+pub fn start(
+  config: driver_config.DriverConfig,
+) -> Result(Request(String), String) {
   let assert Ok(#(profile, profile_dir)) = create_profile_dir("/tmp/butterbee")
     as "Failed to create profile directory"
 
-  use request <- result.try({
-    let browser =
-      config.browser
-      |> option.unwrap(browser.default())
-
-    start_browser(
-      config,
-      Browser(
-        ..browser,
-        profile_dir: Some(profile_dir),
-        profile_name: Some(profile),
-      ),
-    )
-  })
-
-  Ok(request)
+  todo
+  // use request <- result.try({
+  //   let browser =
+  //     config.browser
+  //     |> option.unwrap(browser.default())
+  //
+  //   start_browser(
+  //     config,
+  //     Browser(
+  //       ..browser,
+  //       profile_dir: Some(profile_dir),
+  //       profile_name: Some(profile),
+  //     ),
+  //   )
+  // })
+  //
+  // Ok(request)
 }
 
 /// Create a new profile directory
@@ -94,7 +98,7 @@ pub fn get_port(port_range: #(Int, Int), data_dir: String) -> Int {
 }
 
 fn start_browser(
-  config: config.DriverConfig,
+  config: driver_config.DriverConfig,
   browser: Browser,
 ) -> Result(Request(String), String) {
   let port = get_port(browser.port_range, config.data_dir)
@@ -121,7 +125,7 @@ fn start_browser(
         "-no-first-run",
         "-no-default-browser-check",
         "-no-remote",
-        // "-headless",
+        "-headless",
         "-profile " <> profile,
       ])
     }
@@ -136,7 +140,7 @@ fn start_browser(
   process.spawn(fn() {
     let _ = case
       shellout.command(run: cmd, with: flags, in: profile_dir, opt: [
-        shellout.LetBeStdout,
+        //shellout.LetBeStdout,
       ])
     {
       Ok(_) -> Nil

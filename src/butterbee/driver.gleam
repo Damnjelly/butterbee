@@ -10,13 +10,15 @@ import butterbee/bidi/session/types/capabilities_request
 import butterbee/commands/browser
 import butterbee/commands/browsing_context
 import butterbee/commands/session
-import butterbee/internal/config
+import butterbee/internal/config/butterbee_config
+import butterbee/internal/config/capabilities_config
 import butterbee/internal/lib
 import butterbee/internal/runner
 import butterbee/internal/socket.{type WebDriverSocket}
 import gleam/erlang/process
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/result
 
 ///
 /// Represents a webdriver session
@@ -28,12 +30,23 @@ pub type WebDriver {
     /// The browsing context of the webdriver session
     context: BrowsingContext,
     /// The config used during the webdriver session
-    config: config.ButterbeeConfig,
+    config: butterbee_config.ButterbeeConfig,
   )
 }
 
 ///
-/// Start a new webdriver session connect to the browser session, using the given config
+/// Start a new webdriver session connect to the browser session, using the butterbee.toml file located in the root of the project
+/// 
+pub fn new() -> WebDriver {
+  let path =
+    butterbee_config.parse_config("butterbee.toml")
+    |> result.unwrap(butterbee_config.default())
+
+  new_with_config(path)
+}
+
+///
+/// Start a new webdriver session using the butterbee.toml file located in the given path
 /// 
 /// # Example
 ///
@@ -43,25 +56,23 @@ pub type WebDriver {
 /// let example = driver.new_with_config("test/special_config.toml")
 /// ```
 ///
-pub fn new_with_config(path: String) -> WebDriver {
-  abstract_new(path: path)
+pub fn new_with_config_path(path: String) -> WebDriver {
+  let path =
+    butterbee_config.parse_config(path)
+    |> result.unwrap(butterbee_config.default())
+
+  new_with_config(path)
 }
 
 ///
-/// Start a new webdriver session connect to the browser session, using the config located in root of the project
-/// 
-pub fn new() -> WebDriver {
-  abstract_new(path: "butterbee.toml")
-}
-
-fn abstract_new(path path: String) -> WebDriver {
-  let config = config.parse_config(path)
+/// Start a new webdriver session connect to the browser session, using the ButterbeeConfig type
+///
+pub fn new_with_config(config: butterbee_config.ButterbeeConfig) -> WebDriver {
+  let assert Ok(request) = runner.start(config.driver_config)
 
   let capabilities =
     config.capabilities
-    |> option.unwrap(capabilities_request.CapabilitiesRequest(None, None))
-
-  let assert Ok(request) = runner.start(config.driver_config)
+    |> option.unwrap(capabilities_config.default())
 
   let #(socket, response) = session.new(request, capabilities)
 
@@ -146,7 +157,7 @@ pub fn wait(state: state, duration: Int) -> state {
 /// 
 /// # Example
 ///
-/// This example closes the webdriver session, and returns "gleam", the inner text of the element with the css selector `a.logo`:
+/// This example closes the webdriver session, and returns "Gleam", the inner text of the element with the css selector `a.logo`:
 ///
 /// ```gleam
 /// let example = driver.new()
@@ -163,4 +174,23 @@ pub fn close(driver_with_state: #(WebDriver, state)) -> state {
   socket.close(driver.socket)
 
   state
+}
+
+///
+/// Returns the value of the test without closing the webdriver session 
+/// 
+/// # Example
+///
+/// This example returns "Gleam" without closing the session:
+///
+/// ```gleam
+/// let example = driver.new()
+///   |> driver.goto("https://gleam.run/")
+///   |> query.node(by.css("a.logo"))
+///   |> nodes.inner_text()
+///   |> driver.value()
+/// ```
+///
+pub fn value(driver_with_state: #(WebDriver, state)) -> state {
+  driver_with_state.1
 }
