@@ -74,7 +74,6 @@ pub fn extensible_to_list(
         }
       }
       _ -> {
-        echo value
         logging.log(
           logging.Error,
           "Could not decode dynamic, error: " <> string.inspect(value),

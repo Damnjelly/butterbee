@@ -32,8 +32,6 @@ pub fn new(config: config.ButterbeeConfig) -> Result(Browser, errors.Error) {
     |> browser.with_extra_flags(browser_config.extra_flags)
     |> browser.with_port(port)
 
-  echo browser
-
   let request = browser.get_request(port, browser)
 
   // update browser with request

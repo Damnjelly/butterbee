@@ -62,9 +62,6 @@ pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
 
   let config = lib.toml_to_dynamic(tom.Table(config))
 
-  glam.dynamic_to_doc(config) |> doc.to_string(40) |> io.print()
-
-  echo config
   use config <- result.try({
     decode.run(config, butterbee_config_decoder())
     |> result.map_error(DecodeError)

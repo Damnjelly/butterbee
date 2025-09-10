@@ -9,8 +9,8 @@ import butterbee/input
 import butterbee/query
 
 pub fn main() {
-  logging.configure()
-  logging.set_level(logging.Debug)
+  // logging.configure()
+  // logging.set_level(logging.Info)
   butterbee.init()
   gleeunit.main()
 }

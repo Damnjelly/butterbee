@@ -19,6 +19,7 @@ import gleam/erlang/process
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
+import gleam/string
 import logging
 
 ///
@@ -39,12 +40,18 @@ pub type WebDriver {
 /// Start a new webdriver session connect to the browser session, using the butterbee.toml file located in the root of the project
 /// 
 pub fn new() -> WebDriver {
-  config.parse_config("butterbee.toml")
-  |> result.unwrap({
-    logging.log(logging.Error, "Failed to parse butterbee.toml")
-    config.default()
-  })
-  |> new_with_config
+  let config = case config.parse_config("butterbee.toml") {
+    Ok(config) -> config
+    Error(error) -> {
+      logging.log(
+        logging.Error,
+        "Failed to parse butterbee.toml: " <> string.inspect(error),
+      )
+      config.default()
+    }
+  }
+
+  new_with_config(config)
 }
 
 ///
@@ -59,12 +66,18 @@ pub fn new() -> WebDriver {
 /// ```
 ///
 pub fn new_with_config_path(path: String) -> WebDriver {
-  config.parse_config(path)
-  |> result.unwrap({
-    logging.log(logging.Error, "Failed to parse butterbee.toml")
-    config.default()
-  })
-  |> new_with_config
+  let config = case config.parse_config(path) {
+    Ok(config) -> config
+    Error(error) -> {
+      logging.log(
+        logging.Error,
+        "Failed to parse butterbee.toml: " <> string.inspect(error),
+      )
+      config.default()
+    }
+  }
+
+  new_with_config(config)
 }
 
 ///
