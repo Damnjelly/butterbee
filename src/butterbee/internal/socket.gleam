@@ -8,9 +8,7 @@ import gleam/dynamic/decode.{type Decoder}
 import gleam/erlang/process
 import gleam/http/request.{type Request}
 import gleam/json.{type Json}
-import gleam/option.{None}
 import gleam/otp/actor
-import gleam/result
 import gleam/uri
 import logging
 import stratus

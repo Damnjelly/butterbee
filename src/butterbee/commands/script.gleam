@@ -3,12 +3,9 @@ import butterbee/bidi/script/commands/call_function.{
   type CallFunctionParameters, call_function_parameters_to_json,
 }
 import butterbee/bidi/script/definition as script_definition
-import butterbee/bidi/script/types/evaluate_result.{
-  type EvaluateResult, evaluate_result_decoder,
-}
+import butterbee/bidi/script/types/evaluate_result.{type EvaluateResult}
 import butterbee/internal/id
 import butterbee/internal/socket
-import gleam/dynamic/decode
 import gleam/result
 
 ///

@@ -1,14 +1,12 @@
 import butterbee/bidi/script/commands/call_function
 import butterbee/bidi/script/types/local_value
-import butterbee/bidi/script/types/primitive_protocol_value as primitive
 import butterbee/bidi/script/types/remote_reference
-import butterbee/bidi/script/types/remote_value.{type RemoteValue}
+import butterbee/bidi/script/types/remote_value
 import butterbee/bidi/script/types/target
 import butterbee/commands/script
 import butterbee/internal/lib
 import butterbee/query
 import butterbee/webdriver.{type WebDriver}
-import gleam/bool
 import gleam/list
 import gleam/option.{None, Some}
 

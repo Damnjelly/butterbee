@@ -1,5 +1,5 @@
 import butterbee/bidi/browsing_context/types/browsing_context.{
-  type BrowsingContext, browsing_context_decoder,
+  type BrowsingContext,
 }
 import butterbee/bidi/browsing_context/types/info
 import gleam/dynamic/decode

@@ -1,25 +1,20 @@
 import butterbee/bidi/browsing_context/commands/get_tree.{
-  get_tree_parameters_to_json, get_tree_result_decoder,
+  get_tree_parameters_to_json,
 }
 import butterbee/bidi/browsing_context/commands/locate_nodes.{
-  locate_nodes_parameters_to_json, locate_nodes_result_decoder,
+  locate_nodes_parameters_to_json,
 }
 import butterbee/bidi/browsing_context/commands/navigate.{
-  navigate_parameters_to_json, navigate_result_decoder,
+  navigate_parameters_to_json,
 }
 import butterbee/bidi/browsing_context/definition as browsing_context_definition
-import butterbee/bidi/browsing_context/types/browsing_context.{
-  type BrowsingContext,
-}
 import butterbee/bidi/browsing_context/types/readiness_state
 import butterbee/bidi/definition
 import butterbee/internal/id
 import butterbee/internal/socket
-import gleam/dynamic/decode
 import gleam/json
 import gleam/option.{None, Some}
 import gleam/result
-import logging
 
 ///
 /// # [browsingContext.getTree](https://w3c.github.io/webdriver-bidi/#command-browsingContext-getTree)

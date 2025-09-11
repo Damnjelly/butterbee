@@ -3,12 +3,9 @@ import butterbee/bidi/session/types/capabilities_request.{
 }
 import butterbee/internal/config/browser_config
 import butterbee/internal/config/driver_config.{driver_config_decoder}
-import butterbee/internal/glam
 import butterbee/internal/lib
-import glam/doc
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
-import gleam/io
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import simplifile

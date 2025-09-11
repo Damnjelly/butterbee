@@ -1,10 +1,8 @@
 import butterbee/bidi/browsing_context/types/browsing_context.{
   type BrowsingContext,
 }
-import butterbee/internal/decoders
 import gleam/dynamic/decode
 import gleam/option.{type Option}
-import youid/uuid.{type Uuid}
 
 pub type InfoList {
   InfoList(list: List(Info))

@@ -1,4 +1,4 @@
-import butterbee/internal/browser.{type Browser, Browser}
+import butterbee/internal/browser.{type Browser}
 import butterbee/internal/config/browser_config
 import butterbee/internal/config/config
 import butterbee/internal/retry
@@ -9,7 +9,7 @@ import gleam/dict
 import gleam/erlang/process
 import gleam/int
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option
 import gleam/result
 import gleam/string
 import logging
