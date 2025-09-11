@@ -1,8 +1,6 @@
 import butterbee/bidi/script/commands/call_function
 import butterbee/bidi/script/types/local_value
-import butterbee/bidi/script/types/primitive_protocol_value.{
-  BigInt, Boolean, Null, Number, String, Undefined,
-}
+import butterbee/bidi/script/types/primitive_protocol_value as primitive
 import butterbee/bidi/script/types/remote_reference
 import butterbee/bidi/script/types/remote_value.{type RemoteValue}
 import butterbee/bidi/script/types/target
@@ -88,26 +86,8 @@ pub fn inner_texts(
 
       let remote_value = call_function_result.result.result
 
-      parse_inner_text(remote_value)
+      remote_value.remote_value_to_string(remote_value)
     })
 
   #(driver, inner_texts)
-}
-
-fn parse_inner_text(remote_value: RemoteValue) -> String {
-  let inner_text = case remote_value {
-    remote_value.PrimitiveProtocol(value) -> {
-      case value {
-        Undefined(_) -> "undefined"
-        Null(_) -> "null"
-        String(value) -> value.value
-        Number(value) -> primitive_protocol_value.number_to_string(value.value)
-        Boolean(value) -> bool.to_string(value.value)
-        BigInt(value) -> value.value
-      }
-    }
-    _ -> panic as "Expected primitive protocol"
-  }
-
-  inner_text
 }

@@ -83,6 +83,19 @@ pub fn remote_value_decoder() -> Decoder(RemoteValue) {
   }
 }
 
+pub fn remote_value_to_string(remote_value: RemoteValue) -> String {
+  case remote_value {
+    PrimitiveProtocol(value) -> primitive_protocol_value.to_string(value)
+    NodeRemote(value) -> {
+      logging.log(
+        logging.Debug,
+        "Expected PrimitiveProtocol, got NodeRemote. Returning remote_type",
+      )
+      value.remote_type
+    }
+  }
+}
+
 pub type NodeRemoteValue {
   NodeRemoteValue(
     remote_type: String,
@@ -93,8 +106,6 @@ pub type NodeRemoteValue {
   )
 }
 
-//NOTE: It is so evil that this remote value specifically is needed for the locate node script
-//TODO: Remove
 pub fn node_remote_value_decoder() -> Decoder(NodeRemoteValue) {
   use remote_type <- decode.field("type", decode.string)
   use shared_id <- decode.optional_field(

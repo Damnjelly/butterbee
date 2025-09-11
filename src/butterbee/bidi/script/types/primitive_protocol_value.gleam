@@ -1,3 +1,4 @@
+import gleam/bool
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/float
@@ -11,6 +12,17 @@ pub type PrimitiveProtocolValue {
   Number(NumberValue)
   Boolean(BooleanValue)
   BigInt(BigIntValue)
+}
+
+pub fn to_string(value: PrimitiveProtocolValue) -> String {
+  case value {
+    Undefined(_) -> "undefined"
+    Null(_) -> "null"
+    String(value) -> value.value
+    Number(value) -> number_to_string(value.value)
+    Boolean(value) -> bool.to_string(value.value)
+    BigInt(value) -> value.value
+  }
 }
 
 pub type UndefinedValue {
