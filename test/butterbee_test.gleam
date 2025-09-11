@@ -4,6 +4,8 @@ import butterbee/driver
 import butterbee/nodes
 import gleeunit
 import logging
+import qcheck_gleeunit_utils/run
+import qcheck_gleeunit_utils/test_spec
 
 import butterbee/input
 import butterbee/query
@@ -15,7 +17,8 @@ pub fn main() {
   gleeunit.main()
 }
 
-pub fn minimal_example_test() {
+pub fn minimal_example_test_() {
+  use <- test_spec.make_with_timeout(30)
   let output =
     driver.new()
     |> driver.goto("https://gleam.run/")
@@ -24,6 +27,7 @@ pub fn minimal_example_test() {
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
     |> input.click()
+    |> driver.wait(10_000)
     |> query.node(by.css("pre.log"))
     |> nodes.inner_text()
     |> driver.close()

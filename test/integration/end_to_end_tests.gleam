@@ -4,11 +4,13 @@ import butterbee/key
 import butterbee/nodes
 import gleam/list
 import gleam/string
+import qcheck_gleeunit_utils/test_spec
 
 import butterbee/input
 import butterbee/query
 
-pub fn enter_keys_test() {
+pub fn enter_keys_test_() {
+  use <- test_spec.make_with_timeout(30)
   let package_names =
     driver.new()
     |> driver.goto("https://packages.gleam.run/")
