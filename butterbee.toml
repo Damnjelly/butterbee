@@ -5,9 +5,9 @@ data_dir = "/tmp/butterbee"
 
 [Browsers.firefox]
 
-# flags = ["-headless"]
+flags = ["-headless"]
 host = "127.0.0.1"
-port_range = [9222, 9242]
+port_range = [9222, 9282]
 
 # [Browsers.chrome]
 #
