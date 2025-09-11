@@ -65,28 +65,27 @@ pub fn inner_texts(
 ) -> #(driver.WebDriver, List(String)) {
   let #(driver, nodes) = driver_with_nodes
 
+  let target = target.new_context_target(driver.context)
+
+  let function = "function(node) { return node.innerText; }"
+
   let inner_texts =
     list.map(nodes, fn(node) {
       let assert Some(shared_id) = node.value.shared_id
         as "Node does not have a shared id"
 
+      let node =
+        local_value.remote_reference(remote_reference.remote_reference_from_id(
+          shared_id,
+        ))
+
+      let params =
+        call_function.new(target)
+        |> call_function.with_function(function)
+        |> call_function.with_arguments([node])
+
       let assert Ok(call_function_result) =
-        script.call_function(
-          driver.socket,
-          call_function.CallFunctionParameters(
-            function_declaration: "function(node) { return node.innerText; }",
-            await_promise: False,
-            target: target.Context(target.ContextTarget(driver.context, None)),
-            arguments: Some([
-              local_value.RemoteReference(
-                remote_reference.Shared(remote_reference.SharedReference(
-                  shared_id,
-                  None,
-                )),
-              ),
-            ]),
-          ),
-        )
+        script.call_function(driver.socket, params)
 
       let remote_value = call_function_result.result.result
 

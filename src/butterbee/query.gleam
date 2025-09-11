@@ -1,10 +1,12 @@
 import butterbee/bidi/browsing_context/commands/locate_nodes
 import butterbee/bidi/browsing_context/types/locator.{type Locator}
+import butterbee/bidi/definition
 import butterbee/bidi/script/types/remote_reference
 import butterbee/bidi/script/types/remote_value
 import butterbee/commands/browsing_context
 import butterbee/driver
 import butterbee/internal/retry
+import butterbee/internal/socket
 import gleam/dynamic/decode.{type Decoder}
 import gleam/list
 import gleam/option.{None, Some}
@@ -65,54 +67,32 @@ pub fn nodes(
   driver: driver.WebDriver,
   locator: Locator,
 ) -> #(driver.WebDriver, List(Node)) {
-  let #(socket, locate_nodes_result) =
-    retry.until_ok(
-      fn() {
-        browsing_context.locate_nodes(
-          driver.socket,
-          locate_nodes.LocateNodesParameters(
-            driver.context,
-            locator,
-            None,
-            None,
-            None,
-          ),
-        )
-      },
-      fn(locate_nodes_result) {
-        case locate_nodes_result.1 {
-          Ok(locate_nodes_ok) ->
-            case !list.is_empty(locate_nodes_ok.nodes) {
-              True -> Ok(locate_nodes_ok)
-              False -> {
-                logging.log(logging.Debug, "No nodes found, retrying")
-                Error(Nil)
-              }
-            }
-          Error(locate_nodes_error) -> {
-            logging.log(
-              logging.Debug,
-              "Locating nodes failed, error: "
-                <> string.inspect(locate_nodes_error)
-                <> " retrying",
-            )
-            Error(Nil)
-          }
-        }
-      },
-    )
+  let params = locate_nodes.new(driver.context, locator)
 
-  let assert Ok(locate_nodes_result) = locate_nodes_result
+  let nodes = locate_nodes(driver.socket, params)
 
-  let nodes =
-    locate_nodes_result.nodes
-    |> list.map(fn(node) { Node(node) })
-
-  let webdriver = driver.WebDriver(socket, driver.context, driver.config)
-
-  #(webdriver, nodes)
+  #(driver, nodes)
 }
 
+/// 
+/// Query for a list of nodes from the position of another set of nodes.
+/// 
+/// Will retry for a configurable amount of time to find a node.
+/// Panics if no node is found after retrying for the configured amount of time.
+/// 
+/// # Example
+///
+/// This example first finds all the package items, 
+/// then refines the list of nodes to only contain the package names:
+///
+/// ```gleam
+/// let example =
+///   driver.new()
+///   |> driver.goto("https://packages.gleam.run/")
+///   |> query.nodes(by.css("div.package-item"))
+///   |> query.refine(by.css("h2.package-name"))
+/// ```
+///
 pub fn refine(
   webdriver_with_nodes: #(driver.WebDriver, List(Node)),
   locator: Locator,
@@ -123,23 +103,25 @@ pub fn refine(
     list.map(nodes, fn(node) {
       let assert Some(shared_id) = node.value.shared_id
         as "Some nodes have no shared id"
-      remote_reference.SharedReference(shared_id, None)
+      remote_reference.shared_reference_from_id(shared_id)
     })
 
-  let #(socket, locate_nodes_result) =
+  let params =
+    locate_nodes.new(driver.context, locator)
+    |> locate_nodes.with_start_nodes(shared_ids)
+
+  let nodes = locate_nodes(driver.socket, params)
+
+  #(driver, nodes)
+}
+
+fn locate_nodes(
+  socket: socket.WebDriverSocket,
+  params: locate_nodes.LocateNodesParameters,
+) -> List(Node) {
+  let #(_, locate_nodes_result) =
     retry.until_ok(
-      fn() {
-        browsing_context.locate_nodes(
-          driver.socket,
-          locate_nodes.LocateNodesParameters(
-            driver.context,
-            locator,
-            None,
-            None,
-            Some(shared_ids),
-          ),
-        )
-      },
+      fn() { browsing_context.locate_nodes(socket, params) },
       fn(locate_nodes_result) {
         case locate_nodes_result.1 {
           Ok(locate_nodes_ok) ->
@@ -169,7 +151,5 @@ pub fn refine(
     locate_nodes_result.nodes
     |> list.map(fn(node) { Node(node) })
 
-  let webdriver = driver.WebDriver(socket, driver.context, driver.config)
-
-  #(webdriver, nodes)
+  nodes
 }

@@ -27,6 +27,14 @@ pub type ContextTarget {
   )
 }
 
+pub fn new_context_target(context: browsing_context.BrowsingContext) -> Target {
+  Context(ContextTarget(context, None))
+}
+
+pub fn with_sandbox(context_target: ContextTarget, sandbox: String) -> Target {
+  Context(ContextTarget(..context_target, sandbox: Some(sandbox)))
+}
+
 pub fn context_target_to_json(context_target: ContextTarget) -> Json {
   let ContextTarget(context:, sandbox:) = context_target
   let sandbox = case sandbox {

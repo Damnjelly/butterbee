@@ -14,7 +14,7 @@ always_match = {
 
 [Browsers.firefox]
 
-flags = ["-headless", "--no-remote", "--no-first-run"]
+flags = ["-headless"]
 host = "127.0.0.1"
 port_range = [9222, 9242]
 

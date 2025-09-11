@@ -18,6 +18,10 @@ pub fn remote_reference_to_json(remote_reference: RemoteReference) -> Json {
   }
 }
 
+pub fn remote_reference_from_id(shared_id: Uuid) -> RemoteReference {
+  Shared(shared_reference_from_id(shared_id))
+}
+
 pub type SharedReference {
   SharedReference(shared_id: Uuid, handle: Option(Uuid))
 }
@@ -34,4 +38,16 @@ pub fn shared_reference_to_json(shared_reference: SharedReference) -> Json {
     [#("sharedId", json.string(uuid.to_string(shared_id)))]
     |> list.append(handle),
   )
+}
+
+/// Creates a new shared reference from a shared id
+pub fn shared_reference_from_id(shared_id: Uuid) -> SharedReference {
+  SharedReference(shared_id, None)
+}
+
+pub fn shared_reference_with_handle(
+  shared_reference: SharedReference,
+  handle: Uuid,
+) -> SharedReference {
+  SharedReference(..shared_reference, handle: Some(handle))
 }

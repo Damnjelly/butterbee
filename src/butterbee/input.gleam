@@ -1,18 +1,17 @@
-import butterbee/bidi/definition
 import butterbee/bidi/input/commands/perform_actions
-import butterbee/bidi/input/types/element_origin
 import butterbee/bidi/script/types/remote_reference
 import butterbee/commands/input
 import butterbee/driver
 import butterbee/internal/lib
 import butterbee/internal/retry
 import butterbee/query
-import gleam/bool
 import gleam/list
 import gleam/option.{None, Some}
-import gleam/result
 import gleam/string
 import logging
+import youid/uuid.{type Uuid}
+
+pub const left_click = 0
 
 ///
 /// Perfoms a click on the given node
@@ -40,33 +39,21 @@ pub fn click(
   let assert Some(shared_id) = node.value.shared_id
     as "Node does not have a shared id"
 
+  let params =
+    perform_actions.default(driver.context)
+    |> perform_actions.with_actions([
+      {
+        perform_actions.pointer_actions("mouse", [
+          move_to_element(shared_id),
+          perform_actions.pointer_down_action(left_click),
+          perform_actions.pointer_up_action(left_click),
+        ])
+      },
+    ])
+
   let _ =
     retry.until_ok(
-      fn() {
-        input.perform_actions(
-          driver.socket,
-          perform_actions.PerformActionsParameters(driver.context, [
-            perform_actions.PointerSource(
-              perform_actions.PointerSourceActions("mouse", None, [
-                perform_actions.PointerMove(perform_actions.PointerMoveAction(
-                  0,
-                  0,
-                  option.None,
-                  option.Some(
-                    perform_actions.Element(
-                      element_origin.ElementOrigin(
-                        remote_reference.SharedReference(shared_id, option.None),
-                      ),
-                    ),
-                  ),
-                )),
-                perform_actions.PointerDown(perform_actions.PointerDownAction(0)),
-                perform_actions.PointerUp(perform_actions.PointerUpAction(0)),
-              ]),
-            ),
-          ]),
-        )
-      },
+      fn() { input.perform_actions(driver.socket, params) },
       fn(result) {
         case result.1 {
           Ok(a) -> Ok(a)
@@ -115,21 +102,36 @@ pub fn enter_keys(
 
   let _ = click(#(driver, node_list))
 
-  input.perform_actions(
-    driver.socket,
-    perform_actions.PerformActionsParameters(driver.context, [
-      perform_actions.KeySource(perform_actions.KeySourceActions(
+  let params =
+    perform_actions.default(driver.context)
+    |> perform_actions.with_actions([
+      perform_actions.key_actions(
         "entering " <> keys,
-        list.map(key_list, fn(key) {
-          [
-            perform_actions.KeyDown(perform_actions.KeyDownAction(key)),
-            perform_actions.KeyUp(perform_actions.KeyUpAction(key)),
-          ]
-        })
-          |> list.flatten(),
-      )),
-    ]),
-  )
+        enter_keys_action(key_list),
+      ),
+    ])
+
+  input.perform_actions(driver.socket, params)
 
   driver
+}
+
+fn move_to_element(shared_id: Uuid) -> perform_actions.PointerSourceAction {
+  perform_actions.pointer_move_action(
+    0,
+    0,
+    None,
+    perform_actions.element_origin(remote_reference.shared_reference_from_id(
+      shared_id,
+    )),
+  )
+}
+
+fn enter_keys_action(
+  keys: List(String),
+) -> List(perform_actions.KeySourceAction) {
+  list.map(keys, fn(key) {
+    [perform_actions.key_down_action(key), perform_actions.key_up_action(key)]
+  })
+  |> list.flatten()
 }

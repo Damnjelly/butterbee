@@ -51,6 +51,46 @@ pub fn locate_nodes_parameters_to_json(
   ])
 }
 
+pub fn new(context: BrowsingContext, locator: Locator) -> LocateNodesParameters {
+  LocateNodesParameters(
+    context: context,
+    locator: locator,
+    max_node_count: None,
+    serialization_options: None,
+    start_nodes: None,
+  )
+}
+
+pub fn with_max_node_count(
+  locate_nodes_parameters: LocateNodesParameters,
+  max_node_count: Int,
+) -> LocateNodesParameters {
+  LocateNodesParameters(
+    ..locate_nodes_parameters,
+    max_node_count: Some(max_node_count),
+  )
+}
+
+pub fn with_serialization_options(
+  locate_nodes_parameters: LocateNodesParameters,
+  serialization_options: SerializationOptions,
+) -> LocateNodesParameters {
+  LocateNodesParameters(
+    ..locate_nodes_parameters,
+    serialization_options: Some(serialization_options),
+  )
+}
+
+pub fn with_start_nodes(
+  locate_nodes_parameters: LocateNodesParameters,
+  start_nodes: List(remote_reference.SharedReference),
+) -> LocateNodesParameters {
+  LocateNodesParameters(
+    ..locate_nodes_parameters,
+    start_nodes: Some(start_nodes),
+  )
+}
+
 pub type LocateNodesResult {
   LocateNodesResult(nodes: List(remote_value.NodeRemoteValue))
 }

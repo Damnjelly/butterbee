@@ -2,9 +2,10 @@ import butterbee/bidi/browsing_context/types/browsing_context.{
   type BrowsingContext,
 }
 import butterbee/bidi/input/types/element_origin
+import butterbee/bidi/script/types/remote_reference
 import gleam/json.{type Json}
 import gleam/list
-import gleam/option.{type Option}
+import gleam/option.{type Option, None, Some}
 import youid/uuid
 
 pub type PerformActionsParameters {
@@ -24,6 +25,17 @@ pub fn perform_actions_parameters_to_json(
   ])
 }
 
+pub fn default(context: BrowsingContext) -> PerformActionsParameters {
+  PerformActionsParameters(context, [])
+}
+
+pub fn with_actions(
+  perform_actions_parameters: PerformActionsParameters,
+  actions: List(SourceActions),
+) -> PerformActionsParameters {
+  PerformActionsParameters(..perform_actions_parameters, actions: actions)
+}
+
 pub type SourceActions {
   //TODO: NoneSource(NoneSourceActions)
   KeySource(KeySourceActions)
@@ -39,6 +51,46 @@ fn source_actions_to_json(source_actions: SourceActions) -> Json {
     PointerSource(pointer_source_actions) ->
       pointer_source_actions_to_json(pointer_source_actions)
     //TODO: WheelSource(wheel_source_action) -> todo
+  }
+}
+
+pub fn key_actions(id: String, actions: List(KeySourceAction)) -> SourceActions {
+  KeySource(KeySourceActions(id, actions))
+}
+
+pub fn pointer_actions(
+  id: String,
+  actions: List(PointerSourceAction),
+) -> SourceActions {
+  PointerSource(PointerSourceActions(id, None, actions))
+}
+
+pub fn with_parameters(
+  source_actions: SourceActions,
+  parameters: PointerParameters,
+) -> SourceActions {
+  case source_actions {
+    PointerSource(pointer_source_actions) ->
+      PointerSource(
+        PointerSourceActions(
+          ..pointer_source_actions,
+          parameters: Some(parameters),
+        ),
+      )
+    _ -> panic as "#Expected pointer source actions"
+  }
+}
+
+pub fn with_pointer_actions(
+  source_actions: SourceActions,
+  actions: List(PointerSourceAction),
+) -> SourceActions {
+  case source_actions {
+    PointerSource(pointer_source_actions) ->
+      PointerSource(
+        PointerSourceActions(..pointer_source_actions, actions: actions),
+      )
+    _ -> panic as "#Expected pointer source actions"
   }
 }
 
@@ -65,6 +117,14 @@ fn key_source_action_to_json(key_source_action: KeySourceAction) -> Json {
     KeyDown(key_down_action) -> key_down_action_to_json(key_down_action)
     KeyUp(key_up_action) -> key_up_action_to_json(key_up_action)
   }
+}
+
+pub fn key_down_action(key: String) -> KeySourceAction {
+  KeyDown(KeyDownAction(key))
+}
+
+pub fn key_up_action(key: String) -> KeySourceAction {
+  KeyUp(KeyUpAction(key))
 }
 
 pub type PointerSourceActions {
@@ -130,6 +190,23 @@ pub type PointerSourceAction {
   PointerDown(PointerDownAction)
   PointerUp(PointerUpAction)
   PointerMove(PointerMoveAction)
+}
+
+pub fn pointer_down_action(button: Int) -> PointerSourceAction {
+  PointerDown(PointerDownAction(button))
+}
+
+pub fn pointer_up_action(button: Int) -> PointerSourceAction {
+  PointerUp(PointerUpAction(button))
+}
+
+pub fn pointer_move_action(
+  x: Int,
+  y: Int,
+  duration: Option(Int),
+  origin: Option(Origin),
+) -> PointerSourceAction {
+  PointerMove(PointerMoveAction(x, y, duration, origin))
 }
 
 fn pointer_source_action_to_json(
@@ -241,4 +318,18 @@ fn origin_to_json(origin: Origin) -> Json {
     Element(element_origin) ->
       element_origin.element_origin_to_json(element_origin)
   }
+}
+
+pub fn viewport_origin() -> Origin {
+  Viewport
+}
+
+pub fn pointer_origin() -> Origin {
+  Pointer
+}
+
+pub fn element_origin(
+  shared_reference: remote_reference.SharedReference,
+) -> Option(Origin) {
+  Some(Element(element_origin.ElementOrigin(shared_reference)))
 }

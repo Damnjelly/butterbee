@@ -99,6 +99,7 @@ pub fn locate_nodes(
 ) {
   let command =
     definition.BrowsingContextCommand(browsing_context_definition.LocateNodes)
+
   let request =
     definition.command_to_json(
       definition.Command(id.from_unix(), command, [

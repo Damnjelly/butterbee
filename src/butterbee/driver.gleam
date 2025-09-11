@@ -84,6 +84,11 @@ pub fn new_with_config_path(path: String) -> WebDriver {
 /// Start a new webdriver session connect to the browser session, using the ButterbeeConfig type
 ///
 pub fn new_with_config(config: config.ButterbeeConfig) -> WebDriver {
+  logging.log(
+    logging.Debug,
+    "Starting webdriver session with config: " <> string.inspect(config),
+  )
+  // Setup webdriver session
   let assert Ok(browser) = runner.new(config)
 
   let capabilities =
@@ -96,8 +101,13 @@ pub fn new_with_config(config: config.ButterbeeConfig) -> WebDriver {
 
   let assert Ok(_) = response
 
+  // Get initial browsing context
+  let get_tree_parameters =
+    get_tree.default()
+    |> get_tree.with_max_depth(1)
+
   let assert Ok(info_list) =
-    browsing_context.get_tree(socket, get_tree.GetTreeParameters(Some(1), None))
+    browsing_context.get_tree(socket, get_tree_parameters)
 
   let context = case list.length(info_list.contexts.list) {
     1 -> {
@@ -113,10 +123,7 @@ pub fn new_with_config(config: config.ButterbeeConfig) -> WebDriver {
 
 pub fn get_url(driver: WebDriver) -> #(WebDriver, String) {
   let assert Ok(get_tree_result) =
-    browsing_context.get_tree(
-      driver.socket,
-      get_tree.GetTreeParameters(None, None),
-    )
+    browsing_context.get_tree(driver.socket, get_tree.default())
 
   let assert Ok(info) = lib.single_element(get_tree_result.contexts.list)
     as "Found more than one, or zero, browsing contexts"
@@ -138,15 +145,11 @@ pub fn get_url(driver: WebDriver) -> #(WebDriver, String) {
 /// ```
 ///
 pub fn goto(driver: WebDriver, url: String) -> WebDriver {
-  let _ =
-    browsing_context.navigate(
-      driver.socket,
-      navigate.NavigateParameters(
-        context: driver.context,
-        url: url,
-        wait: Some(readiness_state.Interactive),
-      ),
-    )
+  let params =
+    navigate.default(driver.context, url)
+    |> navigate.with_wait(readiness_state.Interactive)
+
+  let _ = browsing_context.navigate(driver.socket, params)
 
   driver
 }
@@ -167,6 +170,11 @@ pub fn goto(driver: WebDriver, url: String) -> WebDriver {
 ///
 pub fn wait(state: state, duration: Int) -> state {
   process.sleep(duration)
+  state
+}
+
+pub fn log(state: state, message: String) -> state {
+  echo message
   state
 }
 

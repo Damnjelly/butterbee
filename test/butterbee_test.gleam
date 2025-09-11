@@ -9,8 +9,8 @@ import butterbee/input
 import butterbee/query
 
 pub fn main() {
-  // logging.configure()
-  // logging.set_level(logging.Info)
+  logging.configure()
+  logging.set_level(logging.Debug)
   butterbee.init()
   gleeunit.main()
 }
@@ -19,6 +19,7 @@ pub fn minimal_example_test() {
   let output =
     driver.new()
     |> driver.goto("https://gleam.run/")
+    |> driver.log("On gleam.run")
     |> query.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))

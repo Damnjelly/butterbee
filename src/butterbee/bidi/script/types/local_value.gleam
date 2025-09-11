@@ -35,3 +35,7 @@ pub fn local_value_to_json(local_value: LocalValue) -> Json {
     //   set_local_value.set_local_value_to_json(set_local_value)
   }
 }
+
+pub fn remote_reference(remote_reference: RemoteReference) -> LocalValue {
+  RemoteReference(remote_reference)
+}

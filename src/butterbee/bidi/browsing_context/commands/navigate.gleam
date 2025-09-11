@@ -45,6 +45,14 @@ pub fn navigate_parameters_to_json(
   )
 }
 
+pub fn default(context: BrowsingContext, url: String) -> NavigateParameters {
+  NavigateParameters(context:, url:, wait: None)
+}
+
+pub fn with_wait(navigate_parameters: NavigateParameters, wait: ReadinessState) {
+  NavigateParameters(..navigate_parameters, wait: Some(wait))
+}
+
 pub type NavigateResult {
   NavigateResult(
     //navigation: Option(Navigation),
