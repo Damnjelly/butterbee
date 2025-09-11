@@ -27,5 +27,5 @@ pub fn new(
 }
 
 pub fn with_context(webdriver: WebDriver, context: BrowsingContext) -> WebDriver {
-  WebDriver(webdriver.socket, context, webdriver.config)
+  WebDriver(..webdriver, context:)
 }
