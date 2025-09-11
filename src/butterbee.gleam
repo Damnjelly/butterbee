@@ -1,4 +1,5 @@
 import butterbee/driver
+import gleam/erlang/process
 import logging
 import simplifile
 
@@ -12,7 +13,9 @@ pub fn init() {
 }
 
 pub fn main() {
-  logging.configure()
-  logging.set_level(logging.Debug)
+  init()
+  process.sleep(1000)
   driver.new()
+  |> driver.goto("https://gleam.run/")
+  todo
 }

@@ -1,8 +1,8 @@
 import butterbee/internal/browser.{type Browser}
 import butterbee/internal/config/browser_config
 import butterbee/internal/config/config
+import butterbee/internal/error
 import butterbee/internal/retry
-import butterbee/internal/runner/errors
 import butterbee/internal/runner/firefox
 import butterbee/internal/runner/runnable.{type Runnable}
 import gleam/dict
@@ -16,7 +16,9 @@ import logging
 import shellout
 import simplifile
 
-pub fn new(config: config.ButterbeeConfig) -> Result(Browser, errors.Error) {
+pub fn new(
+  config: config.ButterbeeConfig,
+) -> Result(Browser, error.ButterbeeError) {
   let browser_config =
     config.browser_config
     |> option.unwrap(browser_config.default())
@@ -43,7 +45,7 @@ pub fn new(config: config.ButterbeeConfig) -> Result(Browser, errors.Error) {
       browser_config.Chrome -> todo
     })
 
-    run(runnable) |> result.map_error(errors.RunnerError)
+    run(runnable) |> result.map_error(fn(_) { error.RunnerError })
   })
 
   Ok(browser)
@@ -52,14 +54,14 @@ pub fn new(config: config.ButterbeeConfig) -> Result(Browser, errors.Error) {
 pub fn get_port(
   data_dir: String,
   browser_config: browser_config.BrowserConfig,
-) -> Result(Int, errors.Error) {
+) -> Result(Int, error.ButterbeeError) {
   let port_dir = data_dir <> "/used_ports"
 
   let #(min, max) = browser_config.port_range
 
   use _ <- result.try({
     simplifile.create_directory_all(port_dir)
-    |> result.map_error(errors.CreatePortDirError)
+    |> result.map_error(error.CreatePortDirError)
   })
 
   // Get a a list of used ports
@@ -67,7 +69,7 @@ pub fn get_port(
     {
       // Read the files in the port directory
       simplifile.read_directory(port_dir)
-      |> result.map_error(errors.ReadPortDirError)
+      |> result.map_error(error.ReadPortDirError)
     }
     // Convert the list of port strings to a list of port ints
     |> result.map(fn(files) {
@@ -106,13 +108,13 @@ pub fn get_port(
 
   use _ <- result.try({
     simplifile.create_file(port_dir <> "/" <> int.to_string(port))
-    |> result.map_error(errors.FileError)
+    |> result.map_error(error.FileError)
   })
 
   Ok(port)
 }
 
-fn run(runnable: Runnable) -> Result(Runnable, errors.Error) {
+fn run(runnable: Runnable) -> Result(Runnable, error.ButterbeeError) {
   let #(cmd, flags) = runnable.cmd
 
   logging.log(

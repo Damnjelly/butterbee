@@ -1,5 +1,9 @@
+import gleam/bool
 import gleam/dict
 import gleam/dynamic.{type Dynamic}
+import gleam/dynamic/decode
+import gleam/float
+import gleam/int
 import gleam/list
 import gleam/string
 import logging
@@ -44,5 +48,38 @@ pub fn toml_to_dynamic(value: tom.Toml) -> Dynamic {
 
       dynamic.string("")
     }
+  }
+}
+
+pub fn dynamic_to_string(dyn: Dynamic) -> String {
+  case dynamic.classify(dyn) {
+    "String" -> {
+      case decode.run(dyn, decode.string) {
+        Ok(str) -> str
+        Error(_) -> ""
+      }
+    }
+
+    "Int" -> {
+      case decode.run(dyn, decode.int) {
+        Ok(int) -> int.to_string(int)
+        Error(_) -> ""
+      }
+    }
+
+    "Float" -> {
+      case decode.run(dyn, decode.float) {
+        Ok(float) -> float.to_string(float)
+        Error(_) -> ""
+      }
+    }
+
+    "Bool" -> {
+      case decode.run(dyn, decode.bool) {
+        Ok(bool) -> bool.to_string(bool) |> string.lowercase
+        Error(_) -> ""
+      }
+    }
+    _ -> ""
   }
 }

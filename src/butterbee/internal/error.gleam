@@ -1,9 +1,9 @@
 import simplifile
 
-pub type Error {
+pub type ButterbeeError {
   CreatePortDirError(simplifile.FileError)
   CreateProfileDirError(simplifile.FileError)
   FileError(simplifile.FileError)
   ReadPortDirError(simplifile.FileError)
-  RunnerError(Error)
+  RunnerError
 }
