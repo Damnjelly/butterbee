@@ -3,15 +3,6 @@
 browser = "firefox"
 data_dir = "/tmp/butterbee"
 
-[Capabilities]
-
-always_match = {
-  acceptInsecureCerts = false,
-  browserName = "firefox",
-  browserVersion = "141.0",
-  platformName = "linux",
-}
-
 [Browsers.firefox]
 
 flags = ["-headless"]

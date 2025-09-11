@@ -7,13 +7,12 @@ import butterbee/bidi/script/types/remote_reference
 import butterbee/bidi/script/types/remote_value.{type RemoteValue}
 import butterbee/bidi/script/types/target
 import butterbee/commands/script
-import butterbee/driver
 import butterbee/internal/lib
 import butterbee/query
+import butterbee/webdriver.{type WebDriver}
 import gleam/bool
 import gleam/list
 import gleam/option.{None, Some}
-import logging
 
 ///
 /// Returns the inner text of the node.
@@ -31,8 +30,8 @@ import logging
 /// ```
 ///
 pub fn inner_text(
-  driver_with_node: #(driver.WebDriver, List(query.Node)),
-) -> #(driver.WebDriver, String) {
+  driver_with_node: #(WebDriver, List(query.Node)),
+) -> #(WebDriver, String) {
   let #(driver, node) = driver_with_node
 
   let assert Ok(_) = lib.single_element(node)
@@ -61,8 +60,8 @@ pub fn inner_text(
 /// ```
 ///
 pub fn inner_texts(
-  driver_with_nodes: #(driver.WebDriver, List(query.Node)),
-) -> #(driver.WebDriver, List(String)) {
+  driver_with_nodes: #(WebDriver, List(query.Node)),
+) -> #(WebDriver, List(String)) {
   let #(driver, nodes) = driver_with_nodes
 
   let target = target.new_context_target(driver.context)

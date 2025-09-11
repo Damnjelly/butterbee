@@ -75,3 +75,50 @@ fn match_type_to_string(match_type: MatchType) -> String {
     Partial -> "partial"
   }
 }
+
+pub fn new_context_locator(context: browsing_context.BrowsingContext) -> Locator {
+  ContextLocator(context)
+}
+
+pub fn new_accessibility_locator(
+  name: Option(String),
+  role: Option(String),
+) -> Locator {
+  AccessibilityLocator(name, role)
+}
+
+pub fn new_css_locator(value: String) -> Locator {
+  CssLocator(value)
+}
+
+pub fn new_inner_text_locator(value: String) -> Locator {
+  InnerTextLocator(value, None, None, None)
+}
+
+pub fn with_ignore_case(locator: Locator) -> Locator {
+  case locator {
+    InnerTextLocator(value, _, match_type, max_depth) ->
+      InnerTextLocator(value, Some(True), match_type, max_depth)
+    _ -> locator
+  }
+}
+
+pub fn with_match_type(locator: Locator, match_type: MatchType) -> Locator {
+  case locator {
+    InnerTextLocator(value, ignore_case, _, max_depth) ->
+      InnerTextLocator(value, ignore_case, Some(match_type), max_depth)
+    _ -> locator
+  }
+}
+
+pub fn with_max_depth(locator: Locator, max_depth: Int) -> Locator {
+  case locator {
+    InnerTextLocator(value, ignore_case, match_type, _) ->
+      InnerTextLocator(value, ignore_case, match_type, Some(max_depth))
+    _ -> locator
+  }
+}
+
+pub fn new_xpath_locator(value: String) -> Locator {
+  XPathLocator(value)
+}

@@ -1,15 +1,13 @@
 import butterbee/bidi/browsing_context/commands/locate_nodes
 import butterbee/bidi/browsing_context/types/locator.{type Locator}
-import butterbee/bidi/definition
 import butterbee/bidi/script/types/remote_reference
 import butterbee/bidi/script/types/remote_value
 import butterbee/commands/browsing_context
-import butterbee/driver
 import butterbee/internal/retry
 import butterbee/internal/socket
-import gleam/dynamic/decode.{type Decoder}
+import butterbee/webdriver.{type WebDriver}
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{Some}
 import gleam/string
 import logging
 
@@ -33,10 +31,7 @@ pub type Node {
 ///   |> query.node(by.css("a.logo"))
 /// ```
 ///
-pub fn node(
-  driver: driver.WebDriver,
-  locator: Locator,
-) -> #(driver.WebDriver, List(Node)) {
+pub fn node(driver: WebDriver, locator: Locator) -> #(WebDriver, List(Node)) {
   let #(webdriver, nodes) = case nodes(driver, locator) {
     #(webdriver, nodes) -> {
       let assert Ok(node) = list.first(nodes) as "No nodes found"
@@ -63,10 +58,7 @@ pub fn node(
 ///   |> query.nodes(by.css("a.logo"))
 /// ```
 ///
-pub fn nodes(
-  driver: driver.WebDriver,
-  locator: Locator,
-) -> #(driver.WebDriver, List(Node)) {
+pub fn nodes(driver: WebDriver, locator: Locator) -> #(WebDriver, List(Node)) {
   let params = locate_nodes.new(driver.context, locator)
 
   let nodes = locate_nodes(driver.socket, params)
@@ -94,9 +86,9 @@ pub fn nodes(
 /// ```
 ///
 pub fn refine(
-  webdriver_with_nodes: #(driver.WebDriver, List(Node)),
+  webdriver_with_nodes: #(WebDriver, List(Node)),
   locator: Locator,
-) -> #(driver.WebDriver, List(Node)) {
+) -> #(WebDriver, List(Node)) {
   let #(driver, nodes) = webdriver_with_nodes
 
   let shared_ids =

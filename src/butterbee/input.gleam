@@ -1,10 +1,10 @@
 import butterbee/bidi/input/commands/perform_actions
 import butterbee/bidi/script/types/remote_reference
 import butterbee/commands/input
-import butterbee/driver
 import butterbee/internal/lib
 import butterbee/internal/retry
 import butterbee/query
+import butterbee/webdriver.{type WebDriver}
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/string
@@ -28,9 +28,7 @@ pub const left_click = 0
 ///   |> input.click()
 /// ```
 ///
-pub fn click(
-  driver_with_node: #(driver.WebDriver, List(query.Node)),
-) -> driver.WebDriver {
+pub fn click(driver_with_node: #(WebDriver, List(query.Node))) -> WebDriver {
   let #(driver, node) = driver_with_node
 
   let assert Ok(node) = lib.single_element(node)
@@ -87,9 +85,9 @@ pub fn click(
 /// ```
 ///
 pub fn enter_keys(
-  driver_with_node: #(driver.WebDriver, List(query.Node)),
+  driver_with_node: #(WebDriver, List(query.Node)),
   keys: String,
-) -> driver.WebDriver {
+) -> WebDriver {
   let #(driver, node_list) = driver_with_node
 
   let assert Ok(node) = lib.single_element(node_list)

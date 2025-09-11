@@ -2,11 +2,7 @@
 
 import butterbee/bidi/browsing_context/commands/get_tree
 import butterbee/bidi/browsing_context/commands/navigate
-import butterbee/bidi/browsing_context/types/browsing_context.{
-  type BrowsingContext,
-} as _
 import butterbee/bidi/browsing_context/types/readiness_state
-import butterbee/bidi/session/types/capabilities_request
 import butterbee/commands/browser
 import butterbee/commands/browsing_context
 import butterbee/commands/session
@@ -14,27 +10,13 @@ import butterbee/internal/config/capabilities_config
 import butterbee/internal/config/config
 import butterbee/internal/lib
 import butterbee/internal/runner/runner
-import butterbee/internal/socket.{type WebDriverSocket}
+import butterbee/internal/socket
+import butterbee/webdriver.{type WebDriver}
 import gleam/erlang/process
 import gleam/list
-import gleam/option.{None, Some}
-import gleam/result
+import gleam/option.{Some}
 import gleam/string
 import logging
-
-///
-/// Represents a webdriver session
-///
-pub type WebDriver {
-  WebDriver(
-    /// The socket to the webdriver server
-    socket: WebDriverSocket,
-    /// The browsing context of the webdriver session
-    context: BrowsingContext,
-    /// The config used during the webdriver session
-    config: config.ButterbeeConfig,
-  )
-}
 
 ///
 /// Start a new webdriver session connect to the browser session, using the butterbee.toml file located in the root of the project
@@ -118,7 +100,7 @@ pub fn new_with_config(config: config.ButterbeeConfig) -> WebDriver {
     _ -> panic as "Found more than one, or zero, browsing contexts"
   }
 
-  WebDriver(socket, context, config)
+  webdriver.new(socket, context, config)
 }
 
 pub fn get_url(driver: WebDriver) -> #(WebDriver, String) {

@@ -3,21 +3,16 @@
 //// 
 
 import butterbee/bidi/browsing_context/types/locator.{type Locator}
-import gleam/option
 
 pub fn xpath(value: String) -> Locator {
-  locator.XPathLocator(value)
+  locator.new_xpath_locator(value)
 }
 
 pub fn css(value: String) -> Locator {
-  locator.CssLocator(value)
+  locator.new_css_locator(value)
 }
 
 pub fn inner_text(value: String) -> Locator {
-  locator.InnerTextLocator(
-    value,
-    option.None,
-    option.Some(locator.Full),
-    option.None,
-  )
+  locator.new_inner_text_locator(value)
+  |> locator.with_match_type(locator.Partial)
 }
