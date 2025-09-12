@@ -1,3 +1,4 @@
+import butterbee/page
 import butterbee/webdriver
 import qcheck_gleeunit_utils/test_spec
 
@@ -6,13 +7,13 @@ pub fn wait_test_() {
   let driver = webdriver.new()
 
   let first_url =
-    webdriver.get_url(driver)
+    page.url(driver)
     |> webdriver.wait(1000)
     |> webdriver.value
 
   let second_url =
     webdriver.goto(driver, "https://gleam.run/")
-    |> webdriver.get_url()
+    |> page.url()
     |> webdriver.close()
 
   assert #(first_url, second_url) == #("about:home", "https://gleam.run/")

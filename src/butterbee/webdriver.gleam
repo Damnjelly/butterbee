@@ -134,16 +134,6 @@ pub fn new_with_config(config: config.ButterbeeConfig) -> WebDriver {
   new_webdriver(socket, context, config)
 }
 
-pub fn get_url(driver: WebDriver) -> #(WebDriver, String) {
-  let assert Ok(get_tree_result) =
-    browsing_context.get_tree(driver.socket, get_tree.default())
-
-  let assert Ok(info) = lib.single_element(get_tree_result.contexts.list)
-    as "Found more than one, or zero, browsing contexts"
-
-  #(driver, info.url)
-}
-
 ///
 /// Navigates to the given url
 /// 
