@@ -1,6 +1,6 @@
-import butterbee/internal/browser.{type Browser}
-import butterbee/internal/config/browser_config
-import butterbee/internal/config/config
+import butterbee/browser.{type Browser}
+import butterbee/config/browser_config
+import butterbee/config/config
 import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/internal/runner/firefox

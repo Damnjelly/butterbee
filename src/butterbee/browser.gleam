@@ -1,4 +1,4 @@
-import butterbee/internal/config/browser_config
+import butterbee/config/browser_config
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
 import gleam/option.{type Option, None, Some}

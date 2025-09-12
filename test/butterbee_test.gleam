@@ -1,7 +1,7 @@
 import butterbee
 import butterbee/by
-import butterbee/driver
 import butterbee/nodes
+import butterbee/webdriver
 import gleeunit
 import logging
 import qcheck_gleeunit_utils/test_spec
@@ -19,15 +19,15 @@ pub fn main() {
 pub fn minimal_example_test_() {
   use <- test_spec.make_with_timeout(30)
   let output =
-    driver.new()
-    |> driver.goto("https://gleam.run/")
+    webdriver.new()
+    |> webdriver.goto("https://gleam.run/")
     |> query.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
     |> input.click()
-    |> driver.wait(10_000)
+    |> webdriver.wait(10_000)
     |> query.node(by.css("pre.log"))
     |> nodes.inner_text()
-    |> driver.close()
+    |> webdriver.close()
   assert output == "Hello, Joe!\n"
 }

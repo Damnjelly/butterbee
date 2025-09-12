@@ -1,9 +1,5 @@
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
-import gleam/list
-import gleam/result
-import logging
-import tom
 
 pub const default_host = "127.0.0.1"
 

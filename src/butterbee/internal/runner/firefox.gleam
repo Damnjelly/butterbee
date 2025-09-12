@@ -1,6 +1,6 @@
-import butterbee/internal/browser
-import butterbee/internal/config/browser_config
-import butterbee/internal/config/config
+import butterbee/browser
+import butterbee/config/browser_config
+import butterbee/config/config
 import butterbee/internal/error
 import butterbee/internal/lib
 import butterbee/internal/runner/runnable

@@ -1,4 +1,4 @@
-import butterbee/internal/config/browser_config
+import butterbee/config/browser_config
 import gleam/dynamic/decode
 
 const default_max_wait_time = 20_000

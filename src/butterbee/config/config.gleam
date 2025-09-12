@@ -1,8 +1,8 @@
 import butterbee/bidi/session/types/capabilities_request.{
   type CapabilitiesRequest, capabilities_request_decoder,
 }
-import butterbee/internal/config/browser_config
-import butterbee/internal/config/driver_config.{driver_config_decoder}
+import butterbee/config/browser_config
+import butterbee/config/driver_config.{driver_config_decoder}
 import butterbee/internal/lib
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode

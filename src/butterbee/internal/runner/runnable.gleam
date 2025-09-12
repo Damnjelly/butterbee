@@ -1,4 +1,4 @@
-import butterbee/internal/config/browser_config.{type BrowserType}
+import butterbee/config/browser_config.{type BrowserType}
 
 pub type Runnable {
   Firefox(
