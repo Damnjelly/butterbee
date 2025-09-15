@@ -5,15 +5,11 @@ import butterbee/bidi/script/types/remote_value
 import butterbee/commands/browsing_context
 import butterbee/internal/retry
 import butterbee/internal/socket
+import butterbee/nodes.{type Nodes, Node, Nodes}
 import butterbee/webdriver.{type WebDriver}
 import gleam/list
-import gleam/option.{Some}
 import gleam/string
 import logging
-
-pub type Node {
-  Node(value: remote_value.NodeRemoteValue)
-}
 
 ///
 /// Finds a node matching the given locator, if multiple nodes are found, the first node is returned.
@@ -31,15 +27,18 @@ pub type Node {
 ///   |> query.node(by.css("a.logo"))
 /// ```
 ///
-pub fn node(driver: WebDriver, locator: Locator) -> #(WebDriver, List(Node)) {
-  let #(webdriver, nodes) = case nodes(driver, locator) {
-    #(webdriver, nodes) -> {
+pub fn node(driver: WebDriver, locator: Locator) -> #(WebDriver, Nodes) {
+  let #(webdriver, nodes) = nodes(driver, locator)
+
+  let node = case nodes {
+    Nodes(nodes) -> {
       let assert Ok(node) = list.first(nodes) as "No nodes found"
-      #(webdriver, node)
+      Node(node)
     }
+    Node(node) -> Node(node)
   }
 
-  #(webdriver, [nodes])
+  #(webdriver, node)
 }
 
 ///
@@ -58,12 +57,12 @@ pub fn node(driver: WebDriver, locator: Locator) -> #(WebDriver, List(Node)) {
 ///   |> query.nodes(by.css("a.logo"))
 /// ```
 ///
-pub fn nodes(driver: WebDriver, locator: Locator) -> #(WebDriver, List(Node)) {
+pub fn nodes(driver: WebDriver, locator: Locator) -> #(WebDriver, Nodes) {
   let params = locate_nodes.new(driver.context, locator)
 
   let nodes = locate_nodes(driver.socket, params)
 
-  #(driver, nodes)
+  #(driver, nodes.new(nodes))
 }
 
 /// 
@@ -86,17 +85,14 @@ pub fn nodes(driver: WebDriver, locator: Locator) -> #(WebDriver, List(Node)) {
 /// ```
 ///
 pub fn refine(
-  webdriver_with_nodes: #(WebDriver, List(Node)),
+  webdriver_with_nodes: #(WebDriver, Nodes),
   locator: Locator,
-) -> #(WebDriver, List(Node)) {
+) -> #(WebDriver, Nodes) {
   let #(driver, nodes) = webdriver_with_nodes
 
   let shared_ids =
-    list.map(nodes, fn(node) {
-      let assert Some(shared_id) = node.value.shared_id
-        as "Some nodes have no shared id"
-      remote_reference.shared_reference_from_id(shared_id)
-    })
+    nodes.to_shared_ids(nodes)
+    |> list.map(remote_reference.shared_reference_from_id)
 
   let params =
     locate_nodes.new(driver.context, locator)
@@ -104,13 +100,13 @@ pub fn refine(
 
   let nodes = locate_nodes(driver.socket, params)
 
-  #(driver, nodes)
+  #(driver, nodes.new(nodes))
 }
 
 fn locate_nodes(
   socket: socket.WebDriverSocket,
   params: locate_nodes.LocateNodesParameters,
-) -> List(Node) {
+) -> List(remote_value.NodeRemoteValue) {
   let #(_, locate_nodes_result) =
     retry.until_ok(
       fn() { browsing_context.locate_nodes(socket, params) },
@@ -139,9 +135,5 @@ fn locate_nodes(
 
   let assert Ok(locate_nodes_result) = locate_nodes_result
 
-  let nodes =
-    locate_nodes_result.nodes
-    |> list.map(fn(node) { Node(node) })
-
-  nodes
+  locate_nodes_result.nodes
 }

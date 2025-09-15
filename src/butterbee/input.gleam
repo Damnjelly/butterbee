@@ -3,6 +3,7 @@ import butterbee/bidi/script/types/remote_reference
 import butterbee/commands/input
 import butterbee/internal/lib
 import butterbee/internal/retry
+import butterbee/nodes.{type Nodes}
 import butterbee/query
 import butterbee/webdriver.{type WebDriver}
 import gleam/list
@@ -11,7 +12,17 @@ import gleam/string
 import logging
 import youid/uuid.{type Uuid}
 
-pub const left_click = 0
+pub type MouseButton {
+  LeftClick
+  RightClick
+}
+
+fn click_to_int(click: MouseButton) -> Int {
+  case click {
+    LeftClick -> 0
+    RightClick -> 1
+  }
+}
 
 ///
 /// Perfoms a click on the given node
@@ -28,13 +39,16 @@ pub const left_click = 0
 ///   |> input.click()
 /// ```
 ///
-pub fn click(driver_with_node: #(WebDriver, List(query.Node))) -> WebDriver {
+pub fn click(
+  driver_with_node: #(WebDriver, Nodes),
+  mouse_button: MouseButton,
+) -> WebDriver {
   let #(driver, node) = driver_with_node
 
-  let assert Ok(node) = lib.single_element(node)
+  let assert Ok(node) = nodes.unwrap(node) |> lib.single_element
     as "List of nodes has more than one element, expected exactly one"
 
-  let assert Some(shared_id) = node.value.shared_id
+  let assert Some(shared_id) = node.shared_id
     as "Node does not have a shared id"
 
   let params =
@@ -43,8 +57,8 @@ pub fn click(driver_with_node: #(WebDriver, List(query.Node))) -> WebDriver {
       {
         perform_actions.pointer_actions("mouse", [
           move_to_element(shared_id),
-          perform_actions.pointer_down_action(left_click),
-          perform_actions.pointer_up_action(left_click),
+          perform_actions.pointer_down_action(click_to_int(mouse_button)),
+          perform_actions.pointer_up_action(click_to_int(mouse_button)),
         ])
       },
     ])
@@ -85,20 +99,19 @@ pub fn click(driver_with_node: #(WebDriver, List(query.Node))) -> WebDriver {
 /// ```
 ///
 pub fn enter_keys(
-  driver_with_node: #(WebDriver, List(query.Node)),
+  driver_with_node: #(WebDriver, Nodes),
   keys: String,
 ) -> WebDriver {
-  let #(driver, node_list) = driver_with_node
+  let #(driver, nodes) = driver_with_node
 
-  let assert Ok(node) = lib.single_element(node_list)
+  let assert Ok(node) = nodes.unwrap(nodes) |> lib.single_element
     as "List of nodes has more than one element, expected exactly one"
 
-  let assert Some(_shared_id) = node.value.shared_id
-    as "Node does not have a shared id"
+  let assert Some(_) = node.shared_id as "Node does not have a shared id"
 
   let key_list = string.split(keys, "")
 
-  let _ = click(#(driver, node_list))
+  let _ = click(driver_with_node, LeftClick)
 
   let params =
     perform_actions.default(driver.context)

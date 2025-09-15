@@ -11,7 +11,6 @@ import butterbee/commands/browsing_context
 import butterbee/commands/session
 import butterbee/config/capabilities_config
 import butterbee/config/config.{type ButterbeeConfig}
-import butterbee/internal/lib
 import butterbee/internal/runner/runner
 import butterbee/internal/socket.{type WebDriverSocket}
 import gleam/erlang/process
@@ -75,7 +74,7 @@ pub fn new() -> WebDriver {
 /// This example starts a new webdriver session, connects to the browser session, and returns the webdriver session:
 ///
 /// ```gleam
-/// let example = driver.new_with_config("test/special_config.toml")
+/// let example = webdriver.new_with_config("test/special_config.toml")
 /// ```
 ///
 pub fn new_with_config_path(path: String) -> WebDriver {
@@ -143,8 +142,8 @@ pub fn new_with_config(config: config.ButterbeeConfig) -> WebDriver {
 ///
 /// ```gleam
 /// let example =
-///   driver.new()
-///   |> driver.goto("https://gleam.run/")
+///   webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
 /// ```
 ///
 pub fn goto(driver: WebDriver, url: String) -> WebDriver {
@@ -185,9 +184,9 @@ pub fn wait(state: state, duration: Int) -> state {
 ///
 /// ```gleam
 /// let example =
-///   driver.new()
-///   |> driver.log("Logging a message")
-///   |> driver.close()
+///   webdriver.new()
+///   |> webdriver.log("Logging a message")
+///   |> webdriver.close()
 /// ```
 ///
 pub fn log(state: state, message: String) -> state {
@@ -203,11 +202,11 @@ pub fn log(state: state, message: String) -> state {
 /// This example closes the webdriver session, and returns "Gleam", the inner text of the element with the css selector `a.logo`:
 ///
 /// ```gleam
-/// let example = driver.new()
-///   |> driver.goto("https://gleam.run/")
+/// let example = webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
 ///   |> query.node(by.css("a.logo"))
 ///   |> nodes.inner_text()
-///   |> driver.close()
+///   |> webdriver.close()
 /// ```
 ///
 pub fn close(driver_with_state: #(WebDriver, state)) -> state {
@@ -227,11 +226,11 @@ pub fn close(driver_with_state: #(WebDriver, state)) -> state {
 /// This example returns "Gleam" without closing the session:
 ///
 /// ```gleam
-/// let example = driver.new()
-///   |> driver.goto("https://gleam.run/")
+/// let example = webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
 ///   |> query.node(by.css("a.logo"))
 ///   |> nodes.inner_text()
-///   |> driver.value()
+///   |> webdriver.value()
 /// ```
 ///
 pub fn value(driver_with_state: #(WebDriver, state)) -> state {

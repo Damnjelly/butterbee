@@ -24,7 +24,7 @@ pub fn minimal_example_test_() {
     |> query.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
-    |> input.click()
+    |> input.click(input.LeftClick)
     |> webdriver.wait(10_000)
     |> query.node(by.css("pre.log"))
     |> nodes.inner_text()
