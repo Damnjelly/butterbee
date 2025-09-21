@@ -17,7 +17,7 @@ pub type MouseButton {
   RightClick
 }
 
-fn click_to_int(click: MouseButton) -> Int {
+fn mouse_button_to_int(click: MouseButton) -> Int {
   case click {
     LeftClick -> 0
     RightClick -> 1
@@ -33,10 +33,10 @@ fn click_to_int(click: MouseButton) -> Int {
 /// This example perfoms a click on the node with the css selector `a.logo`:
 ///
 /// ```gleam
-/// let example = driver.new()
-///   |> driver.goto("https://gleam.run/")
+/// let example = webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
 ///   |> query.node(by.css("a.logo"))
-///   |> input.click()
+///   |> input.click(input.LeftClick)
 /// ```
 ///
 pub fn click(
@@ -45,10 +45,12 @@ pub fn click(
 ) -> WebDriver {
   let #(driver, node) = driver_with_node
 
-  let assert Ok(node) = nodes.unwrap(node) |> lib.single_element
+  let assert Ok(node) = nodes.first(node)
     as "List of nodes has more than one element, expected exactly one"
 
-  let assert Some(shared_id) = node.shared_id
+  let assert Ok(shared_id) =
+    nodes.to_shared_ids(node)
+    |> list.first()
     as "Node does not have a shared id"
 
   let params =
@@ -57,8 +59,8 @@ pub fn click(
       {
         perform_actions.pointer_actions("mouse", [
           move_to_element(shared_id),
-          perform_actions.pointer_down_action(click_to_int(mouse_button)),
-          perform_actions.pointer_up_action(click_to_int(mouse_button)),
+          perform_actions.pointer_down_action(mouse_button_to_int(mouse_button)),
+          perform_actions.pointer_up_action(mouse_button_to_int(mouse_button)),
         ])
       },
     ])
@@ -92,8 +94,8 @@ pub fn click(
 /// This example enters the text "gleam" into the node with the css selector `a.logo`:
 ///
 /// ```gleam
-/// let example = driver.new()
-///   |> driver.goto("https://gleam.run/")
+/// let example = webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
 ///   |> query.node(by.css("a.logo"))
 ///   |> input.enter_keys("gleam")
 /// ```
@@ -104,10 +106,13 @@ pub fn enter_keys(
 ) -> WebDriver {
   let #(driver, nodes) = driver_with_node
 
-  let assert Ok(node) = nodes.unwrap(nodes) |> lib.single_element
+  let assert Ok(node) = nodes.first(nodes)
     as "List of nodes has more than one element, expected exactly one"
 
-  let assert Some(_) = node.shared_id as "Node does not have a shared id"
+  let assert Ok(_) =
+    nodes.to_shared_ids(node)
+    |> list.first()
+    as "Node does not have a shared id"
 
   let key_list = string.split(keys, "")
 
