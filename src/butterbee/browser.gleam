@@ -1,20 +1,36 @@
+//// 
+//// The browser module contains the Browser type and functions to create and configure browsers.
+////
+//// Usually you will not need to use this module directly, as it is usually derived
+//// from the configuration in the butterbee.toml file.
+////
+
 import butterbee/config/browser_config
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
 import gleam/option.{type Option, None, Some}
 
+///
+/// The Browser type contains all the information needed to run a browser.
+///
 pub type Browser {
   Browser(
+    /// The type of browser to run.
     browser_type: browser_config.BrowserType,
+    /// The host to run the browser on.
     host: String,
+    /// The port range to run the browser on.
+    /// The first port in the range is the minimum port to use for the browser.
+    /// The second port in the range is the maximum port to use for the browser.
     port_range: #(Int, Int),
-    port: Option(Int),
+    /// Extra cli flags to pass to the browser.
     extra_flags: Option(List(String)),
+    /// The request to use to start the browser.
     request: Option(Request(String)),
+    /// The port the browser is running on.
+    port: Option(Int),
   )
 }
-
-// Browser Builders
 
 pub fn default() -> Browser {
   Browser(

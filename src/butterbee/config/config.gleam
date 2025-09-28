@@ -1,3 +1,7 @@
+////
+//// The config module contains the ButterbeeConfig type and functions to parse the butterbee.toml file
+////
+
 import butterbee/bidi/session/types/capabilities_request.{
   type CapabilitiesRequest, capabilities_request_decoder,
 }
@@ -11,6 +15,9 @@ import gleam/result
 import simplifile
 import tom
 
+/// 
+/// Represents the butterbee.toml file
+///
 pub type ButterbeeConfig {
   ButterbeeConfig(
     driver_config: driver_config.DriverConfig,

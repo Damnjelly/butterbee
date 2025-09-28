@@ -1,10 +1,12 @@
+////
+//// The input module contains high level functions to perform user input actions in the browser
+////
+
 import butterbee/bidi/input/commands/perform_actions
 import butterbee/bidi/script/types/remote_reference
 import butterbee/commands/input
-import butterbee/internal/lib
 import butterbee/internal/retry
 import butterbee/nodes.{type Nodes}
-import butterbee/query
 import butterbee/webdriver.{type WebDriver}
 import gleam/list
 import gleam/option.{None, Some}
@@ -143,6 +145,9 @@ fn move_to_element(shared_id: Uuid) -> perform_actions.PointerSourceAction {
   )
 }
 
+///
+/// A helper function to convert a list of keysactions that simulates the user pressing the keys
+///
 fn enter_keys_action(
   keys: List(String),
 ) -> List(perform_actions.KeySourceAction) {

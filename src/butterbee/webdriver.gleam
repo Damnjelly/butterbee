@@ -1,4 +1,6 @@
-//// The driver module contains high-level commands for interacting with the webdriver server
+////
+//// The driver module contains functions for interacting with the webdriver client 
+////
 
 import butterbee/bidi/browsing_context/commands/get_tree
 import butterbee/bidi/browsing_context/commands/navigate
@@ -195,11 +197,13 @@ pub fn log(state: state, message: String) -> state {
 }
 
 ///
-/// Closes the webdriver session, closes the browser, and returns the value of the last function called
+/// Closes the webdriver session, closes the browser, and returns the value 
+/// of the last function called
 /// 
 /// # Example
 ///
-/// This example closes the webdriver session, and returns "Gleam", the inner text of the element with the css selector `a.logo`:
+/// This example closes the webdriver session, and returns "Gleam",
+/// the inner text of the element with the css selector `a.logo`:
 ///
 /// ```gleam
 /// let example = webdriver.new()

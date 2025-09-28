@@ -1,17 +1,20 @@
+////
+//// The nodes module contains functions to work with DOM nodes
+////
+
 import butterbee/bidi/script/commands/call_function
 import butterbee/bidi/script/types/local_value
 import butterbee/bidi/script/types/remote_reference
 import butterbee/bidi/script/types/remote_value
 import butterbee/bidi/script/types/target
 import butterbee/commands/script
-import butterbee/internal/lib
 import butterbee/webdriver.{type WebDriver}
 import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option.{None, Some}
+import gleam/result
 import youid/uuid.{type Uuid}
 
 pub type Nodes {
-  Node(value: remote_value.NodeRemoteValue)
   Nodes(value: List(remote_value.NodeRemoteValue))
 }
 
@@ -19,27 +22,23 @@ pub fn new(value: List(remote_value.NodeRemoteValue)) -> Nodes {
   Nodes(value)
 }
 
-pub fn unwrap(nodes: Nodes) -> List(remote_value.NodeRemoteValue) {
-  case nodes {
-    Node(node) -> [node]
-    Nodes(nodes) -> nodes
-  }
+///
+/// Returns a Nodes struct containing only the first node matching the given locator.
+/// Returns an error if no nodes are found.
+/// 
+pub fn first(nodes: Nodes) -> Result(Nodes, Nil) {
+  list.first(nodes.value)
+  |> result.map(fn(node) { Nodes([node]) })
 }
 
+///
+/// Extracts the shared ids from nodes. Can panic if a node does not have a shared id.
+///
 pub fn to_shared_ids(nodes: Nodes) -> List(Uuid) {
-  let unwrap = fn(ids: Option(Uuid)) -> Uuid {
-    let assert Some(ids) = ids as "Node does not have a shared id"
+  list.map(nodes.value, fn(node) {
+    let assert Some(ids) = node.shared_id as "Node does not have a shared id"
     ids
-  }
-
-  case nodes {
-    Node(node) -> {
-      [unwrap(node.shared_id)]
-    }
-    Nodes(nodes) -> {
-      list.map(nodes, fn(node) { unwrap(node.shared_id) })
-    }
-  }
+  })
 }
 
 ///
@@ -51,16 +50,16 @@ pub fn to_shared_ids(nodes: Nodes) -> List(Uuid) {
 ///
 /// ```gleam
 /// let example =
-///   driver.new()
-///   |> driver.goto("https://gleam.run/")
-///   |> node(by.css("a.logo"))
+///   webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
+///   |> nodes.query(by.css("a.logo"))
 ///   |> nodes.inner_text()
 /// ```
 ///
 pub fn inner_text(driver_with_node: #(WebDriver, Nodes)) -> #(WebDriver, String) {
   let #(driver, node) = driver_with_node
 
-  let assert Ok(_) = unwrap(node) |> lib.single_element
+  let assert Ok(_) = first(node)
     as "List of nodes has more than one element, expected exactly one"
 
   let #(_, inner_text) = inner_texts(driver_with_node)
@@ -79,9 +78,9 @@ pub fn inner_text(driver_with_node: #(WebDriver, Nodes)) -> #(WebDriver, String)
 ///
 /// ```gleam
 /// let example =
-///   driver.new()
-///   |> driver.goto("https://gleam.run/")
-///   |> nodes(by.css("a.logo"))
+///   webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
+///   |> nodes.query(by.css("a.logo"))
 ///   |> nodes.inner_texts()
 /// ```
 ///
@@ -94,10 +93,8 @@ pub fn inner_texts(
 
   let function = "function(node) { return node.innerText; }"
 
-  let nodes = unwrap(nodes)
-
   let inner_texts =
-    list.map(nodes, fn(node) {
+    list.map(nodes.value, fn(node) {
       let assert Some(shared_id) = node.shared_id
 
       let node =

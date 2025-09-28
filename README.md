@@ -1,21 +1,33 @@
 # butterbee
 
+
 [![Package Version](https://img.shields.io/hexpm/v/butterbee)](https://hex.pm/packages/butterbee)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/butterbee/)
 
+Butterbee is a webdriver bidi cilent written in Gleam, for Gleam.
+It provides both a simple API for interacting with a webdriver server, 
+and a more complex API for interacting with the webdriver bidi protocol directly.
+
+WARNING: butterbee is still in early development and incomplete. Butterbee only supports Firefox at the moment, and the API is subject to change.
+
 ```sh
-gleam add butterbee@1
+gleam add butterbee
 ```
+
+### Example
+
+Getting started with butterbee is easy, make sure Firefox is on your $PATH, and run the following:
+
 ```gleam
 import butterbee
 import butterbee/by
-import butterbee/driver
 import butterbee/nodes
+import butterbee/webdriver
 import gleeunit
+import logging
 
 import butterbee/input
 import butterbee/query
-import logging
 
 pub fn main() {
   logging.configure()
@@ -26,24 +38,33 @@ pub fn main() {
 
 pub fn minimal_example_test() {
   let output =
-    driver.new()
-    |> driver.goto("https://gleam.run/")
+    webdriver.new()
+    |> webdriver.goto("https://gleam.run/")
     |> query.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
     |> input.click()
+    |> webdriver.wait(5_000)
     |> query.node(by.css("pre.log"))
     |> nodes.inner_text()
-    |> driver.close()
+    |> webdriver.close()
   assert output == "Hello, Joe!\n"
 }
 ```
 
-Further documentation can be found at <https://hexdocs.pm/butterbee>.
+### Guides
+
+- [butterbee configuration](https://hexdocs.pm/butterbee/configuration)
+- [other testrunners](https://hexdocs.pm/butterbee/test-runners)
+- [webdriver bidi protocol documentation](https://w3c.github.io/webdriver-bidi/)
+
 
 ## Development
 
-```sh
-gleam run   # Run the project
-gleam test  # Run the tests
-```
+### Upcoming features
+
+- [ ] Support for Chrome
+- [ ] Support for more webdriver bidi commands
+- [ ] Running tests in parallel
+
+### Contributing

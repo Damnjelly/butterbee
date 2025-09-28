@@ -1,5 +1,10 @@
-//// This module has been slopped together from a claude prompt
+//// 
+//// A collection of special keys
+////
+//// NOTE: This module has been slopped together from a claude prompt
 //// If a key doesn't work, it's probably a hallucination
+//// Please open an issue if you find a key that doesn't work
+////
 
 pub fn enter() -> String {
   "\u{E007}"
@@ -117,7 +122,7 @@ pub fn alt() -> String {
   "\u{E00A}"
 }
 
-pub fn meta() -> String {
+pub fn super() -> String {
   "\u{E03D}"
 }
 
@@ -189,12 +194,4 @@ pub fn numpad_add() -> String {
 
 pub fn numpad_enter() -> String {
   "\u{E007}"
-}
-
-pub fn semicolon() -> String {
-  "\u{E018}"
-}
-
-pub fn equals() -> String {
-  "\u{E019}"
 }

@@ -1,3 +1,7 @@
+////
+//// The page module contains functions to locate DOM nodes
+////
+
 import butterbee/bidi/browsing_context/commands/locate_nodes
 import butterbee/bidi/browsing_context/types/locator.{type Locator}
 import butterbee/bidi/script/types/remote_reference
@@ -5,7 +9,7 @@ import butterbee/bidi/script/types/remote_value
 import butterbee/commands/browsing_context
 import butterbee/internal/retry
 import butterbee/internal/socket
-import butterbee/nodes.{type Nodes, Node, Nodes}
+import butterbee/nodes.{type Nodes}
 import butterbee/webdriver.{type WebDriver}
 import gleam/list
 import gleam/string
@@ -30,13 +34,7 @@ import logging
 pub fn node(driver: WebDriver, locator: Locator) -> #(WebDriver, Nodes) {
   let #(webdriver, nodes) = nodes(driver, locator)
 
-  let node = case nodes {
-    Nodes(nodes) -> {
-      let assert Ok(node) = list.first(nodes) as "No nodes found"
-      Node(node)
-    }
-    Node(node) -> Node(node)
-  }
+  let assert Ok(node) = nodes.first(nodes) as "No nodes found"
 
   #(webdriver, node)
 }
