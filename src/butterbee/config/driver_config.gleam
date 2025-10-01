@@ -1,10 +1,24 @@
+////
+//// The driver config module contains functions for parsing and creating driver
+//// configurations. The driver configuration specifies general options the webdriver
+//// needs to run, such as the browser to use, the maximum wait time, and the request
+//// timeout.
+////
+
 import butterbee/config/browser_config
 import gleam/dynamic/decode
 
+/// Butterbee will use this maximum wait time unless overridden by the config file. 
+/// This settings determines how long butterbee will perform a retry function for
+/// before timing out (and failing the test).
 const default_max_wait_time = 20_000
 
+/// Butterbee will use this request timeout unless overridden by the config file.
+/// Warn: This value is not currently used.
 const default_request_timeout = 5000
 
+/// Butterbee will use this data directory unless overridden by the config file.
+/// The data directory is used to store profile data for browsers.
 const default_data_dir = "/tmp/butterbee"
 
 pub type DriverConfig {

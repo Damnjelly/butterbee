@@ -1,3 +1,7 @@
+////
+//// # [Script commands](https://w3c.github.io/webdriver-bidi/#module-script-commands)
+////
+
 import butterbee/bidi/definition
 import butterbee/bidi/script/commands/call_function.{
   type CallFunctionParameters, call_function_parameters_to_json,

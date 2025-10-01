@@ -1,5 +1,11 @@
 ////
-//// The config module contains the ButterbeeConfig type and functions to parse the butterbee.toml file
+//// The config module contains the ButterbeeConfig type and functions
+//// to parse the butterbee.toml file
+////
+//// For documentation see the individual config modules for more details:
+//// - [Browser Config](browser_config.html)
+//// - [Capabilities Config](capabilities_config.html)
+//// - [Driver Config](driver_config.html)
 ////
 
 import butterbee/bidi/session/types/capabilities_request.{

@@ -1,3 +1,7 @@
+////
+//// # [Browsing context commands](https://w3c.github.io/webdriver-bidi/#module-browsing-context-commands) 
+////
+
 import butterbee/bidi/browsing_context/commands/get_tree.{
   get_tree_parameters_to_json,
 }
@@ -26,9 +30,7 @@ import gleam/result
 ///
 /// ```gleam
 /// let browsing_tree =
-///   browsing_context.get_tree(
-///     session.0,
-///     browsing_context.GetTreeParameters(None, None),
+///   browsing_context.get_tree(driver.socket, get_tree.default())
 ///   )
 /// ```
 ///
@@ -68,21 +70,10 @@ pub fn get_tree(
 /// ## Example
 ///
 /// ```gleam
-/// let driver_with_nodes =
-///   browsing_context.locate_nodes(
-///     driver.socket,
-///     browsing_context.LocateNodesParameters(
-///       driver.context,
-///       by.locator,
-///       None,
-///       None,
-///       None,
-///     ),
-///   )
-///
-/// let nodes =
-///   { driver_with_nodes.1 }.nodes
-///   |> list.map(fn(node) { Node(node) })
+/// let nodes = locate_nodes(
+///   driver.socket, 
+///   locate_nodes.new(driver.context, locator)
+/// )
 /// ```
 ///
 pub fn locate_nodes(
@@ -130,13 +121,7 @@ pub fn locate_nodes(
 /// ```gleam
 /// let driver =
 ///   browsing_context.navigate(
-///     driver.socket,
-///     browsing_context.NavigateParameters(
-///       context: driver.context,
-///       url: url,
-///       wait: Some(readiness_state.Interactive),
-///     ),
-///   )
+///     driver.socket, navigate.default(driver.context, url))
 /// ```
 ///
 pub fn navigate(

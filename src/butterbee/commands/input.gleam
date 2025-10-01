@@ -1,3 +1,7 @@
+////
+//// # [Input commands](https://w3c.github.io/webdriver-bidi/#module-input-commands)
+////
+
 import butterbee/bidi/definition
 import butterbee/bidi/input/commands/perform_actions.{
   perform_actions_parameters_to_json,
@@ -15,31 +19,17 @@ import gleam/result
 /// ## Example
 ///
 /// ```gleam
-/// let socket =
-///   input.perform_actions(
-///     driver.socket,
-///     perform_actions.PerformActionsParameters(driver.context, [
-///       perform_actions.PointerSource(
-///         perform_actions.PointerSourceActions("mouse", None, [
-///           perform_actions.PointerMove(perform_actions.PointerMoveAction(
-///             0,
-///             0,
-///             option.None,
-///             option.Some(
-///               perform_actions.Element(
-///                 element_origin.ElementOrigin(remote_reference.SharedReference(
-///                   shared_id,
-///                   option.None,
-///                 )),
-///               ),
-///             ),
-///           )),
-///           perform_actions.PointerDown(perform_actions.PointerDownAction(0)),
-///           perform_actions.PointerUp(perform_actions.PointerUpAction(0)),
-///         ]),
-///       ),
-///     ]),
-///   )
+/// let click =
+///   perform_actions.default(driver.context)
+///   |> perform_actions.with_actions([
+///     {
+///       perform_actions.pointer_actions("mouse", [
+///         move_to_element(shared_id),
+///         perform_actions.pointer_down_action(mouse_button_to_int(mouse_button)),
+///         perform_actions.pointer_up_action(mouse_button_to_int(mouse_button)),
+///       ])
+///     },
+///   ])
 /// ```
 ///
 pub fn perform_actions(

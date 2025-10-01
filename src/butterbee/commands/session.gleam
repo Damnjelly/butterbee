@@ -1,3 +1,7 @@
+////
+//// # [Session commands](https://w3c.github.io/webdriver-bidi/#module-session-commands)
+////
+
 import butterbee/bidi/definition
 import butterbee/bidi/session/commands/new
 import butterbee/bidi/session/definition as session_definition

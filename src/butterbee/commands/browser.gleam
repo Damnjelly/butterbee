@@ -1,3 +1,7 @@
+////
+//// # [Browser commands](https://w3c.github.io/webdriver-bidi/#module-browser-commands) 
+////
+
 import butterbee/bidi/browser/definition as browser_definition
 import butterbee/bidi/definition
 import butterbee/internal/id
@@ -7,12 +11,6 @@ import butterbee/internal/socket
 /// # [browser.close](https://w3c.github.io/webdriver-bidi/#command-browser-close)
 /// 
 /// Closes the current browser.
-/// 
-/// ## Example
-/// 
-/// ```gleam
-/// browser.close(socket)
-/// ```
 /// 
 pub fn close(socket: socket.WebDriverSocket) -> Nil {
   let command = definition.BrowserCommand(browser_definition.Close)

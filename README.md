@@ -54,7 +54,7 @@ pub fn minimal_example_test() {
 
 ### Guides
 
-- [butterbee configuration](https://hexdocs.pm/butterbee/configuration)
+- [butterbee configuration](https://hexdocs.pm/butterbee/config)
 - [other testrunners](https://hexdocs.pm/butterbee/test-runners)
 - [webdriver bidi protocol documentation](https://w3c.github.io/webdriver-bidi/)
 
