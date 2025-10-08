@@ -10,11 +10,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./butterbee
     steps:
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-firefox@v1
         with:
-          firefox-version: 'latest'
+          firefox-version: "latest"
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "27.1.2"

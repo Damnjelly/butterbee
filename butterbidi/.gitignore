@@ -1,5 +1,5 @@
 *.beam
 *.ez
-*/build
+/build
 .direnv
 erl_crash.dump

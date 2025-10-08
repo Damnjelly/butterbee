@@ -1,0 +1,16 @@
+[Driver]
+
+browser = "firefox"
+data_dir = "/tmp/butterbee"
+
+[Browsers.firefox]
+
+# flags = ["-headless"]
+host = "127.0.0.1"
+port_range = [9222, 9282]
+
+# [Browsers.chrome]
+#
+# flags = []
+# host = "127.0.0.1"
+# port_range = [9243, 9263]

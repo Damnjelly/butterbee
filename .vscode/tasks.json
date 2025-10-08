@@ -1,32 +1,45 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "run",
+            "label": "butterbee run",
             "type": "shell",
-            "command": "gleam run"
+            "command": "gleam run",
+            "options": {
+                "cwd": "${workspaceFolder}/butterbee"
+            }
         },
         {
-            "label": "test",
+            "label": "butterbee test",
             "type": "shell",
-            "command": "gleam test"
-        }, 
+            "command": "gleam test",
+            "options": {
+                "cwd": "${workspaceFolder}/butterbee"
+            }
+        },
         {
-            "label": "firefox",
+            "label": "butterbee debug",
             "type": "shell",
-            "command": "sh -c 'firefox --headless --remote-debugging-port & sleep 0.5; gleam test'"
-        }, 
+            "command": "gleam test -- --debug",
+            "options": {
+                "cwd": "${workspaceFolder}/butterbee"
+            }
+        },
         {
-            "label": "firefox headed",
+            "label": "butterbee build",
             "type": "shell",
-            "command": "sh -c 'firefox --remote-debugging-port & sleep 0.5; gleam test'"
-        }, 
+            "command": "gleam build",
+            "options": {
+                "cwd": "${workspaceFolder}/butterbee"
+            }
+        },
         {
-            "label": "firefox no sleep",
+            "label": "butterbidi build",
             "type": "shell",
-            "command": "sh -c 'firefox --remote-debugging-port & gleam test'"
+            "command": "gleam build",
+            "options": {
+                "cwd": "${workspaceFolder}/butterbidi"
+            }
         }
     ]
 }

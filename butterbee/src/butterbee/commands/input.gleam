@@ -1,0 +1,53 @@
+////
+//// # [Input commands](https://w3c.github.io/webdriver-bidi/#module-input-commands)
+////
+
+import butterbee/internal/id
+import butterbee/internal/socket
+import butterbidi/definition
+import butterbidi/input/commands/perform_actions.{
+  perform_actions_parameters_to_json,
+}
+import butterbidi/input/definition as input_definition
+import gleam/result
+
+///
+/// # [input.performActions](https://w3c.github.io/webdriver-bidi/#command-input-performActions)
+///
+/// The input.performActions command performs a specified sequence of user input actions.
+/// 
+/// ## Example
+///
+/// ```gleam
+/// let click =
+///   perform_actions.default(driver.context)
+///   |> perform_actions.with_actions([
+///     {
+///       perform_actions.pointer_actions("mouse", [
+///         move_to_element(shared_id),
+///         perform_actions.pointer_down_action(mouse_button_to_int(mouse_button)),
+///         perform_actions.pointer_up_action(mouse_button_to_int(mouse_button)),
+///       ])
+///     },
+///   ])
+/// ```
+///
+pub fn perform_actions(
+  socket: socket.WebDriverSocket,
+  params: perform_actions.PerformActionsParameters,
+) -> #(
+  socket.WebDriverSocket,
+  Result(definition.CommandResponse, definition.ErrorResponse),
+) {
+  let command = definition.InputCommand(input_definition.PerformActions)
+  let request =
+    definition.command_to_json(
+      definition.Command(id.from_unix(), command, [
+        #("params", perform_actions_parameters_to_json(params)),
+      ]),
+    )
+
+  let response = socket.send_request(socket, request, command)
+
+  #(socket, response)
+}
