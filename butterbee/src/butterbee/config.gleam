@@ -7,6 +7,33 @@
 //// - [Capabilities Config](capabilities_config.html)
 //// - [Driver Config](driver_config.html)
 ////
+//// Example of the default settings in toml format:
+////
+//// ```toml
+//// [Driver]
+//// browser = "firefox"
+//// max_wait_time = 20000
+//// request_timeout = 5000
+//// data_dir = "/tmp/butterbee"
+////
+//// [Capabilities]
+////
+//// # Capabilities is empty by default
+////
+//// [Browsers]
+////
+//// [Browsers.firefox]
+////
+//// flags = []
+//// host = "127.0.0.1"
+//// port_range = [9222, 9232]
+////
+//// [Browsers.chrome]
+////
+//// # Chrome is not supported yet
+////
+//// ```
+////
 
 import butterbee/config/browser_config
 import butterbee/config/driver_config.{driver_config_decoder}
