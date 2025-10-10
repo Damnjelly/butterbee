@@ -1,6 +1,6 @@
 import butterbee/browser
+import butterbee/config
 import butterbee/config/browser_config
-import butterbee/config/config
 import butterbee/internal/error
 import butterbee/internal/lib
 import butterbee/internal/runner/runnable
@@ -15,8 +15,8 @@ import simplifile
 import youid/uuid
 
 const default_flags = [
-  "-wait-for-browser", "-no-first-run", "-no-default-browser-check",
-  "-no-remote",
+  "about:blank", "-wait-for-browser", "-no-first-run",
+  "-no-default-browser-check", "-no-remote", "-new-instance", "-juggler-pipe",
 ]
 
 pub fn setup(browser: browser.Browser, config: config.ButterbeeConfig) {
@@ -37,8 +37,8 @@ pub fn setup(browser: browser.Browser, config: config.ButterbeeConfig) {
 
   let flags =
     default_flags
-    |> list.append(["-remote-debugging-port=" <> port, "-profile " <> profile])
-    |> list.append(browser.extra_flags |> option.unwrap(default_flags))
+    |> list.append(["-remote-debugging-port", port, "-profile", profile_dir])
+    |> list.append(browser.extra_flags |> option.unwrap([]))
 
   let runnable =
     runnable.new(browser_config.Firefox)
@@ -92,7 +92,7 @@ fn default_prefs() -> FirefoxPrefs {
     // jest-puppeteer asserts that no error message is emitted by the console
     #(
       "browser.contentblocking.features.standard",
-      dynamic.string("-tp,tpPrivate,cookieBehavior0,-cm,-fp'"),
+      dynamic.string("'-tp,tpPrivate,cookieBehavior0,-cm,-fp'"),
     ),
     // Enable the dump function: which sends messages to the system
     // console
@@ -277,6 +277,11 @@ fn default_prefs() -> FirefoxPrefs {
     #("startup.homepage_welcome_url.additional", dynamic.string("")),
     // Disable browser animations (tabs, fullscreen, sliding alerts)
     #("toolkit.cosmeticAnimations.enabled", dynamic.bool(False)),
+    // Disable user stylesheets
+    #(
+      "toolkit.legacyUserProfileCustomizations.stylesheets",
+      dynamic.bool(False),
+    ),
     // Prevent starting into safe mode after application crashes
     #("toolkit.startup.max_resumed_crashes", dynamic.int(-1)),
   ]

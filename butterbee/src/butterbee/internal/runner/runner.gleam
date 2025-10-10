@@ -1,6 +1,6 @@
 import butterbee/browser.{type Browser}
+import butterbee/config
 import butterbee/config/browser_config
-import butterbee/config/config
 import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/internal/runner/firefox
@@ -124,9 +124,7 @@ fn run(runnable: Runnable) -> Result(Runnable, error.ButterbeeError) {
 
   process.spawn(fn() {
     let _ = case
-      shellout.command(run: cmd, with: flags, in: runnable.profile_dir, opt: [
-        //shellout.LetBeStdout,
-      ])
+      shellout.command(run: cmd, with: flags, in: runnable.profile_dir, opt: [])
     {
       Ok(_) -> Nil
       Error(error) -> {
@@ -134,6 +132,9 @@ fn run(runnable: Runnable) -> Result(Runnable, error.ButterbeeError) {
         logging.log(logging.Error, "Error running browser command: " <> error)
       }
     }
+
+    // INFO: This run after the browser  closes
+
     logging.log(logging.Debug, "Cleaning up profile directory")
     let assert Ok(_) = simplifile.delete(runnable.profile_dir)
       as "Failed to delete profile directory"
