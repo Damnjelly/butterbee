@@ -12,14 +12,12 @@ import logging
 import qcheck_gleeunit_utils/test_spec
 
 pub fn main() {
-  logging.configure()
-  case argv.load().arguments {
+  let _ = case argv.load().arguments {
     ["--debug"] -> {
       log.configure(logging.Debug)
     }
     _ -> log.configure(logging.Info)
   }
-
   butterbee.init()
   gleeunit.main()
 }

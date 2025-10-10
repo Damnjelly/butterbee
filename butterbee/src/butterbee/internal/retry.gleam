@@ -110,7 +110,8 @@ fn wait_on_attempts(attempts: Int) -> Nil {
 fn log_attempts(attempts: Int) -> Nil {
   logging.log(
     logging.Debug,
-    "Attempt failed, retrying, current attempt: " <> int.to_string(attempts),
+    "Connection attempt failed, retrying, current attempt: "
+      <> int.to_string(attempts),
   )
 }
 

@@ -2,6 +2,7 @@ import butterbee/browser.{type Browser}
 import butterbee/config
 import butterbee/config/browser_config
 import butterbee/internal/error
+import butterbee/internal/log
 import butterbee/internal/runner/firefox
 import gleam/bool
 import gleam/dict
@@ -74,10 +75,7 @@ fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
 
   let assert Some(profile_dir) = browser.profile_dir
 
-  logging.log(
-    logging.Debug,
-    "Starting " <> cmd <> " with flags: " <> string.inspect(flags),
-  )
+  log.info("Starting " <> cmd <> " with flags: " <> string.inspect(flags))
 
   process.spawn(fn() {
     let _ = case
