@@ -52,15 +52,14 @@ pub fn minimal_example_test_() {
 
 - [butterbee configuration](https://hexdocs.pm/butterbee/config)
 - [other testrunners](https://hexdocs.pm/butterbee/test-runners)
-- [webdriver bidi protocol documentation](https://w3c.github.io/webdriver-bidi/)
 
 
 ## Development
 
-### Upcoming features
+### Roadmap
 
 - [ ] Support for Chrome
-- [ ] Support for more webdriver bidi commands
-- [ ] Running tests in parallel
-
-### Contributing
+- [ ] Add all webdriver bidi commands
+- [ ] Support for Running tests in parallel
+- [ ] Windows support (I assume this currently doesn't work)
+- [ ] Macos support (I assume this currently doesn't work)

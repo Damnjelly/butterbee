@@ -1,9 +1,9 @@
 //// 
 //// A collection of special keys
 ////
-//// NOTE: This module has been slopped together from a claude prompt
-//// If a key doesn't work, it's probably a hallucination
-//// Please open an issue if you find a key that doesn't work
+//// NOTE: This module has been slopped together from a claude prompt.
+//// If a key doesn't work, it's probably a hallucination.
+//// Please [open an issue](https://codeberg.org/gelei/butterbee/issues/new) if you find one.
 ////
 
 pub fn enter() -> String {

@@ -34,6 +34,7 @@ pub type WebDriver {
   )
 }
 
+@internal
 pub fn new_webdriver(
   socket: WebDriverSocket,
   context: BrowsingContext,
@@ -42,6 +43,7 @@ pub fn new_webdriver(
   WebDriver(socket, context, config)
 }
 
+@internal
 pub fn webdriver_with_context(
   webdriver: WebDriver,
   context: BrowsingContext,
@@ -172,7 +174,7 @@ pub fn goto(driver: WebDriver, url: String) -> WebDriver {
 ///   |> driver.goto("https://gleam.run/")
 /// ```
 ///
-pub fn wait(state: state, duration: Int) -> state {
+pub fn wait(state: value, duration: Int) -> value {
   process.sleep(duration)
   state
 }
@@ -191,7 +193,7 @@ pub fn wait(state: state, duration: Int) -> state {
 ///   |> webdriver.close()
 /// ```
 ///
-pub fn log(state: state, message: String) -> state {
+pub fn log(state: value, message: String) -> value {
   echo message
   state
 }
@@ -213,13 +215,13 @@ pub fn log(state: state, message: String) -> state {
 ///   |> webdriver.close()
 /// ```
 ///
-pub fn close(driver_with_state: #(WebDriver, state)) -> state {
-  let #(driver, state) = driver_with_state
+pub fn close(driver_with_value: #(WebDriver, value)) -> value {
+  let #(driver, value) = driver_with_value
 
   browser.close(driver.socket)
   socket.close(driver.socket)
 
-  state
+  value
 }
 
 ///
@@ -237,6 +239,6 @@ pub fn close(driver_with_state: #(WebDriver, state)) -> state {
 ///   |> webdriver.value()
 /// ```
 ///
-pub fn value(driver_with_state: #(WebDriver, state)) -> state {
+pub fn value(driver_with_state: #(WebDriver, value)) -> value {
   driver_with_state.1
 }
