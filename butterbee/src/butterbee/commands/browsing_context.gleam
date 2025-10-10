@@ -134,7 +134,7 @@ pub fn navigate(
   let command =
     definition.BrowsingContextCommand(browsing_context_definition.Navigate)
 
-  let wait = case params.wait {
+  let _wait = case params.wait {
     None -> []
     Some(state) -> [
       #(

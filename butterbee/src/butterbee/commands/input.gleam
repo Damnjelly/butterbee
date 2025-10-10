@@ -9,7 +9,6 @@ import butterbidi/input/commands/perform_actions.{
   perform_actions_parameters_to_json,
 }
 import butterbidi/input/definition as input_definition
-import gleam/result
 
 ///
 /// # [input.performActions](https://w3c.github.io/webdriver-bidi/#command-input-performActions)

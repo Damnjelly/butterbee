@@ -13,7 +13,7 @@ pub fn new(browser_type: BrowserType) -> Runnable {
   case browser_type {
     browser_config.Firefox ->
       Firefox(cmd: #("", []), port: "", profile: "", profile_dir: "")
-    browser_config.Chrome -> todo
+    browser_config.Chrome -> todo as "chrome is not supported yet"
   }
 }
 

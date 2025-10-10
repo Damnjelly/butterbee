@@ -54,14 +54,8 @@ pub fn call_function(
   socket.send_request(socket, request, command)
   |> result.map(fn(response) {
     case response.result {
-      definition.ScriptResult(result) ->
-        case result {
-          script_definition.EvaluateResult(result) -> result
-          _ -> {
-            panic as "Unexpected evaluate result type"
-          }
-        }
+      definition.ScriptResult(result) -> result
       _ -> panic as "Unexpected script result type"
-    }
+    }.evaluate_result
   })
 }

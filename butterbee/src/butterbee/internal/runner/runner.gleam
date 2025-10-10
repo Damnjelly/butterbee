@@ -42,7 +42,7 @@ pub fn new(
   use _ <- result.try({
     use runnable <- result.try(case browser.browser_type {
       browser_config.Firefox -> firefox.setup(browser, config)
-      browser_config.Chrome -> todo
+      browser_config.Chrome -> todo as "Chrome not supported yet"
     })
 
     run(runnable) |> result.map_error(fn(_) { error.RunnerError })

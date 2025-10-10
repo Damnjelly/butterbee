@@ -43,7 +43,7 @@ import butterbidi/session/types/capabilities_request.{
 }
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
-import gleam/option.{type Option, None, Some}
+import gleam/option.{type Option, None}
 import gleam/result
 import simplifile
 import tom

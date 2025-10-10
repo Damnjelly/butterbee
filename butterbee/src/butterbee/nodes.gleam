@@ -10,7 +10,7 @@ import butterbidi/script/types/remote_reference
 import butterbidi/script/types/remote_value
 import butterbidi/script/types/target
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{Some}
 import gleam/result
 import youid/uuid.{type Uuid}
 
