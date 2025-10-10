@@ -19,12 +19,14 @@
 ////
 //// [Browsers.firefox]
 ////
+//// cmd = "firefox"
 //// flags = ["-headless"]
 //// host = "127.0.0.1"
 //// port_range = [9222, 9282]
 ////
 //// [Browsers.chrome]
 ////
+//// cmd = "google-chrome"
 //// flags = []
 //// host = "127.0.0.1"
 //// port_range = [9243, 9263]
@@ -33,6 +35,9 @@
 
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
+
+/// Butterbee will use this command unless overridden by the config file
+pub const default_cmd = "firefox"
 
 /// Butterbee will use this host url unless overridden by the config file 
 pub const default_host = "127.0.0.1"
@@ -45,10 +50,11 @@ pub const default_port = 9222
 
 pub type BrowserType {
   Firefox
-  /// Note: chrome is not supported yet
+  /// INFO: chrome is not supported yet
   Chrome
 }
 
+@internal
 pub fn browser_type_decoder() -> decode.Decoder(BrowserType) {
   use browser_type <- decode.then(decode.string)
   case browser_type {
@@ -70,6 +76,7 @@ pub fn default() -> Dict(BrowserType, BrowserConfig) {
   |> dict.insert(Firefox, default_configuration())
 }
 
+@internal
 pub fn browser_config_decoder() -> decode.Decoder(
   Dict(BrowserType, BrowserConfig),
 ) {
@@ -82,21 +89,31 @@ pub fn browser_config_decoder() -> decode.Decoder(
 
 pub type BrowserConfig {
   BrowserConfig(
+    /// The path to the browser executable, or the name of the browser if it is in the PATH.
+    cmd: String,
+    /// Extra flags to pass to the browser.
     extra_flags: List(String),
+    /// The host to use for the browser.
     host: String,
+    /// The port range to use for the browser. 
+    /// The first port in the range is the minimum port to use for the browser.
+    /// The second port in the range is the maximum port to use for the browser.
     port_range: #(Int, Int),
   )
 }
 
 pub fn default_configuration() -> BrowserConfig {
   BrowserConfig(
+    cmd: default_cmd,
     extra_flags: [],
     host: default_host,
     port_range: default_port_range,
   )
 }
 
+@internal
 pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {
+  use cmd <- decode.optional_field("cmd", default_cmd, decode.string)
   use extra_flags <- decode.optional_field(
     "flags",
     [],
@@ -109,5 +126,5 @@ pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {
 
     decode.success(#(a, b))
   })
-  decode.success(BrowserConfig(extra_flags:, host:, port_range:))
+  decode.success(BrowserConfig(cmd:, extra_flags:, host:, port_range:))
 }

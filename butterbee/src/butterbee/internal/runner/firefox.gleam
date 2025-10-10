@@ -1,70 +1,46 @@
-import butterbee/browser
-import butterbee/config
-import butterbee/config/browser_config
 import butterbee/internal/error
 import butterbee/internal/lib
-import butterbee/internal/runner/runnable
 import gleam/dynamic.{type Dynamic}
 import gleam/int
 import gleam/list
-import gleam/option
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
-import logging
 import simplifile
-import youid/uuid
 
 const default_flags = [
   "about:blank", "-wait-for-browser", "-no-first-run",
   "-no-default-browser-check", "-no-remote", "-new-instance", "-juggler-pipe",
 ]
 
-pub fn setup(browser: browser.Browser, config: config.ButterbeeConfig) {
-  use #(profile, profile_dir) <- result.try({
-    create_profile(config.driver_config.data_dir)
-    |> result.map_error(error.CreateProfileDirError)
-  })
-
-  let port =
-    browser.port
-    |> option.unwrap(browser_config.default_port)
-    |> int.to_string()
-
-  logging.log(
-    logging.Debug,
-    "creating profile: " <> profile <> " in " <> profile_dir,
-  )
-
-  let flags =
-    default_flags
-    |> list.append(["-remote-debugging-port", port, "-profile", profile_dir])
-    |> list.append(browser.extra_flags |> option.unwrap([]))
-
-  let runnable =
-    runnable.new(browser_config.Firefox)
-    |> runnable.with_cmd(#("firefox", flags))
-    |> runnable.with_port(port)
-    |> runnable.with_profile(profile)
-    |> runnable.with_profile_dir(profile_dir)
-
-  Ok(runnable)
+///
+/// Returns the flags firefox needs to run
+///
+pub fn get_flags(
+  flags: List(String),
+  port: Option(Int),
+  profile_dir: String,
+) -> List(String) {
+  let remote_debugging_port = case port {
+    None -> []
+    Some(port) -> ["-remote-debugging-port", int.to_string(port)]
+  }
+  default_flags
+  |> list.append(remote_debugging_port)
+  |> list.append(["-profile", profile_dir])
+  |> list.append(flags)
 }
 
-/// Create a new profile directory
-/// Returns the name of the profile
-fn create_profile(
-  data_dir: String,
-) -> Result(#(String, String), simplifile.FileError) {
-  let profile = uuid.v7() |> uuid.to_string()
-  let profile_dir = data_dir <> "/" <> profile
+///
+/// Fill the profile directory with user prefs that provide a test environment
+///
+pub fn setup(profile_dir: String) -> Result(Nil, error.ButterbeeError) {
+  use _ <- result.try({
+    write_user_prefs(profile_dir, [])
+    |> result.map_error(fn(err) { error.CreateUserPrefsError(err) })
+  })
 
-  let profile =
-    simplifile.create_directory_all(profile_dir)
-    |> result.map(with: fn(_) { #(profile, profile_dir) })
-
-  use _ <- result.try({ write_user_prefs(profile_dir, []) })
-
-  profile
+  Ok(Nil)
 }
 
 type FirefoxPrefs {

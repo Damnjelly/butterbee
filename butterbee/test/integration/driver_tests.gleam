@@ -1,10 +1,11 @@
+import butterbee/config/browser_config.{Firefox}
 import butterbee/page
 import butterbee/webdriver
 import qcheck_gleeunit_utils/test_spec
 
 pub fn wait_test_() {
   use <- test_spec.make_with_timeout(30)
-  let driver = webdriver.new()
+  let driver = webdriver.new(Firefox)
 
   let first_url =
     page.url(driver)

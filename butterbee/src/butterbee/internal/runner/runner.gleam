@@ -2,120 +2,77 @@ import butterbee/browser.{type Browser}
 import butterbee/config
 import butterbee/config/browser_config
 import butterbee/internal/error
-import butterbee/internal/retry
 import butterbee/internal/runner/firefox
-import butterbee/internal/runner/runnable.{type Runnable}
+import gleam/bool
 import gleam/dict
 import gleam/erlang/process
 import gleam/int
-import gleam/list
-import gleam/option
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import logging
 import shellout
 import simplifile
 
+///
+/// Start a browser instance
+///
 pub fn new(
+  browser_to_run: browser_config.BrowserType,
   config: config.ButterbeeConfig,
 ) -> Result(Browser, error.ButterbeeError) {
+  let driver_config = config.driver_config
   let browser_config =
     config.browser_config
     |> option.unwrap(browser_config.default())
-    |> dict.get(config.driver_config.browser)
+    |> dict.get(browser_to_run)
     |> result.unwrap(browser_config.default_configuration())
 
-  use port <- result.try({
-    get_port(config.driver_config.data_dir, browser_config)
+  use request <- result.try({
+    browser.new_port(driver_config.data_dir, browser_config)
+    |> result.map(fn(port) { browser.get_request(port, browser_config.host) })
+  })
+
+  use #(profile, profile_dir) <- result.try({
+    browser.new_profile(driver_config.data_dir)
+    |> result.map_error(error.CreateProfileDirError)
+  })
+
+  let flags = case browser_to_run {
+    browser_config.Firefox ->
+      firefox.get_flags(browser_config.extra_flags, request.port, profile_dir)
+    browser_config.Chrome -> todo as "Chrome not supported yet"
+  }
+
+  use _ <- result.try({
+    case browser_to_run {
+      browser_config.Firefox -> firefox.setup(profile_dir)
+      browser_config.Chrome -> todo as "Chrome not supported yet"
+    }
   })
 
   let browser =
-    browser.from_config(config.driver_config.browser, browser_config)
-    |> browser.with_extra_flags(browser_config.extra_flags)
-    |> browser.with_port(port)
+    browser.new(browser_to_run)
+    |> browser.with_request(request)
+    |> browser.with_profile_dir(profile_dir)
+    |> browser.with_profile_name(profile)
+    |> browser.with_cmd(#(browser_config.cmd, flags))
 
-  let request = browser.get_request(port, browser)
-
-  // update browser with request
-  let browser = browser |> browser.with_request(request)
-
-  use _ <- result.try({
-    use runnable <- result.try(case browser.browser_type {
-      browser_config.Firefox -> firefox.setup(browser, config)
-      browser_config.Chrome -> todo as "Chrome not supported yet"
-    })
-
-    run(runnable) |> result.map_error(fn(_) { error.RunnerError })
+  use browser <- result.try({
+    run(browser) |> result.map_error(fn(_) { error.RunnerError })
   })
 
   Ok(browser)
 }
 
-pub fn get_port(
-  data_dir: String,
-  browser_config: browser_config.BrowserConfig,
-) -> Result(Int, error.ButterbeeError) {
-  let port_dir = data_dir <> "/used_ports"
+///
+/// Run the browser
+/// TODO: Should maybe be a shell script for better lifetime management
+///
+fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
+  let assert Some(#(cmd, flags)) = browser.cmd
 
-  let #(min, max) = browser_config.port_range
-
-  use _ <- result.try({
-    simplifile.create_directory_all(port_dir)
-    |> result.map_error(error.CreatePortDirError)
-  })
-
-  // Get a a list of used ports
-  use ports <- result.try(
-    {
-      // Read the files in the port directory
-      simplifile.read_directory(port_dir)
-      |> result.map_error(error.ReadPortDirError)
-    }
-    // Convert the list of port strings to a list of port ints
-    |> result.map(fn(files) {
-      files
-      |> list.map(fn(file) {
-        int.parse(file)
-        |> result.unwrap(browser_config.default_port)
-      })
-    }),
-  )
-
-  let max_list_size = case max - min {
-    a if a <= 0 -> panic as "max port range must be greater than min port range"
-    _ -> max - min
-  }
-
-  let _ = case list.length(ports) {
-    s if s >= max_list_size -> panic as "Not enough ports open"
-    _ -> True
-  }
-
-  let port =
-    retry.incremented(min, fn(port) {
-      logging.log(
-        logging.Debug,
-        "Checking if port: " <> int.to_string(port) <> " is open",
-      )
-      case !list.contains(ports, port) {
-        True -> {
-          logging.log(logging.Debug, "Open port found: " <> int.to_string(port))
-          True
-        }
-        False -> False
-      }
-    })
-
-  use _ <- result.try({
-    simplifile.create_file(port_dir <> "/" <> int.to_string(port))
-    |> result.map_error(error.FileError)
-  })
-
-  Ok(port)
-}
-
-fn run(runnable: Runnable) -> Result(Runnable, error.ButterbeeError) {
-  let #(cmd, flags) = runnable.cmd
+  let assert Some(profile_dir) = browser.profile_dir
 
   logging.log(
     logging.Debug,
@@ -124,7 +81,7 @@ fn run(runnable: Runnable) -> Result(Runnable, error.ButterbeeError) {
 
   process.spawn(fn() {
     let _ = case
-      shellout.command(run: cmd, with: flags, in: runnable.profile_dir, opt: [])
+      shellout.command(run: cmd, with: flags, in: profile_dir, opt: [])
     {
       Ok(_) -> Nil
       Error(error) -> {
@@ -136,17 +93,33 @@ fn run(runnable: Runnable) -> Result(Runnable, error.ButterbeeError) {
     // INFO: This run after the browser  closes
 
     logging.log(logging.Debug, "Cleaning up profile directory")
-    let assert Ok(_) = simplifile.delete(runnable.profile_dir)
+    let assert Ok(_) = simplifile.delete(profile_dir)
       as "Failed to delete profile directory"
 
     // Wait a bit before deleting the port file
     process.sleep(1000)
 
-    let port = "/tmp/butterbee/used_ports/" <> runnable.port
-    logging.log(logging.Debug, "Deleting port file at " <> runnable.port)
-    let assert Ok(_) = simplifile.delete(port) as "Failed to delete port file"
-    Nil
+    let _delete_port_if_exists = {
+      let port = case browser.request {
+        None -> None
+        Some(request) ->
+          case request.port {
+            None -> None
+            Some(port) -> Some(int.to_string(port))
+          }
+      }
+
+      use <- bool.guard(option.is_some(port), port)
+
+      let port = option.unwrap(port, "")
+      let port = "/tmp/butterbee/used_ports/" <> port
+      logging.log(logging.Debug, "Deleting port file at " <> port)
+      let _ = simplifile.delete(port)
+      Some("")
+    }
+
+    Ok(Nil)
   })
 
-  Ok(runnable)
+  Ok(browser)
 }

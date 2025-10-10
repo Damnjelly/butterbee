@@ -6,6 +6,7 @@ import butterbee/commands/browser
 import butterbee/commands/browsing_context
 import butterbee/commands/session
 import butterbee/config.{type ButterbeeConfig}
+import butterbee/config/browser_config
 import butterbee/config/capabilities_config
 import butterbee/internal/runner/runner
 import butterbee/internal/socket.{type WebDriverSocket}
@@ -51,7 +52,7 @@ pub fn webdriver_with_context(
 ///
 /// Start a new webdriver session connect to the browser session, using the butterbee.toml file located in the root of the project
 /// 
-pub fn new() -> WebDriver {
+pub fn new(browser: browser_config.BrowserType) -> WebDriver {
   let config = case config.parse_config("butterbee.toml") {
     Ok(config) -> config
     Error(error) -> {
@@ -63,7 +64,7 @@ pub fn new() -> WebDriver {
     }
   }
 
-  new_with_config(config)
+  new_with_config(browser, config)
 }
 
 ///
@@ -77,7 +78,10 @@ pub fn new() -> WebDriver {
 /// let example = webdriver.new_with_config("test/special_config.toml")
 /// ```
 ///
-pub fn new_with_config_path(path: String) -> WebDriver {
+pub fn new_with_config_path(
+  browser: browser_config.BrowserType,
+  path: String,
+) -> WebDriver {
   let config = case config.parse_config(path) {
     Ok(config) -> config
     Error(error) -> {
@@ -89,19 +93,22 @@ pub fn new_with_config_path(path: String) -> WebDriver {
     }
   }
 
-  new_with_config(config)
+  new_with_config(browser, config)
 }
 
 ///
 /// Start a new webdriver session connect to the browser session, using the ButterbeeConfig type
 ///
-pub fn new_with_config(config: config.ButterbeeConfig) -> WebDriver {
+pub fn new_with_config(
+  browser: browser_config.BrowserType,
+  config: config.ButterbeeConfig,
+) -> WebDriver {
   logging.log(
     logging.Debug,
     "Starting webdriver session with config: " <> string.inspect(config),
   )
   // Setup webdriver session
-  let assert Ok(browser) = runner.new(config)
+  let assert Ok(browser) = runner.new(browser, config)
 
   let capabilities =
     config.capabilities

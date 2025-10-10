@@ -11,7 +11,6 @@
 ////
 //// ```toml
 //// [Driver]
-//// browser = "firefox"
 //// max_wait_time = 20000
 //// request_timeout = 5000
 //// data_dir = "/tmp/butterbee"

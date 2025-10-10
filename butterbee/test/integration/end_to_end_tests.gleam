@@ -1,4 +1,5 @@
 import butterbee/by
+import butterbee/config/browser_config.{Firefox}
 import butterbee/key
 import butterbee/nodes
 import butterbee/webdriver
@@ -12,7 +13,7 @@ import butterbee/query
 pub fn enter_keys_test_() {
   use <- test_spec.make_with_timeout(30)
   let package_names =
-    webdriver.new()
+    webdriver.new(Firefox)
     |> webdriver.goto("https://packages.gleam.run/")
     |> query.node(by.xpath("//input[@name='search']"))
     |> input.enter_keys("stdlib" <> key.enter())
