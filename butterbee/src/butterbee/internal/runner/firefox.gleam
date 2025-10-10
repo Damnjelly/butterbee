@@ -1,5 +1,6 @@
 import butterbee/internal/error
 import butterbee/internal/lib
+import butterlib/log
 import gleam/dynamic.{type Dynamic}
 import gleam/int
 import gleam/list
@@ -35,6 +36,7 @@ pub fn get_flags(
 /// Fill the profile directory with user prefs that provide a test environment
 ///
 pub fn setup(profile_dir: String) -> Result(Nil, error.ButterbeeError) {
+  log.debug("Creating user prefs")
   use _ <- result.try({
     write_user_prefs(profile_dir, [])
     |> result.map_error(fn(err) { error.CreateUserPrefsError(err) })

@@ -3,6 +3,7 @@
 import butterbee/internal/glam
 import butterbee/internal/retry
 import butterbidi/definition
+import butterlib/log
 import gleam/dict
 import gleam/dynamic/decode.{type Decoder}
 import gleam/erlang/process
@@ -10,7 +11,6 @@ import gleam/http/request.{type Request}
 import gleam/json.{type Json}
 import gleam/otp/actor
 import gleam/uri
-import logging
 import stratus
 
 const request_timeout = 5000
@@ -26,11 +26,11 @@ pub type WebDriverSocket {
   )
 }
 
+// TODO: Less asserts
 pub fn new(request: Request(String)) -> WebDriverSocket {
-  logging.log(
-    logging.Debug,
+  log.debug(
     "Connecting to WebDriver server at "
-      <> request.to_uri(request) |> uri.to_string(),
+    <> request.to_uri(request) |> uri.to_string(),
   )
   let state = dict.new()
 
@@ -39,11 +39,7 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
     |> stratus.on_message(fn(state, msg, conn) {
       case msg {
         stratus.Text(msg) -> {
-          logging.log(
-            logging.Debug,
-            "------------------- Received WebDriver Response -------------------
-" <> glam.pretty_json(msg),
-          )
+          log_response(msg)
           let assert Ok(result) = json.parse(msg, definition.message_decoder())
             as "Failed to parse webdriver response"
           case result {
@@ -70,11 +66,7 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
             decode.success(id)
           }
           let assert Ok(id) = json.parse(request, id_d)
-          logging.log(
-            logging.Debug,
-            "------------------- Sending WebDriver Request -------------------
-" <> glam.pretty_json(request),
-          )
+          log_request(request)
           let assert Ok(_) = stratus.send_text_message(conn, request)
             as "Failed to send webdriver request"
           stratus.continue(dict.insert(state, id, subject))
@@ -135,4 +127,14 @@ pub fn send_request(
       Error(error)
     }
   }
+}
+
+fn log_response(response: String) {
+  log.debug("------------------- Received WebDriver Response -------------------
+    " <> glam.pretty_json(response))
+}
+
+fn log_request(request: String) {
+  log.debug("------------------- Sending WebDriver Request -------------------
+    " <> glam.pretty_json(request))
 }

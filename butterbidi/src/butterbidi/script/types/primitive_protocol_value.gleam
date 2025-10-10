@@ -1,9 +1,9 @@
+import butterlib/log
 import gleam/bool
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/float
 import gleam/int
-import logging
 
 pub type PrimitiveProtocolValue {
   Undefined(UndefinedValue)
@@ -50,10 +50,7 @@ fn string_to_special_number(variant: String) -> SpecialNumber {
     "-0" -> NegativeZero
     "Infinity" -> Infinity
     "-Infinity" -> NegativeInfinity
-    _ -> {
-      logging.log(logging.Warning, "Unknown special number: " <> variant)
-      NaN
-    }
+    _ -> log.warning_and_continue("Unknown special number: " <> variant, NaN)
   }
 }
 
@@ -89,34 +86,26 @@ pub fn number_value_classifier(value: Dynamic) -> Number {
     "Int" ->
       case decode.run(value, decode.int) {
         Ok(int) -> Int(int)
-        Error(_) -> {
-          logging.log(logging.Warning, "Failed to decode Int")
-          Special(NaN)
-        }
+        Error(_) ->
+          log.warning_and_continue("Failed to decode Int", Special(NaN))
       }
     "Float" ->
       case decode.run(value, decode.float) {
         Ok(float) -> Float(float)
-        Error(_) -> {
-          logging.log(logging.Warning, "Failed to decode Float")
-          Special(NaN)
-        }
+        Error(_) ->
+          log.warning_and_continue("Failed to decode Float", Special(NaN))
       }
     "String" ->
       case decode.run(value, decode.string) {
         Ok(string) -> Special(string_to_special_number(string))
-        Error(_) -> {
-          logging.log(logging.Warning, "Failed to decode String")
-          Special(NaN)
-        }
+        Error(_) ->
+          log.warning_and_continue("Failed to decode String", Special(NaN))
       }
-    _ -> {
-      logging.log(
-        logging.Warning,
+    _ ->
+      log.warning_and_continue(
         "Unknown number type: " <> dynamic.classify(value),
+        Special(NaN),
       )
-      Special(NaN)
-    }
   }
 }
 

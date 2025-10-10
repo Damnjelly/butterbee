@@ -62,6 +62,7 @@ import butterbidi/session/types/capabilities_request.{
 import butterbidi/session/types/capability_request.{
   type CapabilityRequest, CapabilityRequest,
 }
+import butterlib/log
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode
@@ -69,7 +70,6 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
-import logging
 import tom
 
 ///
@@ -106,23 +106,18 @@ pub fn capabilities_request_from_toml(
       case cap {
         // Each first_match entry should be an inline table
         tom.InlineTable(cap) -> Ok(capability_request_from_toml(cap))
-        _ -> {
-          logging.log(
-            logging.Error,
+        _ ->
+          log.error_and_continue(
             "Could not parse Capabilities.first_match, expected InlineTable, got "
               <> string.inspect(cap),
+            Error(Nil),
           )
-          Error(Nil)
-        }
       }
     })
 
   // Return capabilities request if either always_match or first_match is present
   case always_match, first_match {
-    None, None -> {
-      logging.log(logging.Debug, "No capabilities found")
-      None
-    }
+    None, None -> log.debug_and_continue("No capabilities found", None)
     _, _ -> {
       Some(CapabilitiesRequest(always_match:, first_match:))
     }
@@ -157,14 +152,12 @@ fn capability_request_from_toml(
   // Handle parsing results with fallback for errors
   case capabilities {
     Ok(capabilities) -> capabilities
-    Error(error) -> {
-      logging.log(
-        logging.Error,
-        "Could not parse Capabilities, error: " <> string.inspect(error) <> "
-     Replacing with empty CapabilityRequest",
+    Error(error) ->
+      log.error_and_continue(
+        "Could not parse Capabilities, error: "
+          <> string.inspect(error)
+          <> " Replacing with empty CapabilityRequest",
+        CapabilityRequest(None, None, None, None, dict.new()),
       )
-      // Return empty capability request as fallback
-      CapabilityRequest(None, None, None, None, dict.new())
-    }
   }
 }

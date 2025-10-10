@@ -14,6 +14,46 @@ pub fn debug(msg: String) -> Nil {
   logging.log(logging.Debug, msg)
 }
 
+pub fn error(msg: String) -> Nil {
+  logging.log(logging.Error, msg)
+}
+
+///
+/// Logs an Info log and return a value
+/// Useful for when you want to log an info log before returning a value
+///
+pub fn info_and_continue(msg: String, continue: a) -> a {
+  info(msg)
+  continue
+}
+
+/// 
+/// Logs an Warning log and return a value
+/// Useful for when you want to log a warning before returning a value
+///
+pub fn warning_and_continue(msg: String, continue: a) -> a {
+  warning(msg)
+  continue
+}
+
+/// 
+/// Logs an Debug log and return a value
+/// Useful for when you want to log a debug log before returning a value
+///
+pub fn debug_and_continue(msg: String, continue: a) -> a {
+  debug(msg)
+  continue
+}
+
+///
+/// Creates an Error log and return the given value 'a'
+/// Useful for when you want to log an error before returning a value
+///
+pub fn error_and_continue(msg: String, continue: a) -> a {
+  error(msg)
+  continue
+}
+
 const filters = [
   "WebSocket handshake failed: Sock\\(Econnrefused\\)", "Making request",
 ]

@@ -1,5 +1,4 @@
-import butterbee/internal/log
-import logging
+import butterlib/log
 import simplifile
 
 ///
@@ -7,10 +6,11 @@ import simplifile
 /// Call this in the main function of your test, before calling gleeunit.main
 ///
 pub fn init() {
+  log.debug("Initializing butterbee")
   let _ = log.suppress_sasl_error_reports()
-  logging.log(logging.Debug, "Initializing butterbee")
 
-  logging.log(logging.Debug, "Deleting data_dir")
+  log.debug("Deleting data_dir")
+  //TODO: actually delete data_dir instead of hardcoding it
   let _ = simplifile.delete("/tmp/butterbee")
 
   Nil

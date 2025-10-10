@@ -3,10 +3,10 @@ import butterbee
 import butterbee/by
 import butterbee/config/browser_config
 import butterbee/input
-import butterbee/internal/log
 import butterbee/nodes
 import butterbee/query
 import butterbee/webdriver
+import butterlib/log
 import gleeunit
 import logging
 import qcheck_gleeunit_utils/test_spec
@@ -16,7 +16,7 @@ pub fn main() {
     ["--debug"] -> {
       log.configure(logging.Debug)
     }
-    _ -> log.configure(logging.Info)
+    _ -> log.configure(logging.Error)
   }
   butterbee.init()
   gleeunit.main()

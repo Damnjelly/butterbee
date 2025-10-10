@@ -8,13 +8,13 @@
 import butterbee/config/browser_config
 import butterbee/internal/error
 import butterbee/internal/retry
+import butterlib/log
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
-import logging
 import simplifile
 import youid/uuid
 
@@ -125,15 +125,13 @@ pub fn new_port(
 
   let port =
     retry.incremented(min, fn(port) {
-      logging.log(
-        logging.Debug,
-        "Checking if port: " <> int.to_string(port) <> " is open",
-      )
+      log.debug("Checking if port: " <> int.to_string(port) <> " is open")
       case !list.contains(ports, port) {
-        True -> {
-          logging.log(logging.Debug, "Open port found: " <> int.to_string(port))
-          True
-        }
+        True ->
+          log.debug_and_continue(
+            "Open port found: " <> int.to_string(port),
+            True,
+          )
         False -> False
       }
     })
@@ -160,7 +158,7 @@ pub fn new_profile(
     simplifile.create_directory_all(profile_dir)
     |> result.map(with: fn(_) { #(profile, profile_dir) })
 
-  logging.log(logging.Debug, "Created profile at " <> profile_dir)
+  log.debug("Created profile at " <> profile_dir)
 
   profile
 }

@@ -14,11 +14,11 @@ import butterbidi/browsing_context/commands/get_tree
 import butterbidi/browsing_context/commands/navigate
 import butterbidi/browsing_context/types/browsing_context.{type BrowsingContext} as _
 import butterbidi/browsing_context/types/readiness_state
+import butterlib/log
 import gleam/erlang/process
 import gleam/list
 import gleam/option.{Some}
 import gleam/string
-import logging
 
 ///
 /// Represents a webdriver session
@@ -55,13 +55,11 @@ pub fn webdriver_with_context(
 pub fn new(browser: browser_config.BrowserType) -> WebDriver {
   let config = case config.parse_config("butterbee.toml") {
     Ok(config) -> config
-    Error(error) -> {
-      logging.log(
-        logging.Error,
+    Error(error) ->
+      log.error_and_continue(
         "Failed to parse butterbee.toml: " <> string.inspect(error),
+        config.default(),
       )
-      config.default()
-    }
   }
 
   new_with_config(browser, config)
@@ -84,13 +82,11 @@ pub fn new_with_config_path(
 ) -> WebDriver {
   let config = case config.parse_config(path) {
     Ok(config) -> config
-    Error(error) -> {
-      logging.log(
-        logging.Error,
+    Error(error) ->
+      log.error_and_continue(
         "Failed to parse butterbee.toml: " <> string.inspect(error),
+        config.default(),
       )
-      config.default()
-    }
   }
 
   new_with_config(browser, config)
@@ -103,8 +99,7 @@ pub fn new_with_config(
   browser: browser_config.BrowserType,
   config: config.ButterbeeConfig,
 ) -> WebDriver {
-  logging.log(
-    logging.Debug,
+  log.debug(
     "Starting webdriver session with config: " <> string.inspect(config),
   )
   // Setup webdriver session

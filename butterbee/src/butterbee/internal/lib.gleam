@@ -1,3 +1,4 @@
+import butterlib/log
 import gleam/bool
 import gleam/dict
 import gleam/dynamic.{type Dynamic}
@@ -6,7 +7,6 @@ import gleam/float
 import gleam/int
 import gleam/list
 import gleam/string
-import logging
 import tom
 
 /// 
@@ -39,15 +39,13 @@ pub fn toml_to_dynamic(value: tom.Toml) -> Dynamic {
           #(dynamic.string(key), toml_to_dynamic(value))
         })
       })
-    _ -> {
-      logging.log(
-        logging.Error,
-        "Could not unwrap value: " <> string.inspect(value) <> "
-     Replacing with empty string",
+    _ ->
+      log.error_and_continue(
+        "Could not unwrap value: "
+          <> string.inspect(value)
+          <> " Replacing with empty string",
+        dynamic.string(""),
       )
-
-      dynamic.string("")
-    }
   }
 }
 
@@ -80,6 +78,12 @@ pub fn dynamic_to_string(dyn: Dynamic) -> String {
         Error(_) -> ""
       }
     }
-    _ -> ""
+    _ ->
+      log.error_and_continue(
+        "Could not convert dynamic to string, value: "
+          <> string.inspect(dyn)
+          <> " replacing with empty string",
+        "",
+      )
   }
 }

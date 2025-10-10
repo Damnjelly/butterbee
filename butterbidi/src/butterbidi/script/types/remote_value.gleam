@@ -2,11 +2,11 @@ import butterbidi/script/types/primitive_protocol_value.{
   type PrimitiveProtocolValue, BigInt, BigIntValue, Boolean, BooleanValue, Null,
   NullValue, Number, NumberValue, String, StringValue, Undefined, UndefinedValue,
 }
+import butterlib/log
 import gleam/dict
 import gleam/dynamic/decode.{type Decoder}
 import gleam/option.{type Option, None}
 import internal/decoders
-import logging
 import youid/uuid.{type Uuid}
 
 pub type RemoteValue {
@@ -76,23 +76,25 @@ pub fn remote_value_decoder() -> Decoder(RemoteValue) {
         )),
       )
     }
-    _ -> {
-      logging.log(logging.Warning, "Unknown remote value type: " <> remote_type)
-      panic as "Unknown remote value type"
-    }
+    _ ->
+      log.error_and_continue(
+        "Unknown remote value type: " <> remote_type,
+        decode.failure(
+          NodeRemote(NodeRemoteValue("", None, None, None, None)),
+          "Unknown remote value type",
+        ),
+      )
   }
 }
 
 pub fn remote_value_to_string(remote_value: RemoteValue) -> String {
   case remote_value {
     PrimitiveProtocol(value) -> primitive_protocol_value.to_string(value)
-    NodeRemote(value) -> {
-      logging.log(
-        logging.Debug,
+    NodeRemote(value) ->
+      log.debug_and_continue(
         "Expected PrimitiveProtocol, got NodeRemote. Returning remote_type",
+        value.remote_type,
       )
-      value.remote_type
-    }
   }
 }
 

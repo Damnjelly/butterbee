@@ -8,10 +8,10 @@ import butterbee/nodes.{type Nodes}
 import butterbee/webdriver.{type WebDriver}
 import butterbidi/input/commands/perform_actions
 import butterbidi/script/types/remote_reference
+import butterlib/log
 import gleam/list
 import gleam/option.{None}
 import gleam/string
-import logging
 import youid/uuid.{type Uuid}
 
 pub type MouseButton {
@@ -73,13 +73,11 @@ pub fn click(
       fn(result) {
         case result.1 {
           Ok(a) -> Ok(a)
-          Error(b) -> {
-            logging.log(
-              logging.Debug,
+          Error(b) ->
+            log.debug_and_continue(
               "Click failed, error: " <> string.inspect(b) <> " retrying",
+              Error(b),
             )
-            Error(b)
-          }
         }
       },
     )

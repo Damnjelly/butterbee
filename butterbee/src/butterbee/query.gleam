@@ -11,9 +11,9 @@ import butterbidi/browsing_context/commands/locate_nodes
 import butterbidi/browsing_context/types/locator.{type Locator}
 import butterbidi/script/types/remote_reference
 import butterbidi/script/types/remote_value
+import butterlib/log
 import gleam/list
 import gleam/string
-import logging
 
 ///
 /// Finds a node matching the given locator, if multiple nodes are found, the first node is returned.
@@ -113,20 +113,16 @@ fn locate_nodes(
           Ok(locate_nodes_ok) ->
             case !list.is_empty(locate_nodes_ok.nodes) {
               True -> Ok(locate_nodes_ok)
-              False -> {
-                logging.log(logging.Debug, "No nodes found, retrying")
-                Error(Nil)
-              }
+              False ->
+                log.debug_and_continue("No nodes found, retrying", Error(Nil))
             }
-          Error(locate_nodes_error) -> {
-            logging.log(
-              logging.Debug,
+          Error(locate_nodes_error) ->
+            log.debug_and_continue(
               "Locating nodes failed, error: "
                 <> string.inspect(locate_nodes_error)
                 <> " retrying",
+              Error(Nil),
             )
-            Error(Nil)
-          }
         }
       },
     )

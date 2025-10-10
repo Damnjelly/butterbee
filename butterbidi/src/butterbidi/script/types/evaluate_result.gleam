@@ -1,8 +1,9 @@
+import butterbidi/script/types/primitive_protocol_value
 import butterbidi/script/types/remote_value.{
   type RemoteValue, remote_value_decoder,
 }
+import butterlib/log
 import gleam/dynamic/decode.{type Decoder}
-import logging
 
 pub type EvaluateResult {
   SuccessResult(result: EvaluateResultSuccess)
@@ -14,15 +15,24 @@ pub fn evaluate_result_decoder() -> Decoder(EvaluateResult) {
   case result_type {
     "success" -> success_result_decoder()
     "exception" -> todo
-    _ -> {
-      logging.log(
-        logging.Warning,
+    _ ->
+      log.error_and_continue(
         "Unknown evaluate result type: " <> result_type,
+        decode.failure(evaulate_result_failure, "Unknown evaluate result type"),
       )
-      panic as "Unknown evaluate result type"
-    }
   }
 }
+
+const evaulate_result_failure = SuccessResult(
+  EvaluateResultSuccess(
+    result_type: Exception,
+    result: remote_value.PrimitiveProtocol(
+      primitive_protocol_value.Undefined(
+        primitive_protocol_value.UndefinedValue("undefined"),
+      ),
+    ),
+  ),
+)
 
 pub type EvaluateResultSuccess {
   EvaluateResultSuccess(

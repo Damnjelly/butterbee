@@ -22,6 +22,7 @@ pages = [
 
 [dependencies]
 butterbidi = { path = "../butterbidi" }
+butterlib = { path = "../butterlib" }
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
 gleam_erlang = ">= 1.2.0 and < 2.0.0"
 shellout = ">= 1.7.0 and < 2.0.0"

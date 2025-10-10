@@ -1,8 +1,8 @@
 import birl
 import birl/duration
+import butterlib/log
 import gleam/erlang/process
 import gleam/int
-import logging
 
 const max_wait_time = 20_000
 
@@ -40,10 +40,7 @@ fn retry_loop(
         birl.add(time_started, duration.milli_seconds(max_wait_time))
         |> birl.has_occured()
       {
-        True -> {
-          logging.log(logging.Warning, "Retry timed out")
-          a
-        }
+        True -> log.warning_and_continue("Retry timed out", a)
         False -> {
           wait_on_attempts(attempts)
           log_attempts(attempts)
@@ -108,10 +105,9 @@ fn wait_on_attempts(attempts: Int) -> Nil {
 }
 
 fn log_attempts(attempts: Int) -> Nil {
-  logging.log(
-    logging.Debug,
+  log.debug(
     "Connection attempt failed, retrying, current attempt: "
-      <> int.to_string(attempts),
+    <> int.to_string(attempts),
   )
 }
 
