@@ -9,7 +9,7 @@ import butterbee/webdriver.{type WebDriver}
 import butterbidi/input/commands/perform_actions
 import butterbidi/script/types/remote_reference
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{None}
 import gleam/string
 import logging
 import youid/uuid.{type Uuid}
