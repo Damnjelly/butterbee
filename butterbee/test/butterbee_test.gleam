@@ -1,7 +1,7 @@
 import argv
 import butterbee
 import butterbee/by
-import butterbee/config/browser_config
+import butterbee/config/browser
 import butterbee/input
 import butterbee/nodes
 import butterbee/query
@@ -25,7 +25,7 @@ pub fn main() {
 pub fn minimal_example_test_() {
   use <- test_spec.make_with_timeout(30)
   let output =
-    webdriver.new(browser_config.Firefox)
+    webdriver.new(browser.Firefox)
     |> webdriver.goto("https://gleam.run/")
     |> query.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",

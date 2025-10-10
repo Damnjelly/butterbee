@@ -1,5 +1,5 @@
 import butterbee/by
-import butterbee/config/browser_config.{Firefox}
+import butterbee/config/browser.{Firefox}
 import butterbee/key
 import butterbee/nodes
 import butterbee/webdriver

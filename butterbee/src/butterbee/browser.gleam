@@ -5,7 +5,7 @@
 //// from the configuration in the butterbee.toml file.
 ////
 
-import butterbee/config/browser_config
+import butterbee/config/browser as browser_config
 import butterbee/internal/error
 import butterbee/internal/retry
 import butterlib/log

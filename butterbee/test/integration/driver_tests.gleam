@@ -1,4 +1,4 @@
-import butterbee/config/browser_config.{Firefox}
+import butterbee/config/browser.{Firefox}
 import butterbee/page
 import butterbee/webdriver
 import qcheck_gleeunit_utils/test_spec

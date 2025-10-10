@@ -24,6 +24,7 @@ pub type DriverConfig {
   DriverConfig(max_wait_time: Int, request_timeout: Int, data_dir: String)
 }
 
+@internal
 pub fn driver_config_decoder() -> decode.Decoder(DriverConfig) {
   use max_wait_time <- decode.optional_field(
     "max_wait_time",

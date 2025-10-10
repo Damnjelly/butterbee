@@ -6,8 +6,8 @@ import butterbee/commands/browser
 import butterbee/commands/browsing_context
 import butterbee/commands/session
 import butterbee/config.{type ButterbeeConfig}
-import butterbee/config/browser_config
-import butterbee/config/capabilities_config
+import butterbee/config/browser as browser_config
+import butterbee/config/capabilities as capabilities_config
 import butterbee/internal/runner/runner
 import butterbee/internal/socket.{type WebDriverSocket}
 import butterbidi/browsing_context/commands/get_tree

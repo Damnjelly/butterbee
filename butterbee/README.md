@@ -21,7 +21,7 @@ Getting started with butterbee is easy, make sure Firefox is on your $PATH, and 
 ```gleam
 import butterbee
 import butterbee/by
-import butterbee/config/browser_config
+import butterbee/config/browser
 import butterbee/input
 import butterbee/nodes
 import butterbee/query
@@ -35,7 +35,7 @@ pub fn main() {
 
 pub fn minimal_example_test_() {
   let output =
-    webdriver.new(browser_config.Firefox)
+    webdriver.new(browser.Firefox)
     |> webdriver.goto("https://gleam.run/")
     |> query.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",

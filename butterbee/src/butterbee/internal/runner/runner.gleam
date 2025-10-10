@@ -1,6 +1,6 @@
 import butterbee/browser.{type Browser}
 import butterbee/config
-import butterbee/config/browser_config
+import butterbee/config/browser as browser_config
 import butterbee/internal/error
 import butterbee/internal/runner/firefox
 import butterlib/log
@@ -21,7 +21,7 @@ pub fn new(
   browser_to_run: browser_config.BrowserType,
   config: config.ButterbeeConfig,
 ) -> Result(Browser, error.ButterbeeError) {
-  let driver_config = config.driver_config
+  let driver_config = config.driver
   let browser_config =
     config.browser_config
     |> option.unwrap(browser_config.default())

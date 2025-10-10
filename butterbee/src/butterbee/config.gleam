@@ -34,8 +34,8 @@
 //// ```
 ////
 
-import butterbee/config/browser_config
-import butterbee/config/driver_config.{driver_config_decoder}
+import butterbee/config/browser
+import butterbee/config/driver.{driver_config_decoder}
 import butterbee/internal/lib
 import butterbidi/session/types/capabilities_request.{
   type CapabilitiesRequest, capabilities_request_decoder,
@@ -52,18 +52,16 @@ import tom
 ///
 pub type ButterbeeConfig {
   ButterbeeConfig(
-    driver_config: driver_config.DriverConfig,
+    driver: driver.DriverConfig,
     capabilities: Option(CapabilitiesRequest),
-    browser_config: Option(
-      Dict(browser_config.BrowserType, browser_config.BrowserConfig),
-    ),
+    browser_config: Option(Dict(browser.BrowserType, browser.BrowserConfig)),
   )
 }
 
 fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
-  use driver_config <- decode.optional_field(
+  use driver <- decode.optional_field(
     "Driver",
-    driver_config.default(),
+    driver.default(),
     driver_config_decoder(),
   )
   use capabilities <- decode.optional_field(
@@ -74,21 +72,27 @@ fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
   use browser_config <- decode.optional_field(
     "Browsers",
     None,
-    decode.optional(browser_config.browser_config_decoder()),
+    decode.optional(browser.browser_config_decoder()),
   )
-  decode.success(ButterbeeConfig(driver_config:, capabilities:, browser_config:))
+  decode.success(ButterbeeConfig(driver:, capabilities:, browser_config:))
 }
 
+/// 
+/// Returns the default configuration
+/// See the toml representation of the default configuration above
+///
 pub fn default() -> ButterbeeConfig {
-  ButterbeeConfig(driver_config.default(), None, None)
+  ButterbeeConfig(driver.default(), None, None)
 }
 
+@internal
 pub type Error {
   ReadError(simplifile.FileError)
   ParseError(tom.ParseError)
   DecodeError(List(decode.DecodeError))
 }
 
+@internal
 pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
   use path <- result.try({
     simplifile.read(path) |> result.map_error(ReadError)
