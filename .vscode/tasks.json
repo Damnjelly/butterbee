@@ -26,6 +26,14 @@
             }
         },
         {
+            "label": "butterbee check",
+            "type": "shell",
+            "command": "gleam check",
+            "options": {
+                "cwd": "${workspaceFolder}/butterbee"
+            }
+        },
+        {
             "label": "butterbee build",
             "type": "shell",
             "command": "gleam build",
