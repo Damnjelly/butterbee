@@ -16,5 +16,5 @@ pub fn wait_test_() {
     |> page.url()
     |> webdriver.close()
 
-  assert #(first_url, second_url) == #("about:home", "https://gleam.run/")
+  assert #(first_url, second_url) == #("about:blank", "https://gleam.run/")
 }
