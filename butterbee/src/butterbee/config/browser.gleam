@@ -50,8 +50,8 @@ pub const default_port = 9222
 
 pub type BrowserType {
   Firefox
-  /// INFO: chrome is not supported yet
-  Chrome
+  // TODO: support chrome
+  // Chrome
 }
 
 @internal
@@ -59,8 +59,12 @@ pub fn browser_type_decoder() -> decode.Decoder(BrowserType) {
   use browser_type <- decode.then(decode.string)
   case browser_type {
     "firefox" -> decode.success(Firefox)
-    "chrome" -> decode.success(Chrome)
-    _ -> decode.failure(Firefox, "Browser type not supported: " <> browser_type)
+    // "chrome" -> decode.success(Chrome)
+    _ ->
+      decode.failure(
+        default_browser_type(),
+        "Browser type not supported: " <> browser_type,
+      )
   }
 }
 
