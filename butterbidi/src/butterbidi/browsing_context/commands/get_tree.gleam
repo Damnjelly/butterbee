@@ -1,4 +1,6 @@
-import butterbidi/browsing_context/types/browsing_context.{type BrowsingContext}
+import butterbidi/browsing_context/types/browsing_context.{
+  type BrowsingContext, browsing_context_to_json,
+}
 import butterbidi/browsing_context/types/info
 import gleam/dynamic/decode
 import gleam/json.{type Json}
@@ -19,7 +21,7 @@ pub fn get_tree_parameters_to_json(
     }),
     #("root", case root {
       None -> json.null()
-      Some(value) -> todo as "Encoder for BrowsingContext"
+      Some(value) -> browsing_context_to_json(value)
     }),
   ])
 }
