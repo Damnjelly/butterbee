@@ -41,13 +41,13 @@ pub fn new(
   let flags = case browser_to_run {
     browser_config.Firefox ->
       firefox.get_flags(browser_config.extra_flags, request.port, profile_dir)
-    browser_config.Chrome -> todo as "Chrome not supported yet"
+    // browser_config.Chrome -> todo as "Chrome not supported yet"
   }
 
   use _ <- result.try({
     case browser_to_run {
       browser_config.Firefox -> firefox.setup(profile_dir)
-      browser_config.Chrome -> todo as "Chrome not supported yet"
+      // browser_config.Chrome -> todo as "Chrome not supported yet"
     }
   })
 
