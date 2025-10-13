@@ -12,12 +12,49 @@ import butterbee/internal/id
 import butterbee/internal/socket
 import butterbidi/definition
 import butterbidi/session/commands/new
+import butterbidi/session/commands/status
 import butterbidi/session/definition as session_definition
 import butterbidi/session/types/capabilities_request.{
   type CapabilitiesRequest, capabilities_request_to_json,
 }
 import gleam/http/request.{type Request}
 import gleam/result
+
+///
+/// # [session.status](https://w3c.github.io/webdriver-bidi/#command-session-status)
+///
+/// Returns information about whether a remote end is in a state in which it can create
+/// new sessions.
+///
+pub fn status(
+  request: Request(String),
+) -> Result(status.StatusResult, definition.ErrorResponse) {
+  let socket = socket.new(request)
+  let command = definition.SessionCommand(session_definition.Status)
+  let request =
+    definition.command_to_json(
+      definition.Command(id.from_unix(), command, [
+        #("params", definition.empty_params_to_json(definition.EmptyParams([]))),
+      ]),
+    )
+
+  let response =
+    socket.send_request(socket, request, command)
+    |> result.map(fn(response) {
+      case response.result {
+        definition.SessionResult(result) ->
+          case result {
+            session_definition.StatusResult(result) -> result
+            _ -> {
+              panic as "Unexpected status result type"
+            }
+          }
+        _ -> panic as "Unexpected session result type"
+      }
+    })
+
+  response
+}
 
 ///
 /// # [session.new](https://w3c.github.io/webdriver-bidi/#command-session-new)
