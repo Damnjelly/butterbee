@@ -1,3 +1,7 @@
+////
+//// [w3c link](https://w3c.github.io/webdriver-bidi/#type-browsingContext-Browsingcontext)
+////
+
 import gleam/dynamic/decode
 import gleam/json
 import internal/decoders

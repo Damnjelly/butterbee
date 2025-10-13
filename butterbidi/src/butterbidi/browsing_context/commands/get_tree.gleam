@@ -1,3 +1,7 @@
+////
+//// [w3c link](https://w3c.github.io/webdriver-bidi/#command-browsingContext-getTree)
+////
+
 import butterbidi/browsing_context/types/browsing_context.{
   type BrowsingContext, browsing_context_to_json,
 }

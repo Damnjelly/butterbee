@@ -11,7 +11,7 @@ and a more complex API for interacting with the webdriver bidi protocol directly
 WARNING: butterbee is still in early development and incomplete. Butterbee only supports Firefox at the moment, and the API is subject to change.
 
 ```sh
-gleam add butterbee
+gleam add --dev butterbee
 ```
 
 ### Example
