@@ -1,3 +1,9 @@
+////
+//// [w3c link](https://w3c.github.io/webdriver-bidi/#type-script-RemoteValue)
+////
+//// Todo: Handle type, internal_id type
+////
+
 import butterbidi/script/types/primitive_protocol_value.{
   type PrimitiveProtocolValue, BigInt, BigIntValue, Boolean, BooleanValue, Null,
   NullValue, Number, NumberValue, String, StringValue, Undefined, UndefinedValue,
@@ -11,6 +17,7 @@ import youid/uuid.{type Uuid}
 
 pub type RemoteValue {
   PrimitiveProtocol(PrimitiveProtocolValue)
+  ErrorRemote(ErrorRemoteValue)
   NodeRemote(NodeRemoteValue)
 }
 
@@ -45,37 +52,8 @@ pub fn remote_value_decoder() -> Decoder(RemoteValue) {
         PrimitiveProtocol(BigInt(BigIntValue(remote_type:, value:))),
       )
     }
-    "node" -> {
-      use shared_id <- decode.optional_field(
-        "sharedId",
-        None,
-        decode.optional(decoders.uuid()),
-      )
-      use handle <- decode.optional_field(
-        "handle",
-        None,
-        decode.optional(decoders.uuid()),
-      )
-      use internal_id <- decode.optional_field(
-        "internalId",
-        None,
-        decode.optional(decode.string),
-      )
-      use value <- decode.optional_field(
-        "value",
-        None,
-        decode.optional(node_properties_decoder()),
-      )
-      decode.success(
-        NodeRemote(NodeRemoteValue(
-          remote_type:,
-          shared_id:,
-          handle:,
-          internal_id:,
-          value:,
-        )),
-      )
-    }
+    "error" -> error_remote_value_decoder()
+    "node" -> node_remote_decoder()
     _ ->
       log.error_and_continue(
         "Unknown remote value type: " <> remote_type,
@@ -90,12 +68,42 @@ pub fn remote_value_decoder() -> Decoder(RemoteValue) {
 pub fn remote_value_to_string(remote_value: RemoteValue) -> String {
   case remote_value {
     PrimitiveProtocol(value) -> primitive_protocol_value.to_string(value)
+    ErrorRemote(value) ->
+      log.debug_and_continue(
+        "Expected PrimitiveProtocol, got ErrorRemote. Returning remote_type",
+        value.remote_type,
+      )
     NodeRemote(value) ->
       log.debug_and_continue(
         "Expected PrimitiveProtocol, got NodeRemote. Returning remote_type",
         value.remote_type,
       )
   }
+}
+
+pub type ErrorRemoteValue {
+  ErrorRemoteValue(
+    remote_type: String,
+    handle: Option(Uuid),
+    internal_id: Option(String),
+  )
+}
+
+pub fn error_remote_value_decoder() -> Decoder(RemoteValue) {
+  use remote_type <- decode.field("type", decode.string)
+  use handle <- decode.optional_field(
+    "handle",
+    None,
+    decode.optional(decoders.uuid()),
+  )
+  use internal_id <- decode.optional_field(
+    "internalId",
+    None,
+    decode.optional(decode.string),
+  )
+  decode.success(
+    ErrorRemote(ErrorRemoteValue(remote_type:, handle:, internal_id:)),
+  )
 }
 
 pub type NodeRemoteValue {
@@ -106,6 +114,11 @@ pub type NodeRemoteValue {
     internal_id: Option(String),
     value: Option(NodeProperties),
   )
+}
+
+pub fn node_remote_decoder() -> Decoder(RemoteValue) {
+  use node_remote_value <- decode.then(node_remote_value_decoder())
+  decode.success(NodeRemote(node_remote_value))
 }
 
 pub fn node_remote_value_decoder() -> Decoder(NodeRemoteValue) {

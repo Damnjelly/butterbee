@@ -1,20 +1,28 @@
+////
+//// [w3c link](https://w3c.github.io/webdriver-bidi/#type-script-EvaluateResult)
+////
+
+import butterbidi/script/types/exception_details.{
+  type ExceptionDetails, exception_details_decoder,
+}
 import butterbidi/script/types/primitive_protocol_value
 import butterbidi/script/types/remote_value.{
   type RemoteValue, remote_value_decoder,
 }
+import butterbidi/script/types/stack_trace
 import butterlib/log
 import gleam/dynamic/decode.{type Decoder}
 
 pub type EvaluateResult {
   SuccessResult(result: EvaluateResultSuccess)
-  //TODO: ExceptionResult(EvaluateResultException)
+  ExceptionResult(result: EvaluateResultException)
 }
 
 pub fn evaluate_result_decoder() -> Decoder(EvaluateResult) {
   use result_type <- decode.field("type", decode.string)
   case result_type {
     "success" -> success_result_decoder()
-    "exception" -> todo
+    "exception" -> exception_result_decoder()
     _ ->
       log.error_and_continue(
         "Unknown evaluate result type: " <> result_type,
@@ -23,13 +31,19 @@ pub fn evaluate_result_decoder() -> Decoder(EvaluateResult) {
   }
 }
 
-const evaulate_result_failure = SuccessResult(
-  EvaluateResultSuccess(
+pub const evaulate_result_failure = ExceptionResult(
+  EvaluateResultException(
     result_type: Exception,
-    result: remote_value.PrimitiveProtocol(
-      primitive_protocol_value.Undefined(
-        primitive_protocol_value.UndefinedValue("undefined"),
+    exception_details: exception_details.ExceptionDetails(
+      column_number: 0,
+      exception: remote_value.PrimitiveProtocol(
+        primitive_protocol_value.Undefined(
+          primitive_protocol_value.UndefinedValue("undefined"),
+        ),
       ),
+      line_number: 0,
+      stack_trace: stack_trace.StackTrace(call_frames: []),
+      text: "Butterbee Evaluate Result Failure",
     ),
   ),
 )
@@ -49,9 +63,26 @@ fn success_result_decoder() -> Decoder(EvaluateResult) {
   )
 }
 
-//TODO: pub type EvaluateResultException {
-//   EvaluateResultException(result_type: EvaluateResultType)
-// }
+pub type EvaluateResultException {
+  EvaluateResultException(
+    result_type: EvaluateResultType,
+    exception_details: ExceptionDetails,
+    //TODO: realm: Realm
+  )
+}
+
+fn exception_result_decoder() -> Decoder(EvaluateResult) {
+  use exception_details <- decode.field(
+    "exceptionDetails",
+    exception_details_decoder(),
+  )
+  decode.success(
+    ExceptionResult(EvaluateResultException(
+      result_type: Exception,
+      exception_details:,
+    )),
+  )
+}
 
 pub type EvaluateResultType {
   Success
