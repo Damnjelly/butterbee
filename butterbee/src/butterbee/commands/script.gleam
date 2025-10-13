@@ -27,22 +27,20 @@ import gleam/result
 ///
 /// ```gleam
 /// let result =
-///   script.call_function(
-///     driver.socket,
-///     call_function.CallFunctionParameters(
-///       function_declaration: "function(node) { return node.innerText; }",
-///       await_promise: False,
-///       target: target.Context(target.ContextTarget(driver.context, None)),
-///       arguments: Some([
-///         local_value.RemoteReference(
-///           remote_reference.Shared(remote_reference.SharedReference(
-///             shared_id,
-///             None,
-///           )),
-///         ),
-///       ]),
-///     ),
-///   )
+///   webdriver.socket
+///   |> script.call_function(call_function.CallFunctionParameters(
+///     function_declaration: "function(node) { return node.innerText; }",
+///     await_promise: False,
+///     target: target.Context(target.ContextTarget(webdriver.context, None)),
+///     arguments: Some([
+///       local_value.RemoteReference(
+///         remote_reference.Shared(remote_reference.SharedReference(
+///           shared_id,
+///           None,
+///         )),
+///       ),
+///     ]),
+///   ))
 /// ```
 ///
 pub fn call_function(

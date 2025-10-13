@@ -8,6 +8,7 @@ import butterbee/commands/session
 import butterbee/config.{type ButterbeeConfig}
 import butterbee/config/browser as browser_config
 import butterbee/config/capabilities as capabilities_config
+import butterbee/internal/retry
 import butterbee/internal/runner/runner
 import butterbee/internal/socket.{type WebDriverSocket}
 import butterbidi/browsing_context/commands/get_tree
@@ -18,6 +19,7 @@ import butterlib/log
 import gleam/erlang/process
 import gleam/list
 import gleam/option.{Some}
+import gleam/result
 import gleam/string
 
 ///
@@ -113,9 +115,17 @@ pub fn new_with_config(
 
   let assert Some(request) = browser.request
 
-  let #(socket, response) = session.new(request, capabilities)
+  use <- retry.until_true(fn() {
+    let response = session.status(request)
+    case response {
+      Error(_) -> False
+      Ok(resp) -> resp.ready
+    }
+  })
 
-  let assert Ok(_) = response
+  let #(socket, session) = session.new(request, capabilities)
+
+  let assert Ok(response) = session
 
   // Get initial browsing context
   let get_tree_parameters =

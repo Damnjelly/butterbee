@@ -105,29 +105,25 @@ fn locate_nodes(
   socket: socket.WebDriverSocket,
   params: locate_nodes.LocateNodesParameters,
 ) -> List(remote_value.NodeRemoteValue) {
-  let #(_, locate_nodes_result) =
-    retry.until_ok(
-      fn() { browsing_context.locate_nodes(socket, params) },
-      fn(locate_nodes_result) {
-        case locate_nodes_result.1 {
-          Ok(locate_nodes_ok) ->
-            case !list.is_empty(locate_nodes_ok.nodes) {
-              True -> Ok(locate_nodes_ok)
-              False ->
-                log.debug_and_continue("No nodes found, retrying", Error(Nil))
-            }
-          Error(locate_nodes_error) ->
-            log.debug_and_continue(
-              "Locating nodes failed, error: "
-                <> string.inspect(locate_nodes_error)
-                <> " retrying",
-              Error(Nil),
-            )
-        }
-      },
-    )
+  use locate_nodes_result <- retry.until_ok(fn() {
+    let locate_nodes_result = browsing_context.locate_nodes(socket, params).1
 
-  let assert Ok(locate_nodes_result) = locate_nodes_result
+    case locate_nodes_result {
+      Ok(locate_nodes_ok) ->
+        case !list.is_empty(locate_nodes_ok.nodes) {
+          True -> Ok(locate_nodes_ok)
+          False ->
+            log.debug_and_continue("No nodes found, retrying", Error(Nil))
+        }
+      Error(locate_nodes_error) ->
+        log.debug_and_continue(
+          "Locating nodes failed, error: "
+            <> string.inspect(locate_nodes_error)
+            <> " retrying",
+          Error(Nil),
+        )
+    }
+  })
 
   locate_nodes_result.nodes
 }

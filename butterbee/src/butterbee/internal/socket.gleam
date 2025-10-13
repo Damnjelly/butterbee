@@ -78,14 +78,7 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
       }
     })
 
-  let assert Ok(subject) =
-    retry.until_ok(fn() { stratus.start(subject) }, fn(result) {
-      case result {
-        Ok(_) -> Ok(subject)
-        Error(_) -> Error("Failed to connect to webdriver server")
-      }
-    })
-    as "Failed to connect to webdriver server"
+  use subject <- retry.until_ok(fn() { stratus.start(subject) })
 
   WebDriverSocket(subject)
 }
@@ -130,11 +123,11 @@ pub fn send_request(
 }
 
 fn log_response(response: String) {
-  log.debug("------------------- Received WebDriver Response -------------------
+  log.debug("── Received WebDriver Response ───────────────────────
     " <> glam.pretty_json(response))
 }
 
 fn log_request(request: String) {
-  log.debug("------------------- Sending WebDriver Request -------------------
+  log.debug("── Sending WebDriver Request ─────────────────────────
     " <> glam.pretty_json(request))
 }

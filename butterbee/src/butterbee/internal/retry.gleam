@@ -3,26 +3,40 @@ import birl/duration
 import butterlib/log
 import gleam/erlang/process
 import gleam/int
+import gleam/string
 
 const max_wait_time = 20_000
 
+///
 /// Retry a function until it returns a result that satisfies a condition that returns a Result
+///
 pub fn until_ok(
-  retry_function: fn() -> result,
-  condition: fn(result) -> Result(a, b),
-) -> result {
-  result_loop(retry_function, condition, birl.now(), 1)
+  retry_function: fn() -> Result(a, b),
+  callback: fn(a) -> return_type,
+) -> return_type {
+  let final_result = result_loop(retry_function, birl.now(), 1)
+  case final_result {
+    Ok(value) -> callback(value)
+    // This should rarely happen (only on timeout)
+    Error(err) -> {
+      let err = string.inspect(err)
+      panic as err
+    }
+  }
 }
 
+///
 /// Retry a function until it returns a result that satisfies a condition that returns a Bool
+/// Panics if the function never returns true
+///
 pub fn until_true(
-  retry_function: fn() -> result,
-  condition: fn(result) -> Bool,
-) -> result {
-  bool_loop(retry_function, condition, birl.now(), 1)
+  retry_function: fn() -> Bool,
+  callback: fn() -> return_type,
+) -> return_type {
+  let _ = bool_loop(retry_function, birl.now(), 1)
+  callback()
 }
 
-// Generic retry loop that handles the common logic
 fn retry_loop(
   retry_function: fn() -> result,
   should_continue: fn(result) -> Bool,
@@ -55,17 +69,15 @@ fn retry_loop(
   }
 }
 
-// Wrapper for Result-based conditions
 fn result_loop(
-  retry_function: fn() -> result,
-  condition: fn(result) -> Result(a, b),
+  retry_function: fn() -> Result(a, b),
   time_started: birl.Time,
   attempts: Int,
-) -> result {
+) -> Result(a, b) {
   retry_loop(
     retry_function,
     fn(r) {
-      case condition(r) {
+      case r {
         Ok(_) -> False
         // Success, don't continue
         Error(_) -> True
@@ -77,20 +89,33 @@ fn result_loop(
   )
 }
 
-// Wrapper for Bool-based conditions
 fn bool_loop(
-  retry_function: fn() -> result,
-  condition: fn(result) -> Bool,
+  retry_function: fn() -> Bool,
   time_started: birl.Time,
   attempts: Int,
-) -> result {
-  retry_loop(
-    retry_function,
-    fn(r) { !condition(r) },
-    // Invert because True means success, False means retry
-    time_started,
-    attempts,
-  )
+) -> Nil {
+  let result = retry_function()
+  case result {
+    True -> Nil
+    // Success, stop retrying
+    False -> {
+      // Need to retry
+      case
+        birl.add(time_started, duration.milli_seconds(max_wait_time))
+        |> birl.has_occured()
+      {
+        True -> {
+          log.warning("Retry timed out")
+          Nil
+        }
+        False -> {
+          wait_on_attempts(attempts)
+          log_attempts(attempts)
+          bool_loop(retry_function, time_started, attempts + 1)
+        }
+      }
+    }
+  }
 }
 
 fn wait_on_attempts(attempts: Int) -> Nil {

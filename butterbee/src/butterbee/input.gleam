@@ -67,20 +67,17 @@ pub fn click(
       },
     ])
 
-  let _ =
-    retry.until_ok(
-      fn() { input.perform_actions(driver.socket, params) },
-      fn(result) {
-        case result.1 {
-          Ok(a) -> Ok(a)
-          Error(b) ->
-            log.debug_and_continue(
-              "Click failed, error: " <> string.inspect(b) <> " retrying",
-              Error(b),
-            )
-        }
-      },
-    )
+  use _result <- retry.until_ok(fn() {
+    let result = input.perform_actions(driver.socket, params).1
+    case result {
+      Ok(a) -> Ok(a)
+      Error(b) ->
+        log.debug_and_continue(
+          "Click failed, error: " <> string.inspect(b) <> " retrying",
+          Error(b),
+        )
+    }
+  })
 
   driver
 }

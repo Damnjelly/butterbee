@@ -4,14 +4,18 @@
 
 import butterbee/commands/script
 import butterbee/webdriver.{type WebDriver}
+import butterbidi/definition
 import butterbidi/script/commands/call_function
+import butterbidi/script/types/evaluate_result.{type EvaluateResult}
 import butterbidi/script/types/local_value
 import butterbidi/script/types/remote_reference
 import butterbidi/script/types/remote_value
 import butterbidi/script/types/target
+import butterlib/log
 import gleam/list
 import gleam/option.{Some}
 import gleam/result
+import gleam/string
 import youid/uuid.{type Uuid}
 
 pub type Nodes {
@@ -87,13 +91,59 @@ pub fn inner_text(driver_with_node: #(WebDriver, Nodes)) -> #(WebDriver, String)
 pub fn inner_texts(
   driver_with_nodes: #(WebDriver, Nodes),
 ) -> #(WebDriver, List(String)) {
+  let #(driver, _nodes) = driver_with_nodes
+
+  let function = "function(node) { return node.innerText; }"
+
+  let #(_, results) = call_function(driver_with_nodes, function)
+
+  let inner_texts =
+    list.map(results, fn(result) {
+      let call_function_result = case result {
+        Ok(call_function_result) -> call_function_result
+        Error(error) ->
+          log.error_and_continue(
+            "Error calling function: " <> string.inspect(error),
+            evaluate_result.evaulate_result_failure,
+          )
+      }
+
+      let remote_value = case call_function_result {
+        evaluate_result.SuccessResult(success) -> success.result
+        evaluate_result.ExceptionResult(exception) ->
+          log.error_and_continue(
+            "Error calling function: " <> string.inspect(exception),
+            exception.exception_details.exception,
+          )
+      }
+
+      remote_value.remote_value_to_string(remote_value)
+    })
+
+  #(driver, inner_texts)
+}
+
+///
+/// Calls a javascript function on nodes.
+/// This function is called for every node in the list of nodes.
+///
+/// The function has 1 parameter, the node to call the function on.
+///
+/// # Function Example
+///
+/// '''js
+/// function(node) { return node.innerText; }
+/// '''
+/// 
+pub fn call_function(
+  driver_with_nodes: #(WebDriver, Nodes),
+  function: String,
+) -> #(WebDriver, List(Result(EvaluateResult, definition.ErrorResponse))) {
   let #(driver, nodes) = driver_with_nodes
 
   let target = target.new_context_target(driver.context)
 
-  let function = "function(node) { return node.innerText; }"
-
-  let inner_texts =
+  let results =
     list.map(nodes.value, fn(node) {
       let assert Some(shared_id) = node.shared_id
 
@@ -107,13 +157,8 @@ pub fn inner_texts(
         |> call_function.with_function(function)
         |> call_function.with_arguments([node])
 
-      let assert Ok(call_function_result) =
-        script.call_function(driver.socket, params)
-
-      let remote_value = call_function_result.result.result
-
-      remote_value.remote_value_to_string(remote_value)
+      script.call_function(driver.socket, params)
     })
 
-  #(driver, inner_texts)
+  #(driver, results)
 }

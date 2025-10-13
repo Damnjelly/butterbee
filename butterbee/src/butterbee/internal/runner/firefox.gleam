@@ -24,7 +24,7 @@ pub fn get_flags(
 ) -> List(String) {
   let remote_debugging_port = case port {
     None -> []
-    Some(port) -> ["-remote-debugging-port", int.to_string(port)]
+    Some(port) -> ["-remote-debugging-port=" <> int.to_string(port)]
   }
   default_flags
   |> list.append(remote_debugging_port)
