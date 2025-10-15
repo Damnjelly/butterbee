@@ -36,15 +36,13 @@ pub type Browser {
   )
 }
 
-pub fn default() -> Browser {
-  Browser(
-    browser_type: browser_config.default_browser_type(),
-    cmd: None,
-    request: None,
-    profile_name: None,
-    profile_dir: None,
-  )
-}
+pub const default: Browser = Browser(
+  browser_type: browser_config.default_browser_type,
+  cmd: None,
+  request: None,
+  profile_name: None,
+  profile_dir: None,
+)
 
 pub fn new(browser_to_run: browser_config.BrowserType) -> Browser {
   Browser(

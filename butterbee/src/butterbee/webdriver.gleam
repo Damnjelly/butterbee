@@ -62,7 +62,7 @@ pub fn new(browser: browser_config.BrowserType) -> WebDriver {
     Error(error) ->
       log.error_and_continue(
         "Failed to parse gleam.toml: " <> string.inspect(error),
-        config.default(),
+        config.default,
       )
   }
 
@@ -84,7 +84,7 @@ pub fn new_with_config(
 
   let capabilities =
     config.capabilities
-    |> option.unwrap(capabilities_config.default())
+    |> option.unwrap(capabilities_config.default)
 
   let assert Some(request) = browser.request
 
@@ -102,7 +102,7 @@ pub fn new_with_config(
 
   // Get initial browsing context
   let get_tree_parameters =
-    get_tree.default()
+    get_tree.default
     |> get_tree.with_max_depth(1)
 
   let assert Ok(info_list) =

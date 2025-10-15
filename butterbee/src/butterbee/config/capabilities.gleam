@@ -87,10 +87,9 @@ import tom
 /// // CapabilitiesRequest(always_match: None, first_match: None)
 /// ```
 ///
-pub fn default() -> CapabilitiesRequest {
-  CapabilitiesRequest(None, None)
-}
+pub const default: CapabilitiesRequest = CapabilitiesRequest(None, None)
 
+@internal
 pub fn capabilities_request_from_toml(
   config: Dict(String, tom.Toml),
 ) -> Option(CapabilitiesRequest) {

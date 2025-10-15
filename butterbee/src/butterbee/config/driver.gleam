@@ -10,19 +10,25 @@ import gleam/dynamic/decode
 /// Butterbee will use this maximum wait time unless overridden.
 /// This settings determines how long butterbee will perform a retry function for
 /// before timing out (and failing the test).
-const default_max_wait_time = 20_000
+pub const default_max_wait_time: Int = 20_000
 
 /// Butterbee will use this request timeout unless overridden.
 /// Warn: This value is not currently used.
-const default_request_timeout = 5000
+pub const default_request_timeout: Int = 5000
 
 /// Butterbee will use this data directory unless overridden.
 /// The data directory is used to store profile data for browsers.
-const default_data_dir = "/tmp/butterbee"
+pub const default_data_dir: String = "/tmp/butterbee"
 
 pub type DriverConfig {
   DriverConfig(max_wait_time: Int, request_timeout: Int, data_dir: String)
 }
+
+pub const default: DriverConfig = DriverConfig(
+  max_wait_time: default_max_wait_time,
+  request_timeout: default_request_timeout,
+  data_dir: default_data_dir,
+)
 
 @internal
 pub fn driver_config_decoder() -> decode.Decoder(DriverConfig) {
@@ -43,12 +49,4 @@ pub fn driver_config_decoder() -> decode.Decoder(DriverConfig) {
   )
 
   decode.success(DriverConfig(max_wait_time:, request_timeout:, data_dir:))
-}
-
-pub fn default() -> DriverConfig {
-  DriverConfig(
-    max_wait_time: default_max_wait_time,
-    request_timeout: default_request_timeout,
-    data_dir: default_data_dir,
-  )
 }

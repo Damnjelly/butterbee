@@ -59,7 +59,7 @@ pub type ButterbeeConfig {
 fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
   use driver <- decode.optional_field(
     "driver",
-    driver.default(),
+    driver.default,
     driver_config_decoder(),
   )
   use capabilities <- decode.optional_field(
@@ -76,12 +76,10 @@ fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
 }
 
 /// 
-/// Returns the default configuration
+/// The default config
 /// See the toml representation of the default configuration above
 ///
-pub fn default() -> ButterbeeConfig {
-  ButterbeeConfig(driver.default(), None, None)
-}
+pub const default: ButterbeeConfig = ButterbeeConfig(driver.default, None, None)
 
 @internal
 pub type Error {

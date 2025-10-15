@@ -30,9 +30,7 @@ pub fn get_tree_parameters_to_json(
   ])
 }
 
-pub fn default() -> GetTreeParameters {
-  GetTreeParameters(None, None)
-}
+pub const default: GetTreeParameters = GetTreeParameters(None, None)
 
 pub fn with_max_depth(
   get_tree_parameters: GetTreeParameters,

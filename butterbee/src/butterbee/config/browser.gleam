@@ -34,22 +34,35 @@ import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 
 /// Butterbee will use this command unless overridden
-pub const default_cmd = "firefox"
+pub const default_cmd: String = "firefox"
 
 /// Butterbee will use this host url unless overridden 
-pub const default_host = "127.0.0.1"
+pub const default_host: String = "127.0.0.1"
 
 /// Butterbee will use this port range unless overridden
-pub const default_port_range = #(9222, 9232)
+pub const default_port_range: #(Int, Int) = #(9222, 9232)
 
 /// Butterbee will use this port unless overridden
-pub const default_port = 9222
+pub const default_port: Int = 9222
+
+///
+/// Returns the default browser configuration
+///
+pub fn default() -> Dict(BrowserType, BrowserConfig) {
+  dict.new()
+  |> dict.insert(Firefox, default_configuration)
+}
 
 pub type BrowserType {
   Firefox
   // TODO: support chrome
   // Chrome
 }
+
+///
+/// Returns the default browser type, firefox
+///
+pub const default_browser_type = Firefox
 
 @internal
 pub fn browser_type_decoder() -> decode.Decoder(BrowserType) {
@@ -59,33 +72,10 @@ pub fn browser_type_decoder() -> decode.Decoder(BrowserType) {
     // "chrome" -> decode.success(Chrome)
     _ ->
       decode.failure(
-        default_browser_type(),
+        default_browser_type,
         "Browser type not supported: " <> browser_type,
       )
   }
-}
-
-///
-/// Returns the default browser type, firefox
-///
-pub fn default_browser_type() -> BrowserType {
-  Firefox
-}
-
-pub fn default() -> Dict(BrowserType, BrowserConfig) {
-  dict.new()
-  |> dict.insert(Firefox, default_configuration())
-}
-
-@internal
-pub fn browser_config_decoder() -> decode.Decoder(
-  Dict(BrowserType, BrowserConfig),
-) {
-  use browser_config <- decode.then(decode.dict(
-    browser_type_decoder(),
-    configuration_options_decoder(),
-  ))
-  decode.success(browser_config)
 }
 
 pub type BrowserConfig {
@@ -103,14 +93,23 @@ pub type BrowserConfig {
   )
 }
 
-pub fn default_configuration() -> BrowserConfig {
-  BrowserConfig(
-    cmd: default_cmd,
-    extra_flags: [],
-    host: default_host,
-    port_range: default_port_range,
-  )
+@internal
+pub fn browser_config_decoder() -> decode.Decoder(
+  Dict(BrowserType, BrowserConfig),
+) {
+  use browser_config <- decode.then(decode.dict(
+    browser_type_decoder(),
+    configuration_options_decoder(),
+  ))
+  decode.success(browser_config)
 }
+
+pub const default_configuration: BrowserConfig = BrowserConfig(
+  cmd: default_cmd,
+  extra_flags: [],
+  host: default_host,
+  port_range: default_port_range,
+)
 
 @internal
 pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {
