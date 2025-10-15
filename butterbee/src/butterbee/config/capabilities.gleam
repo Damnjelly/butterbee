@@ -18,11 +18,14 @@
 ////
 //// ## TOML Configuration Format
 ////
-//// The capabilities are defined in a TOML configuration file under the `[Capabilities]`
+//// The capabilities are defined in a TOML configuration file under the
+//// `[tools.butterbee.capabilities]` section:
 //// section:
 ////
 //// ```toml
-//// [Capabilities]
+//// # gleam.toml
+////
+//// [tools.butterbee.capabilities]
 ////
 //// # Required capabilities that must always be matched
 //// always_match = {

@@ -26,8 +26,8 @@ import gleam/string
 ///
 /// ```gleam
 /// let example =
-///   driver.new()
-///   |> driver.goto("https://gleam.run/")
+///   webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
 ///   |> query.node(by.css("a.logo"))
 /// ```
 ///
@@ -50,8 +50,8 @@ pub fn node(driver: WebDriver, locator: Locator) -> #(WebDriver, Nodes) {
 ///
 /// ```gleam
 /// let example =
-///   driver.new()
-///   |> driver.goto("https://gleam.run/")
+///   webdriver.new()
+///   |> webdriver.goto("https://gleam.run/")
 ///   |> query.nodes(by.css("a.logo"))
 /// ```
 ///
@@ -76,8 +76,8 @@ pub fn nodes(driver: WebDriver, locator: Locator) -> #(WebDriver, Nodes) {
 ///
 /// ```gleam
 /// let example =
-///   driver.new()
-///   |> driver.goto("https://packages.gleam.run/")
+///   webdriver.new()
+///   |> webdriver.goto("https://packages.gleam.run/")
 ///   |> query.nodes(by.css("div.package-item"))
 ///   |> query.refine(by.css("h2.package-name"))
 /// ```

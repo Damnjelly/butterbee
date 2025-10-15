@@ -152,9 +152,9 @@ pub fn goto(driver: WebDriver, url: String) -> WebDriver {
 ///
 /// ```gleam
 /// let example =
-///   driver.new()
-///   |> driver.wait(2000)
-///   |> driver.goto("https://gleam.run/")
+///   webdriver.new()
+///   |> webdriver.wait(2000)
+///   |> webdriver.goto("https://gleam.run/")
 /// ```
 ///
 pub fn wait(state: value, duration: Int) -> value {
