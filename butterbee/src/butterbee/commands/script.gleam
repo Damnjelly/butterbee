@@ -5,7 +5,7 @@
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level
 //// API. But you can use these commands directly if you want something specific.
 ////
-//// These commands usually expect parameter defined in the [butterbdi project](https://hexdocs.pm/butterbidi/index.html).
+//// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////  
 
 import butterbee/internal/id
@@ -18,8 +18,6 @@ import butterbidi/script/definition as script_definition
 import butterbidi/script/types/evaluate_result.{type EvaluateResult}
 import gleam/result
 
-///
-/// # [script.callFunction](https://w3c.github.io/webdriver-bidi/#command-script-callFunction)
 ///
 /// Calls a function on the page with the given arguments.
 ///
@@ -42,6 +40,8 @@ import gleam/result
 ///     ]),
 ///   ))
 /// ```
+///
+/// [w3c](https://w3c.github.io/webdriver-bidi/#command-script-callFunction)
 ///
 pub fn call_function(
   socket: socket.WebDriverSocket,

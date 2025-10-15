@@ -131,9 +131,9 @@ pub fn inner_texts(
 ///
 /// # Function Example
 ///
-/// '''js
+/// ```js
 /// function(node) { return node.innerText; }
-/// '''
+/// ```
 /// 
 pub fn call_function(
   driver_with_nodes: #(WebDriver, Nodes),

@@ -5,7 +5,7 @@
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level
 //// API. But you can use these commands directly if you want something specific.
 ////
-//// These commands usually expect parameter defined in the [butterbdi project](https://hexdocs.pm/butterbidi/index.html).
+//// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////
 
 import butterbee/internal/id
@@ -16,8 +16,6 @@ import butterbidi/input/commands/perform_actions.{
 }
 import butterbidi/input/definition as input_definition
 
-///
-/// # [input.performActions](https://w3c.github.io/webdriver-bidi/#command-input-performActions)
 ///
 /// The input.performActions command performs a specified sequence of user input actions.
 /// 
@@ -36,6 +34,8 @@ import butterbidi/input/definition as input_definition
 ///     },
 ///   ])
 /// ```
+///
+/// [w3c](https://w3c.github.io/webdriver-bidi/#command-input-performActions)
 ///
 pub fn perform_actions(
   socket: socket.WebDriverSocket,

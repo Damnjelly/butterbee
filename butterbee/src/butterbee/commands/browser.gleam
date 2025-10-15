@@ -5,7 +5,7 @@
 //// webdriver bidi protocol. Butterbee usese these internally to create the high level
 //// API. But you can use these commands directly if you want something specific.
 ////
-//// These commands usually expect parameter defined in the [butterbdi project](https://hexdocs.pm/butterbidi/index.html).
+//// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////
 
 import butterbee/internal/id
@@ -14,9 +14,9 @@ import butterbidi/browser/definition as browser_definition
 import butterbidi/definition
 
 /// 
-/// # [browser.close](https://w3c.github.io/webdriver-bidi/#command-browser-close)
-/// 
 /// Closes the current browser.
+/// 
+/// [w3c](https://w3c.github.io/webdriver-bidi/#command-browser-close)
 /// 
 pub fn close(socket: socket.WebDriverSocket) -> Nil {
   let command = definition.BrowserCommand(browser_definition.Close)

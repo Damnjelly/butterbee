@@ -5,7 +5,7 @@
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level
 //// API. But you can use these commands directly if you want something specific.
 ////
-//// These commands usually expect parameter defined in the [butterbdi project](https://hexdocs.pm/butterbidi/index.html).
+//// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////
 
 import butterbee/internal/id
@@ -27,8 +27,6 @@ import gleam/option.{None, Some}
 import gleam/result
 
 ///
-/// # [browsingContext.getTree](https://w3c.github.io/webdriver-bidi/#command-browsingContext-getTree)
-///
 /// Returns a tree of all descendent navigables including the given 
 /// parent itself, or all top-level contexts when no parent is provided.
 /// 
@@ -39,6 +37,8 @@ import gleam/result
 ///   browsing_context.get_tree(driver.socket, get_tree.default())
 ///   )
 /// ```
+///
+/// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-getTree)
 ///
 pub fn get_tree(
   socket: socket.WebDriverSocket,
@@ -69,8 +69,6 @@ pub fn get_tree(
 }
 
 ///
-/// # [browsingContext.locateNodes](https://w3c.github.io/webdriver-bidi/#command-browsingContext-locateNodes)
-///
 /// Returns a list of all nodes matching the specified locator.
 /// 
 /// ## Example
@@ -81,6 +79,8 @@ pub fn get_tree(
 ///   locate_nodes.new(driver.context, locator)
 /// )
 /// ```
+///
+/// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-locateNodes)
 ///
 pub fn locate_nodes(
   socket: socket.WebDriverSocket,
@@ -118,8 +118,6 @@ pub fn locate_nodes(
 }
 
 ///
-/// # [browsingContext.navigate](https://w3c.github.io/webdriver-bidi/#command-browsingContext-navigate)
-///
 /// Navigates a navigable to the given URL.
 /// 
 /// ## Example
@@ -129,6 +127,8 @@ pub fn locate_nodes(
 ///   browsing_context.navigate(
 ///     driver.socket, navigate.default(driver.context, url))
 /// ```
+///
+/// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-navigate)
 ///
 pub fn navigate(
   socket: socket.WebDriverSocket,
