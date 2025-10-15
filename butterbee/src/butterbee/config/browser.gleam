@@ -12,20 +12,17 @@
 //// ## TOML Configuration Format
 ////
 //// The browser configuration is defined in a TOML configuration file under the
-//// `[Browsers]` section:
+//// `[tools.butterbee.browser]` section of your `gleam.toml` file:
 ////
 //// ```toml
-//// [Browsers]
-////
-//// [Browsers.firefox]
-////
+//// [tools.butterbee.browser.firefox]
 //// cmd = "firefox"
 //// flags = ["-headless"]
 //// host = "127.0.0.1"
 //// port_range = [9222, 9282]
 ////
 //// # NOTE: chromium is not supported yet
-//// [Browsers.chromium]
+//// [tools.butterbee.browser.chromium]
 //// cmd = "chromium"
 //// flags = []
 //// host = "127.0.0.1"
