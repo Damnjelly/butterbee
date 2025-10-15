@@ -59,7 +59,4 @@ pub fn minimal_example_test_() {
 ### Roadmap
 
 - [ ] Support for Chrome
-- [ ] Add all webdriver bidi commands
-- [ ] Support for Running tests in parallel
-- [ ] Windows support (I assume this currently doesn't work)
-- [ ] Macos support (I assume this currently doesn't work)
+- [ ] Add more webdriver bidi commands
