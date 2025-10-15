@@ -36,16 +36,16 @@
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 
-/// Butterbee will use this command unless overridden by the config file
+/// Butterbee will use this command unless overridden
 pub const default_cmd = "firefox"
 
-/// Butterbee will use this host url unless overridden by the config file 
+/// Butterbee will use this host url unless overridden 
 pub const default_host = "127.0.0.1"
 
-/// Butterbee will use this port range unless overridden by the config file
+/// Butterbee will use this port range unless overridden
 pub const default_port_range = #(9222, 9232)
 
-/// Butterbee will use this port unless overridden by the config file
+/// Butterbee will use this port unless overridden
 pub const default_port = 9222
 
 pub type BrowserType {

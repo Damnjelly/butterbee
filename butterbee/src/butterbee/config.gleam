@@ -1,7 +1,7 @@
 ////
-//// Butterbee optionally uses a configuration file to configure the webdriver bidi client.
-//// When you call the `new` function in the webdriver module, butterbee tries to find a
-//// file called `butterbee.toml` in the root of the project. If it can't find it, 
+//// Butterbee can be configured using the `gleam.toml` file.
+//// When you call the `new` function in the webdriver module, butterbee tries 
+//// to parse the `gleam.toml` file in the root of the project. If it can't find it,
 //// it will use the default configuration.
 ////
 //// For documentation see the individual config modules for more details:
@@ -12,27 +12,21 @@
 //// Example of the default configuration in toml format:
 ////
 //// ```toml
-//// [Driver]
+//// # gleam.toml
+////
+//// [tools.butterbee.driver]
 //// max_wait_time = 20000
 //// request_timeout = 5000
 //// data_dir = "/tmp/butterbee"
 ////
-//// [Capabilities]
+//// [tools.butterbee.capabilities]
 ////
 //// # Capabilities is empty by default
 ////
-//// [Browsers]
-////
-//// [Browsers.firefox]
-////
+//// [tools.butterbee.browser.firefox]
 //// flags = []
 //// host = "127.0.0.1"
 //// port_range = [9222, 9232]
-////
-//// [Browsers.chrome]
-////
-//// # Chrome is not supported yet
-////
 //// ```
 ////
 
@@ -42,15 +36,17 @@ import butterbee/internal/lib
 import butterbidi/session/types/capabilities_request.{
   type CapabilitiesRequest, capabilities_request_decoder,
 }
+import butterlib/log
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 import gleam/option.{type Option, None}
 import gleam/result
+import gleam/string
 import simplifile
 import tom
 
 /// 
-/// Represents the butterbee.toml file
+/// Represents the [tools.butterbee] section of the gleam.toml file
 ///
 pub type ButterbeeConfig {
   ButterbeeConfig(
@@ -62,17 +58,17 @@ pub type ButterbeeConfig {
 
 fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
   use driver <- decode.optional_field(
-    "Driver",
+    "driver",
     driver.default(),
     driver_config_decoder(),
   )
   use capabilities <- decode.optional_field(
-    "Capabilities",
+    "capabilities",
     None,
     decode.optional(capabilities_request_decoder()),
   )
   use browser_config <- decode.optional_field(
-    "Browsers",
+    "browser",
     None,
     decode.optional(browser.browser_config_decoder()),
   )
@@ -103,11 +99,15 @@ pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
   use config <- result.try({ tom.parse(path) |> result.map_error(ParseError) })
 
   let config = lib.toml_to_dynamic(tom.Table(config))
+  log.debug("Butterbee config: \n" <> string.inspect(config))
+
+  let decoder = decode.at(["tools", "butterbee"], butterbee_config_decoder())
 
   use config <- result.try({
-    decode.run(config, butterbee_config_decoder())
+    decode.run(config, decoder)
     |> result.map_error(DecodeError)
   })
+  log.debug("Butterbee config: \n" <> string.inspect(config))
 
   Ok(config)
 }

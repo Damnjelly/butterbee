@@ -7,16 +7,16 @@
 
 import gleam/dynamic/decode
 
-/// Butterbee will use this maximum wait time unless overridden by the config file. 
+/// Butterbee will use this maximum wait time unless overridden.
 /// This settings determines how long butterbee will perform a retry function for
 /// before timing out (and failing the test).
 const default_max_wait_time = 20_000
 
-/// Butterbee will use this request timeout unless overridden by the config file.
+/// Butterbee will use this request timeout unless overridden.
 /// Warn: This value is not currently used.
 const default_request_timeout = 5000
 
-/// Butterbee will use this data directory unless overridden by the config file.
+/// Butterbee will use this data directory unless overridden.
 /// The data directory is used to store profile data for browsers.
 const default_data_dir = "/tmp/butterbee"
 

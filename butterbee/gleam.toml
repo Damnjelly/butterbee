@@ -1,24 +1,25 @@
 name = "butterbee"
 version = "0.1.0"
-
 description = "A webdriver bidi cilent written in Gleam, for Gleam."
-
 licences = ["Apache-2.0"]
-
-repository = { type = "codeberg", user = "gelei", repo = "butterbee" }
-
-links = [
-	{ title = "github mirror", href = "https://github.com/Damnjelly/butterbee" },
-]
-
-target = "erlang"
 
 internal-modules = ["butterbee/internal/*"]
 
-[documentation]
-pages = [
-	{ title = "test runners", path = "test-runners.html", source = "docs/test-runners.md" },
-]
+target = "erlang"
+
+[repository]
+type = "codeberg"
+user = "gelei"
+repo = "butterbee"
+
+[[links]]
+title = "github mirror"
+href = "https://github.com/Damnjelly/butterbee"
+
+[[documentation.pages]]
+title = "test runners"
+path = "test-runners.html"
+source = "docs/test-runners.md"
 
 [dependencies]
 butterbidi = { path = "../butterbidi" }
@@ -35,14 +36,25 @@ gleam_json = ">= 3.0.2 and < 4.0.0"
 gleam_httpc = ">= 5.0.0 and < 6.0.0"
 youid = ">= 1.5.1 and < 2.0.0"
 glam = ">= 2.0.3 and < 3.0.0"
-birl = ">= 1.8.0 and < 2.0.0"
 tom = ">= 2.0.0 and < 3.0.0"
 simplifile = ">= 2.3.0 and < 3.0.0"
 logging = ">= 1.3.0 and < 2.0.0"
 argv = ">= 1.0.2 and < 2.0.0"
+gleam_time = ">= 1.4.0 and < 2.0.0"
 
 [dev-dependencies]
 qcheck_gleeunit_utils = ">= 1.0.0 and < 2.0.0"
 birdie = ">= 1.4.1 and < 2.0.0"
 gleeunit = ">= 1.6.1 and < 2.0.0"
 pprint = ">= 1.0.6 and < 2.0.0"
+
+
+# [tools.butterbee]
+
+[tools.butterbee.driver]
+data_dir = "/tmp/butterbee"
+
+[tools.butterbee.browser.firefox]
+flags = ["-headless"]
+host = "127.0.0.1"
+port_range = [9222, 9282]

@@ -19,7 +19,6 @@ import butterlib/log
 import gleam/erlang/process
 import gleam/list
 import gleam/option.{Some}
-import gleam/result
 import gleam/string
 
 ///
@@ -54,41 +53,15 @@ pub fn webdriver_with_context(
 }
 
 ///
-/// Start a new webdriver session connect to the browser session, using the butterbee.toml file located in the root of the project
+/// Start a new webdriver session connect to the browser session, 
+/// using the configuration in the gleam.toml file.
 /// 
 pub fn new(browser: browser_config.BrowserType) -> WebDriver {
-  let config = case config.parse_config("butterbee.toml") {
+  let config = case config.parse_config("gleam.toml") {
     Ok(config) -> config
     Error(error) ->
       log.error_and_continue(
-        "Failed to parse butterbee.toml: " <> string.inspect(error),
-        config.default(),
-      )
-  }
-
-  new_with_config(browser, config)
-}
-
-///
-/// Start a new webdriver session using the butterbee.toml file located in the given path
-/// 
-/// # Example
-///
-/// This example starts a new webdriver session, connects to the browser session, and returns the webdriver session:
-///
-/// ```gleam
-/// let example = webdriver.new_with_config("test/special_config.toml")
-/// ```
-///
-pub fn new_with_config_path(
-  browser: browser_config.BrowserType,
-  path: String,
-) -> WebDriver {
-  let config = case config.parse_config(path) {
-    Ok(config) -> config
-    Error(error) ->
-      log.error_and_continue(
-        "Failed to parse butterbee.toml: " <> string.inspect(error),
+        "Failed to parse gleam.toml: " <> string.inspect(error),
         config.default(),
       )
   }
@@ -125,7 +98,7 @@ pub fn new_with_config(
 
   let #(socket, session) = session.new(request, capabilities)
 
-  let assert Ok(response) = session
+  let assert Ok(_response) = session
 
   // Get initial browsing context
   let get_tree_parameters =

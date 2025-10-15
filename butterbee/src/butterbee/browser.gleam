@@ -2,7 +2,7 @@
 //// The browser module contains the Browser type and functions to create and configure browsers.
 ////
 //// Usually you will not need to use this module directly, as it is usually derived
-//// from the configuration in the butterbee.toml file.
+//// from the configuration in the gleam.toml file.
 ////
 
 import butterbee/config/browser as browser_config

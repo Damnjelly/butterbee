@@ -10,7 +10,7 @@ import gleam/string
 import tom
 
 /// 
-/// Returns the first element of the list, or an error if the list is empty or has more than one element.
+/// Returns the first element of the list, or an error if the list is empty
 /// 
 pub fn single_element(list: List(a)) -> Result(a, String) {
   case list {
@@ -39,6 +39,11 @@ pub fn toml_to_dynamic(value: tom.Toml) -> Dynamic {
           #(dynamic.string(key), toml_to_dynamic(value))
         })
       })
+    tom.ArrayOfTables(value) -> {
+      dynamic.array({
+        list.map(value, fn(table) { toml_to_dynamic(tom.Table(table)) })
+      })
+    }
     _ ->
       log.error_and_continue(
         "Could not unwrap value: "
