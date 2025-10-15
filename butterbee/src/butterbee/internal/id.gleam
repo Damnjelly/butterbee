@@ -1,5 +1,7 @@
-import birl
+import gleam/time/timestamp
 
 pub fn from_unix() -> Int {
-  birl.utc_now() |> birl.to_unix_micro()
+  let #(_seconds, nanoseconds) =
+    timestamp.to_unix_seconds_and_nanoseconds(timestamp.system_time())
+  nanoseconds
 }
