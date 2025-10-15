@@ -24,12 +24,12 @@
 //// host = "127.0.0.1"
 //// port_range = [9222, 9282]
 ////
-//// [Browsers.chrome]
-////
-//// cmd = "google-chrome"
+//// # NOTE: chromium is not supported yet
+//// [Browsers.chromium]
+//// cmd = "chromium"
 //// flags = []
 //// host = "127.0.0.1"
-//// port_range = [9243, 9263]
+//// port_range = [9143, 9163]
 //// ```
 ////
 
