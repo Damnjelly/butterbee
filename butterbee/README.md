@@ -58,5 +58,5 @@ pub fn minimal_example_test_() {
 
 ### Roadmap
 
-- [ ] Support for Chrome
+- [ ] Support for chromium 
 - [ ] Add more webdriver bidi commands
