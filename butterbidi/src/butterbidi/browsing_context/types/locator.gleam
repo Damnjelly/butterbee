@@ -1,11 +1,13 @@
-import butterbidi/browsing_context/types/browsing_context
+import butterbidi/browsing_context/types/browsing_context.{
+  type BrowsingContext, browsing_context_to_json,
+}
 import gleam/json.{type Json}
 import gleam/option.{type Option, None, Some}
 
 pub type Locator {
   AccessibilityLocator(name: Option(String), role: Option(String))
   CssLocator(value: String)
-  ContextLocator(context: browsing_context.BrowsingContext)
+  ContextLocator(context: BrowsingContext)
   InnerTextLocator(
     value: String,
     ignore_case: Option(Bool),
@@ -34,10 +36,10 @@ pub fn locator_to_json(locator: Locator) -> Json {
         #("type", json.string("css")),
         #("value", json.string(value)),
       ])
-    ContextLocator(context: _) ->
+    ContextLocator(context:) ->
       json.object([
         #("type", json.string("context")),
-        #("context", todo as "Encoder for BrowsingContext"),
+        #("context", browsing_context_to_json(context)),
       ])
     InnerTextLocator(value:, ignore_case:, match_type:, max_depth:) ->
       json.object([
