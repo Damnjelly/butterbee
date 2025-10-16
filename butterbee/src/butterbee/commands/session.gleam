@@ -1,5 +1,5 @@
 ////
-//// # [Session commands](https://w3c.github.io/webdriver-bidi/#module-session-commands)
+//// ## [Session commands](https://w3c.github.io/webdriver-bidi/#module-session-commands)
 ////
 //// The session commands module contains commands found in the session section of the
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level

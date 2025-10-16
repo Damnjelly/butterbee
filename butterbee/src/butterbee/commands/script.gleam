@@ -1,5 +1,5 @@
 ////
-//// # [Script commands](https://w3c.github.io/webdriver-bidi/#module-script-commands)
+//// ## [Script commands](https://w3c.github.io/webdriver-bidi/#module-script-commands)
 ////
 //// The script commands module contains commands found in the script section of the
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level

@@ -1,5 +1,5 @@
 ////
-//// # [Browser commands](https://w3c.github.io/webdriver-bidi/#module-browser-commands) 
+//// ## [Browser commands](https://w3c.github.io/webdriver-bidi/#module-browser-commands) 
 ////
 //// The browser commands module contains commands found in the browser section of the
 //// webdriver bidi protocol. Butterbee usese these internally to create the high level

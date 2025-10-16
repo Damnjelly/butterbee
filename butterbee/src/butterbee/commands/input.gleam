@@ -1,5 +1,5 @@
 ////
-//// # [Input commands](https://w3c.github.io/webdriver-bidi/#module-input-commands)
+//// ## [Input commands](https://w3c.github.io/webdriver-bidi/#module-input-commands)
 ////
 //// The input commands module contains commands found in the input section of the
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level

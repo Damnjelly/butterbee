@@ -1,20 +1,15 @@
 ////
-//// # Browser Config Module
-////
 //// This module provides functionality for parsing and creating browser configurations
 //// from TOML configuration files for WebDriver BiDi sessions.
 ////
-//// ## Overview
-////
-//// Butterbee uses WebDriver BiDi to communicate with browsers, and the browser 
-//// configuration specifies the desired browser and its configuration options.
-////
-//// ## TOML Configuration Format
+//// ### TOML Configuration Format
 ////
 //// The browser configuration is defined in a TOML configuration file under the
 //// `[tools.butterbee.browser]` section of your `gleam.toml` file:
 ////
 //// ```toml
+//// # gleam.toml
+////
 //// [tools.butterbee.browser.firefox]
 //// cmd = "firefox"
 //// flags = ["-headless"]
@@ -93,6 +88,35 @@ pub type BrowserConfig {
   )
 }
 
+pub const default_configuration: BrowserConfig = BrowserConfig(
+  cmd: default_cmd,
+  extra_flags: [],
+  host: default_host,
+  port_range: default_port_range,
+)
+
+pub fn with_cmd(config: BrowserConfig, cmd: String) -> BrowserConfig {
+  BrowserConfig(..config, cmd:)
+}
+
+pub fn with_extra_flags(
+  config: BrowserConfig,
+  extra_flags: List(String),
+) -> BrowserConfig {
+  BrowserConfig(..config, extra_flags:)
+}
+
+pub fn with_host(config: BrowserConfig, host: String) -> BrowserConfig {
+  BrowserConfig(..config, host:)
+}
+
+pub fn with_port_range(
+  config: BrowserConfig,
+  port_range: #(Int, Int),
+) -> BrowserConfig {
+  BrowserConfig(..config, port_range:)
+}
+
 @internal
 pub fn browser_config_decoder() -> decode.Decoder(
   Dict(BrowserType, BrowserConfig),
@@ -103,13 +127,6 @@ pub fn browser_config_decoder() -> decode.Decoder(
   ))
   decode.success(browser_config)
 }
-
-pub const default_configuration: BrowserConfig = BrowserConfig(
-  cmd: default_cmd,
-  extra_flags: [],
-  host: default_host,
-  port_range: default_port_range,
-)
 
 @internal
 pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {

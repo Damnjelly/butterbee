@@ -1,10 +1,6 @@
 ////
-//// # Capabilities Request Config Module
-////
 //// This module provides functionality for parsing and creating capabilities requests 
 //// from TOML configuration files for WebDriver BiDi sessions.
-////
-//// ## Overview
 ////
 //// In browser automation contexts, **capabilities** define the desired properties 
 //// and features that a WebDriver session should support. They specify requirements 
@@ -16,7 +12,7 @@
 //// - `always_match`: Capabilities that must be satisfied for the session to be created
 //// - `first_match`: A list of capability sets where at least one must be satisfied
 ////
-//// ## TOML Configuration Format
+//// ### TOML Configuration Format
 ////
 //// The capabilities are defined in a TOML configuration file under the
 //// `[tools.butterbee.capabilities]` section:
@@ -26,7 +22,6 @@
 //// # gleam.toml
 ////
 //// [tools.butterbee.capabilities]
-////
 //// # Required capabilities that must always be matched
 //// always_match = {
 ////   browserName = "chrome"

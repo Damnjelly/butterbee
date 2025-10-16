@@ -1,5 +1,5 @@
 ////
-//// # [Browsing context commands](https://w3c.github.io/webdriver-bidi/#module-browsing-context-commands) 
+//// ## [Browsing context commands](https://w3c.github.io/webdriver-bidi/#module-browsing-context-commands) 
 ////
 //// The browsing context commands module contains commands found in the browsing context section of the
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level

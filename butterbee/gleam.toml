@@ -21,6 +21,11 @@ title = "test runners"
 path = "test-runners.html"
 source = "docs/test-runners.md"
 
+[[documentation.pages]]
+title = "github actions"
+path = "github-actions.html"
+source = "docs/github-actions.md"
+
 [dependencies]
 butterbidi = { path = "../butterbidi" }
 butterlib = { path = "../butterlib" }

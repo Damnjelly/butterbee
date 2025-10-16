@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebDriver Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .section {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .status-pass {
+            color: green;
+            font-weight: bold;
+        }
+        .status-fail {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebDriver Test Page</h1>
+    <p>This page contains various elements for testing webdriver automation.</p>
+
+    <div class="section">
+        <h2>Text Input Fields</h2>
+        <label for="username">Username:</label>
+        <input type="text" id="username" placeholder="Enter your username">
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="Enter your email">
+        
+        <label for="age">Age:</label>
+        <input type="number" id="age" min="0" max="120" placeholder="Enter your age">
+    </div>
+
+    <div class="section">
+        <h2>Dropdown Selection</h2>
+        <label for="country">Country:</label>
+        <select id="country">
+            <option value="">-- Select a country --</option>
+            <option value="usa">United States</option>
+            <option value="uk">United Kingdom</option>
+            <option value="canada">Canada</option>
+            <option value="australia">Australia</option>
+            <option value="germany">Germany</option>
+        </select>
+    </div>
+
+    <div class="section">
+        <h2>Text Area</h2>
+        <label for="comments">Comments:</label>
+        <textarea id="comments" rows="4" placeholder="Enter your comments here"></textarea>
+    </div>
+
+    <div class="section">
+        <h2>Buttons & Actions</h2>
+        <button id="submitBtn">Submit Form</button>
+        <button id="clearBtn">Clear Form</button>
+        <button id="changeColorBtn">Change Color</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Data Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Test Item 1</td>
+                    <td class="status-pass">PASS</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Test Item 2</td>
+                    <td class="status-fail">FAIL</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Test Item 3</td>
+                    <td class="status-pass">PASS</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Links & Navigation</h2>
+        <p>
+            <a href="#" id="externalLink">Test Link</a> | 
+            <a href="#" id="disabledLink">Disabled Link</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (username && email) {
+                resultDiv.textContent = `Form submitted! Username: ${username}, Email: ${email}`;
+                resultDiv.classList.add('show');
+            } else {
+                resultDiv.textContent = 'Please fill in all required fields';
+                resultDiv.classList.add('show');
+            }
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('username').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('country').value = '';
+            document.getElementById('comments').value = '';
+            document.getElementById('result').classList.remove('show');
+        });
+
+        document.getElementById('changeColorBtn').addEventListener('click', function() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            document.body.style.backgroundColor = randomColor;
+        });
+
+        document.getElementById('externalLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Link clicked!');
+        });
+
+        document.getElementById('disabledLink').addEventListener('click', function(e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>

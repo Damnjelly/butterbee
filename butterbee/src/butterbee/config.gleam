@@ -46,7 +46,7 @@ import simplifile
 import tom
 
 /// 
-/// Represents the [tools.butterbee] section of the gleam.toml file
+/// Represents the [tools.butterbee] section of your gleam.toml file
 ///
 pub type ButterbeeConfig {
   ButterbeeConfig(
@@ -76,7 +76,7 @@ fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
 }
 
 /// 
-/// The default config
+/// The default config.
 /// See the toml representation of the default configuration above
 ///
 pub const default: ButterbeeConfig = ButterbeeConfig(driver.default, None, None)

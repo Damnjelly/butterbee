@@ -4,6 +4,20 @@
 //// needs to run, such as the browser to use, the maximum wait time, and the request
 //// timeout.
 ////
+//// ### TOML Configuration Format
+////
+//// The driver configuration is defined in a TOML configuration file under the
+//// `[tools.butterbee.driver]` section of your `gleam.toml` file:
+////
+//// ```toml
+//// # gleam.toml
+////
+//// [tools.butterbee.driver]
+//// max_wait_time = 20000
+//// request_timeout = 5000
+//// data_dir = "/tmp/butterbee"
+//// ```
+////
 
 import gleam/dynamic/decode
 

@@ -3,7 +3,9 @@ import simplifile
 
 ///
 /// Initialize butterbee,
-/// Call this in the main function of your test, before calling gleeunit.main
+/// Call this in the main function of your test, before calling gleeunit.main.
+/// Then call [`webdriver.new`](https://hexdocs.pm/butterbee/webdriver.html#new) in your test
+/// to start using butterbee.
 ///
 pub fn init() {
   log.debug("Initializing butterbee")
