@@ -1,16 +1,9 @@
 ---
 version: 1.4.1
-title: When javascript throws, call_function should return an exception
+title: When javascript throws, call_function should return an exception value
+file: ./test/call_function_tests.gleam
+test_name: evaluate_result_error_test_
 ---
-Result #0:
-  Exception Thrown: |
-    Type: `error`
-    Message: `Error: Test exception`
-    Stack Trace:
-      at `0:39` in `test_exception` page `(about:blank)`
-      at `0:71` in `anonymous function` page `(about:blank)`
-
-Raw Type:
 [
   [1mOk[0m(ExceptionResult[0m(EvaluateResultException[0m(
     Exception[0m,

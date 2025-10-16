@@ -48,6 +48,14 @@
             "options": {
                 "cwd": "${workspaceFolder}/butterbidi"
             }
+        },
+        {
+            "label": "create birdie snapshots",
+            "type": "shell",
+            "command": "gleam run -m birdie",
+            "options": {
+                "cwd": "${workspaceFolder}/butterbee"
+            }
         }
     ]
 }

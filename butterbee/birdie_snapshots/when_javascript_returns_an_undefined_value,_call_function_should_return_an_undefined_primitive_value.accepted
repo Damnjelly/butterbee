@@ -1,0 +1,10 @@
+---
+version: 1.4.1
+title: When javascript returns an undefined value, call_function should return an undefined primitive value
+---
+[
+  [1mOk[0m(SuccessResult[0m(EvaluateResultSuccess[0m(
+    Success[0m,
+    PrimitiveProtocol[0m(Undefined[0m(UndefinedValue[0m([38;5;2m"undefined"[0m))),
+  ))),
+]

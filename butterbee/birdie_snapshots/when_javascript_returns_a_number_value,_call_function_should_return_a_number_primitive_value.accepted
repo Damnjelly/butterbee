@@ -1,0 +1,13 @@
+---
+version: 1.4.1
+title: When javascript returns a number value, call_function should return a number primitive value
+---
+[
+  [1mOk[0m(SuccessResult[0m(EvaluateResultSuccess[0m(
+    Success[0m,
+    PrimitiveProtocol[0m(Number[0m(NumberValue[0m(
+      [38;5;2m"number"[0m,
+      Int[0m([38;5;3m1[0m),
+    ))),
+  ))),
+]

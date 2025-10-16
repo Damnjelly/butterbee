@@ -1,0 +1,15 @@
+---
+version: 1.4.1
+title: When javascript returns negative zero, call_function should return a NegativeZero special Number primitive value
+file: ./test/call_function_tests.gleam
+test_name: evaluate_result_negative_zero_test_
+---
+[
+  [1mOk[0m(SuccessResult[0m(EvaluateResultSuccess[0m(
+    Success[0m,
+    PrimitiveProtocol[0m(Number[0m(NumberValue[0m(
+      [38;5;2m"number"[0m,
+      Special[0m(NegativeZero[0m),
+    ))),
+  ))),
+]
