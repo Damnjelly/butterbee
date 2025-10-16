@@ -1,5 +1,10 @@
 import simplifile
 
+pub type PortError {
+  SocketError(String)
+  BindError(String)
+}
+
 pub type ButterbeeError {
   CreateUserPrefsError(simplifile.FileError)
   CreatePortDirError(simplifile.FileError)
@@ -7,4 +12,5 @@ pub type ButterbeeError {
   FileError(simplifile.FileError)
   ReadPortDirError(simplifile.FileError)
   RunnerError
+  PortError(PortError)
 }

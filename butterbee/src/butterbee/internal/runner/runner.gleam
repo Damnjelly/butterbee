@@ -28,8 +28,9 @@ pub fn new(
     |> result.unwrap(browser_config.default_configuration)
 
   use request <- result.try({
-    browser.new_port(driver_config.data_dir, browser_config)
+    browser.new_port()
     |> result.map(fn(port) { browser.get_request(port, browser_config.host) })
+    |> result.map_error(error.PortError)
   })
 
   use #(profile, profile_dir) <- result.try({
@@ -39,7 +40,13 @@ pub fn new(
 
   let flags = case browser_to_run {
     browser_config.Firefox ->
-      firefox.get_flags(browser_config.extra_flags, request.port, profile_dir)
+      firefox.get_flags(
+        {
+          [browser_config.start_url] |> list.append(browser_config.extra_flags)
+        },
+        request.port,
+        profile_dir,
+      )
     // browser_config.Chrome -> todo as "Chrome not supported yet"
   }
 

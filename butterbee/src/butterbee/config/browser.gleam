@@ -28,6 +28,9 @@
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 
+/// Butterbee will use this start url unless overridden
+pub const default_start_url: String = "about:blank"
+
 /// Butterbee will use this command unless overridden
 pub const default_cmd: String = "firefox"
 
@@ -75,6 +78,8 @@ pub fn browser_type_decoder() -> decode.Decoder(BrowserType) {
 
 pub type BrowserConfig {
   BrowserConfig(
+    /// The url that is loaded when the browser is started.
+    start_url: String,
     /// The path to the browser executable, or the name of the browser if it is in the PATH.
     cmd: String,
     /// Extra flags to pass to the browser.
@@ -89,11 +94,16 @@ pub type BrowserConfig {
 }
 
 pub const default_configuration: BrowserConfig = BrowserConfig(
+  start_url: default_start_url,
   cmd: default_cmd,
   extra_flags: [],
   host: default_host,
   port_range: default_port_range,
 )
+
+pub fn with_start_url(config: BrowserConfig, start_url: String) -> BrowserConfig {
+  BrowserConfig(..config, start_url:)
+}
 
 pub fn with_cmd(config: BrowserConfig, cmd: String) -> BrowserConfig {
   BrowserConfig(..config, cmd:)
@@ -130,6 +140,11 @@ pub fn browser_config_decoder() -> decode.Decoder(
 
 @internal
 pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {
+  use start_url <- decode.optional_field(
+    "start_url",
+    default_start_url,
+    decode.string,
+  )
   use cmd <- decode.optional_field("cmd", default_cmd, decode.string)
   use extra_flags <- decode.optional_field(
     "flags",
@@ -143,5 +158,11 @@ pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {
 
     decode.success(#(a, b))
   })
-  decode.success(BrowserConfig(cmd:, extra_flags:, host:, port_range:))
+  decode.success(BrowserConfig(
+    start_url:,
+    cmd:,
+    extra_flags:,
+    host:,
+    port_range:,
+  ))
 }

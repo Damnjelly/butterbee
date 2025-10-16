@@ -10,8 +10,8 @@ import gleam/string
 import simplifile
 
 const default_flags = [
-  "about:blank", "-wait-for-browser", "-no-first-run",
-  "-no-default-browser-check", "-no-remote", "-new-instance", "-juggler-pipe",
+  "-wait-for-browser", "-no-first-run", "-no-default-browser-check",
+  "-no-remote", "-new-instance", "-juggler-pipe",
 ]
 
 ///
@@ -26,10 +26,10 @@ pub fn get_flags(
     None -> []
     Some(port) -> ["-remote-debugging-port=" <> int.to_string(port)]
   }
-  default_flags
+  flags
+  |> list.append(default_flags)
   |> list.append(remote_debugging_port)
   |> list.append(["-profile", profile_dir])
-  |> list.append(flags)
 }
 
 ///

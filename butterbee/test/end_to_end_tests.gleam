@@ -1,54 +1,43 @@
-import butterbee/by
 import butterbee/config/browser.{Firefox}
+import butterbee/input
+import butterbee/internal/test_page
 import butterbee/key
 import butterbee/nodes
 import butterbee/page
 import butterbee/webdriver
 import butterbee_test
-import gleam/list
 import gleam/string
 import qcheck_gleeunit_utils/test_spec
 
-import butterbee/input
-import butterbee/query
-
 pub fn enter_keys_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
-  let package_names =
-    webdriver.new(Firefox)
-    |> webdriver.goto("https://packages.gleam.run/")
-    |> query.node(by.xpath("//input[@name='search']"))
-    |> input.enter_keys("stdlib" <> key.enter())
-    |> webdriver.wait(200)
-    |> query.nodes(by.css("div.package-item"))
-    |> query.refine(by.css("h2.package-name"))
-    |> nodes.inner_texts()
+
+  let comments =
+    butterbee_test.test_page(Firefox)
+    |> test_page.comments_field()
+    |> input.enter_keys("line1" <> key.enter <> "line2" <> key.enter)
+    |> test_page.comments_field()
+    |> nodes.inner_text()
     |> webdriver.close()
 
-  let trimmed_package_names =
-    package_names
-    |> list.map(fn(package_name) {
-      let assert Ok(p) = string.split(package_name, "@") |> list.first()
-        as "No package name found"
-      p
-    })
-
-  assert trimmed_package_names |> list.contains("gleam_stdlib")
+  assert comments == "line1\nline2\n"
 }
 
-pub fn wait_test_() {
+pub fn navigation_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
-  let driver = webdriver.new(Firefox)
+  let driver = butterbee_test.test_page(Firefox)
 
   let first_url =
     page.url(driver)
     |> webdriver.wait(1000)
     |> webdriver.value
+    |> string.ends_with("test_page.html")
 
   let second_url =
-    webdriver.goto(driver, "https://gleam.run/")
+    webdriver.goto(driver, "about:blank")
     |> page.url()
     |> webdriver.close()
+    |> string.contains("about:blank")
 
-  assert #(first_url, second_url) == #("about:blank", "https://gleam.run/")
+  assert #(first_url, second_url) == #(True, True)
 }

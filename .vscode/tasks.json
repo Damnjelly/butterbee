@@ -56,6 +56,14 @@
             "options": {
                 "cwd": "${workspaceFolder}/butterbee"
             }
+        },
+        {
+            "label": "firefox: open test page",
+            "type": "shell",
+            "command": "firefox file:///${workspaceFolder}/butterbee/assets/test_page.html",
+            "options": {
+                "cwd": "${workspaceFolder}/butterbee"
+            }
         }
     ]
 }

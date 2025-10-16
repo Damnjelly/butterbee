@@ -39,7 +39,7 @@ import butterbidi/session/types/capabilities_request.{
 import butterlib/log
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
-import gleam/option.{type Option, None}
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
 import simplifile
@@ -54,6 +54,27 @@ pub type ButterbeeConfig {
     capabilities: Option(CapabilitiesRequest),
     browser_config: Option(Dict(browser.BrowserType, browser.BrowserConfig)),
   )
+}
+
+pub fn with_driver_config(
+  config: ButterbeeConfig,
+  driver: driver.DriverConfig,
+) -> ButterbeeConfig {
+  ButterbeeConfig(..config, driver:)
+}
+
+pub fn with_capabilities(
+  config: ButterbeeConfig,
+  capabilities: CapabilitiesRequest,
+) -> ButterbeeConfig {
+  ButterbeeConfig(..config, capabilities: Some(capabilities))
+}
+
+pub fn with_browser_config(
+  config: ButterbeeConfig,
+  browser_config: Dict(browser.BrowserType, browser.BrowserConfig),
+) -> ButterbeeConfig {
+  ButterbeeConfig(..config, browser_config: Some(browser_config))
 }
 
 fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
