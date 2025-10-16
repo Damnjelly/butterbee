@@ -7,7 +7,6 @@ packages = [
   { name = "butterbidi", version = "0.1.0", build_tools = ["gleam"], requirements = ["butterlib", "gleam_json", "gleam_stdlib", "logging", "youid"], source = "local", path = "../butterbidi" },
   { name = "butterlib", version = "1.0.0", build_tools = ["gleam"], requirements = ["gleam_erlang", "gleam_stdlib", "logging"], source = "local", path = "../butterlib" },
   { name = "edit_distance", version = "3.0.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "edit_distance", source = "hex", outer_checksum = "7DC465C34695F9E57D79FC65670C53C992CE342BF29E0AA41FF44F61AF62FC56" },
-  { name = "envoy", version = "1.0.2", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "95FD059345AA982E89A0B6E2A3BF1CF43E17A7048DCD85B5B65D3B9E4E39D359" },
   { name = "exception", version = "2.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "exception", source = "hex", outer_checksum = "329D269D5C2A314F7364BD2711372B6F2C58FA6F39981572E5CA68624D291F8C" },
   { name = "filepath", version = "1.1.2", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "filepath", source = "hex", outer_checksum = "B06A9AF0BF10E51401D64B98E4B627F1D2E48C154967DA7AF4D0914780A6D40A" },
   { name = "glam", version = "2.0.3", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "glam", source = "hex", outer_checksum = "237C2CE218A2A0A5D46D625F8EF5B78F964BC91018B78D692B17E1AB84295229" },
@@ -46,7 +45,6 @@ argv = { version = ">= 1.0.2 and < 2.0.0" }
 birdie = { version = ">= 1.4.1 and < 2.0.0" }
 butterbidi = { path = "../butterbidi" }
 butterlib = { path = "../butterlib" }
-envoy = { version = ">= 1.0.2 and < 2.0.0" }
 glam = { version = ">= 2.0.3 and < 3.0.0" }
 gleam_erlang = { version = ">= 1.2.0 and < 2.0.0" }
 gleam_http = { version = ">= 4.1.1 and < 5.0.0" }

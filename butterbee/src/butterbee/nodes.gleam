@@ -61,12 +61,12 @@ pub fn to_shared_ids(nodes: Nodes) -> List(Uuid) {
 /// ```
 ///
 pub fn inner_text(driver_with_node: #(WebDriver, Nodes)) -> #(WebDriver, String) {
-  let #(driver, node) = driver_with_node
+  let #(_driver, node) = driver_with_node
 
   let assert Ok(_) = first(node)
     as "List of nodes has more than one element, expected exactly one"
 
-  let #(_, inner_text) = inner_texts(driver_with_node)
+  let #(driver, inner_text) = inner_texts(driver_with_node)
 
   let assert Ok(inner_text) = list.first(inner_text) as "No inner text found"
 

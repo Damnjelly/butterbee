@@ -9,7 +9,7 @@ import butterbee/webdriver
 import butterlib/log
 import gleeunit
 import logging
-import pprint.{BitArraysAsString, Config, Labels, Styled}
+import pprint.{BitArraysAsString, Config, NoLabels, Styled}
 import qcheck_gleeunit_utils/test_spec
 
 pub const timeout = 30
@@ -40,14 +40,11 @@ pub fn minimal_example_test_() {
   assert output == "Hello, Joe!\n"
 }
 
-///
-/// Pretty prints a value using the pprint library
-///
 pub fn pretty_print(value: a) -> String {
   value
   |> pprint.with_config(Config(
     style_mode: Styled,
     bit_array_mode: BitArraysAsString,
-    label_mode: Labels,
+    label_mode: NoLabels,
   ))
 }
