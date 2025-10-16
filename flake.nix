@@ -29,25 +29,28 @@
         { pkgs }:
         {
           default = pkgs.mkShell {
-            packages = let 
-              dependencies = with pkgs; [
-                erlang_27
-                rebar3
-              ];
+            packages =
+              let
+                dependencies = with pkgs; [
+                  erlang_27
+                  rebar3
+                ];
 
-              runtimeDependencies = with pkgs; [
-                firefox
-                servo
-                chromium
-              ];
+                runtimeDependencies = with pkgs; [
+                  firefox
+                  servo
+                  chromium
+                ];
 
-              devDependencies = with pkgs; [
-                gleam
-                beamMinimal27Packages.erlang-ls
-                nixd
-                nixfmt
-              ];
-            in dependencies ++ runtimeDependencies ++ devDependencies;
+                devDependencies = with pkgs; [
+                  gleam
+                  beamMinimal27Packages.erlang-ls
+                  typescript-language-server
+                  nixd
+                  nixfmt
+                ];
+              in
+              dependencies ++ runtimeDependencies ++ devDependencies;
           };
         }
       );

@@ -7,12 +7,9 @@
 
 import butterbee/config/browser as browser_config
 import butterbee/internal/error
-import butterbee/internal/retry
 import butterlib/log
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
-import gleam/int
-import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import simplifile
@@ -78,69 +75,9 @@ pub fn get_request(port: Int, host: String) -> Request(String) {
   |> request.set_scheme(Http)
 }
 
-///
-/// Returns the port to use for the browser
-///
-pub fn new_port(
-  data_dir: String,
-  browser_config: browser_config.BrowserConfig,
-) -> Result(Int, error.ButterbeeError) {
-  let port_dir = data_dir <> "/used_ports"
-
-  let #(min, max) = browser_config.port_range
-
-  use _ <- result.try({
-    simplifile.create_directory_all(port_dir)
-    |> result.map_error(error.CreatePortDirError)
-  })
-
-  // Get a a list of used ports
-  use ports <- result.try(
-    {
-      // Read the files in the port directory
-      simplifile.read_directory(port_dir)
-      |> result.map_error(error.ReadPortDirError)
-    }
-    // Convert the list of port strings to a list of port ints
-    |> result.map(fn(files) {
-      files
-      |> list.map(fn(file) {
-        int.parse(file)
-        |> result.unwrap(browser_config.default_port)
-      })
-    }),
-  )
-
-  let max_list_size = case max - min {
-    a if a <= 0 -> panic as "max port range must be greater than min port range"
-    _ -> max - min
-  }
-
-  let _ = case list.length(ports) {
-    s if s >= max_list_size -> panic as "Not enough ports open"
-    _ -> True
-  }
-
-  let port =
-    retry.incremented(min, fn(port) {
-      log.debug("Checking if port: " <> int.to_string(port) <> " is open")
-      case !list.contains(ports, port) {
-        True ->
-          log.debug_and_continue(
-            "Open port found: " <> int.to_string(port),
-            True,
-          )
-        False -> False
-      }
-    })
-
-  use _ <- result.try({
-    simplifile.create_file(port_dir <> "/" <> int.to_string(port))
-    |> result.map_error(error.FileError)
-  })
-
-  Ok(port)
-}
+@external(erlang, "port_finder", "new_port")
+@external(javascript, "port_finder", "new_port")
+pub fn new_port() -> Result(Int, error.PortError)
 
 ///
 /// Create a new profile directory

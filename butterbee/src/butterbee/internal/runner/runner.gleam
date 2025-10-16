@@ -4,11 +4,10 @@ import butterbee/config/browser as browser_config
 import butterbee/internal/error
 import butterbee/internal/runner/firefox
 import butterlib/log
-import gleam/bool
 import gleam/dict
 import gleam/erlang/process
-import gleam/int
-import gleam/option.{None, Some}
+import gleam/list
+import gleam/option.{Some}
 import gleam/result
 import gleam/string
 import shellout
@@ -85,34 +84,10 @@ fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
     }
 
     // INFO: This run after the browser  closes
-
     log.debug("Cleaning up profile directory")
     let assert Ok(_) = simplifile.delete(profile_dir)
       as "Failed to delete profile directory"
-
-    // Wait a bit before deleting the port file
-    process.sleep(1000)
-
-    let _delete_port_if_exists = {
-      let port = case browser.request {
-        None -> None
-        Some(request) ->
-          case request.port {
-            None -> None
-            Some(port) -> Some(int.to_string(port))
-          }
-      }
-
-      use <- bool.guard(option.is_some(port), port)
-
-      let port = option.unwrap(port, "")
-      let port = "/tmp/butterbee/used_ports/" <> port
-      log.debug("Deleting port file at " <> port)
-      let _ = simplifile.delete(port)
-      Some("")
-    }
-
-    Ok(Nil)
+    Some("Done")
   })
 
   Ok(browser)
