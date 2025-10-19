@@ -1,4 +1,6 @@
-import butterbidi/browsing_context/types/browsing_context.{type BrowsingContext}
+import butterbidi/browsing_context/types/browsing_context.{
+  type BrowsingContext, BrowsingContext,
+}
 import butterbidi/browsing_context/types/locator.{type Locator}
 import butterbidi/script/types/remote_reference
 import butterbidi/script/types/remote_value
@@ -49,12 +51,32 @@ pub fn locate_nodes_parameters_to_json(
 
 pub fn new(context: BrowsingContext, locator: Locator) -> LocateNodesParameters {
   LocateNodesParameters(
-    context: context,
-    locator: locator,
+    locator:,
+    context:,
     max_node_count: None,
     serialization_options: None,
     start_nodes: None,
   )
+}
+
+///
+/// Creates a new `LocateNodesParameters` type without a context.
+///
+pub fn new_without_context(locator: Locator) -> LocateNodesParameters {
+  LocateNodesParameters(
+    locator:,
+    context: BrowsingContext(id: uuid.nil),
+    max_node_count: None,
+    serialization_options: None,
+    start_nodes: None,
+  )
+}
+
+pub fn with_context(
+  locate_nodes_parameters: LocateNodesParameters,
+  context: BrowsingContext,
+) -> LocateNodesParameters {
+  LocateNodesParameters(..locate_nodes_parameters, context: context)
 }
 
 pub fn with_max_node_count(

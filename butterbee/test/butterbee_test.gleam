@@ -1,12 +1,15 @@
 import argv
 import butterbee
+import butterbee/action
 import butterbee/by
 import butterbee/config
 import butterbee/config/browser
-import butterbee/input
-import butterbee/nodes
-import butterbee/query
+import butterbee/driver
+import butterbee/get
+import butterbee/key
+import butterbee/node
 import butterbee/webdriver.{type WebDriver}
+import butterbidi/browsing_context/types/info
 import butterlib/log
 import gleam/dict
 import gleam/option
@@ -32,16 +35,16 @@ pub fn main() {
 pub fn minimal_example_test_() {
   use <- test_spec.make_with_timeout(timeout)
   let output =
-    webdriver.new(browser.Firefox)
-    |> webdriver.goto("https://gleam.run/")
-    |> query.node(by.xpath(
+    driver.new(browser.Firefox)
+    |> driver.goto("https://gleam.run/")
+    |> get.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
-    |> input.click(input.LeftClick)
-    |> query.node(by.css("pre.log"))
-    |> nodes.inner_text()
-    |> webdriver.close()
-  assert output == "Hello, Joe!\n"
+    |> node.do(action.click(key.LeftClick))
+    |> get.node(by.css("pre.log"))
+    |> node.get(node.inner_text())
+    |> driver.close()
+  assert output == Ok("Hello, Joe!\n")
 }
 
 pub fn pretty_print(value: a) -> String {
@@ -53,7 +56,7 @@ pub fn pretty_print(value: a) -> String {
   ))
 }
 
-pub fn test_page(browser: browser.BrowserType) -> WebDriver {
+pub fn test_page(browser: browser.BrowserType) -> WebDriver(info.InfoList) {
   let assert Ok(config) = config.parse_config("gleam.toml")
 
   let file_path = case simplifile.current_directory() {
@@ -75,5 +78,5 @@ pub fn test_page(browser: browser.BrowserType) -> WebDriver {
     config
     |> config.with_browser_config(browser_config)
 
-  webdriver.new_with_config(browser, config)
+  driver.new_with_config(browser, config)
 }

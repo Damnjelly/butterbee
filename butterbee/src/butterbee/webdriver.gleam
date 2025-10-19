@@ -1,227 +1,89 @@
-////
-//// The driver module contains functions for interacting with the webdriver client 
-////
-
-import butterbee/commands/browser
-import butterbee/commands/browsing_context
-import butterbee/commands/session
-import butterbee/config.{type ButterbeeConfig}
-import butterbee/config/browser as browser_config
-import butterbee/config/capabilities as capabilities_config
-import butterbee/internal/retry
-import butterbee/internal/runner/runner
+import butterbee/config
 import butterbee/internal/socket.{type WebDriverSocket}
-import butterbidi/browsing_context/commands/get_tree
-import butterbidi/browsing_context/commands/navigate
 import butterbidi/browsing_context/types/browsing_context.{type BrowsingContext} as _
-import butterbidi/browsing_context/types/readiness_state
-import butterlib/log
-import gleam/erlang/process
-import gleam/list
-import gleam/option.{Some}
-import gleam/string
+import butterbidi/definition
+import gleam/option.{type Option, None, Some}
 
 ///
 /// Represents a webdriver session
 ///
-pub type WebDriver {
+pub type WebDriver(state) {
   WebDriver(
     /// The socket to the webdriver server
-    socket: WebDriverSocket,
+    socket: Option(WebDriverSocket),
     /// The browsing context of the webdriver session
-    context: BrowsingContext,
+    context: Option(BrowsingContext),
     /// The config used during the webdriver session
-    config: ButterbeeConfig,
+    config: Option(config.ButterbeeConfig),
+    /// Some state that is returned from a command (e.g. inner_text() fills state with Some(String))
+    state: Result(state, definition.ErrorResponse),
   )
 }
 
-@internal
-pub fn new_webdriver(
+/// Signals that the webdriver session holds no state
+pub type Empty {
+  Empty
+}
+
+pub fn new() -> WebDriver(Empty) {
+  WebDriver(None, None, None, Ok(Empty))
+}
+
+pub fn with_context(
+  webdriver: WebDriver(state),
+  context: BrowsingContext,
+) -> WebDriver(state) {
+  WebDriver(..webdriver, context: Some(context))
+}
+
+pub fn with_config(
+  webdriver: WebDriver(state),
+  config: config.ButterbeeConfig,
+) -> WebDriver(state) {
+  WebDriver(..webdriver, config: Some(config))
+}
+
+pub fn with_state(
+  webdriver: WebDriver(state),
+  state: Result(new_state, definition.ErrorResponse),
+) -> WebDriver(new_state) {
+  WebDriver(..webdriver, state: state)
+}
+
+pub fn map_state(
+  state: Result(new_state, definition.ErrorResponse),
+  webdriver: WebDriver(state),
+) -> WebDriver(new_state) {
+  WebDriver(..webdriver, state:)
+}
+
+pub fn assert_state(webdriver: WebDriver(state)) -> state {
+  let assert Ok(state) = webdriver.state as "Webdriver state is error"
+  state
+}
+
+pub fn with_socket(
+  webdriver: WebDriver(state),
   socket: WebDriverSocket,
-  context: BrowsingContext,
-  config: config.ButterbeeConfig,
-) -> WebDriver {
-  WebDriver(socket, context, config)
+) -> WebDriver(state) {
+  WebDriver(..webdriver, socket: Some(socket))
 }
 
-@internal
-pub fn webdriver_with_context(
-  webdriver: WebDriver,
-  context: BrowsingContext,
-) -> WebDriver {
-  WebDriver(..webdriver, context:)
+pub fn get_socket(webdriver: WebDriver(state)) -> WebDriverSocket {
+  let assert Some(socket) = webdriver.socket as "Webdriver has no socket"
+  socket
 }
 
-///
-/// Start a new webdriver session connect to the browser session, 
-/// using the configuration in the gleam.toml file.
-/// 
-pub fn new(browser: browser_config.BrowserType) -> WebDriver {
-  let config = case config.parse_config("gleam.toml") {
-    Ok(config) -> config
-    Error(error) ->
-      log.error_and_continue(
-        "Failed to parse gleam.toml: " <> string.inspect(error),
-        config.default,
-      )
-  }
-
-  new_with_config(browser, config)
+pub fn get_context(webdriver: WebDriver(state)) -> BrowsingContext {
+  let assert Some(context) = webdriver.context as "Webdriver has no context"
+  context
 }
 
-///
-/// Start a new webdriver session connect to the browser session, using the ButterbeeConfig type
-///
-pub fn new_with_config(
-  browser: browser_config.BrowserType,
-  config: config.ButterbeeConfig,
-) -> WebDriver {
-  log.debug(
-    "Starting webdriver session with config: " <> string.inspect(config),
-  )
-  // Setup webdriver session
-  let assert Ok(browser) = runner.new(browser, config)
-
-  let capabilities =
-    config.capabilities
-    |> option.unwrap(capabilities_config.default)
-
-  let assert Some(request) = browser.request
-
-  use <- retry.until_true(fn() {
-    let response = session.status(request)
-    case response {
-      Error(_) -> False
-      Ok(resp) -> resp.ready
-    }
-  })
-
-  let #(socket, session) = session.new(request, capabilities)
-
-  let assert Ok(_response) = session
-
-  // Get initial browsing context
-  let get_tree_parameters =
-    get_tree.default
-    |> get_tree.with_max_depth(1)
-
-  let assert Ok(info_list) =
-    browsing_context.get_tree(socket, get_tree_parameters)
-
-  let context = case list.length(info_list.contexts.list) {
-    1 -> {
-      let assert Ok(info) = list.first(info_list.contexts.list)
-        as "Found no browsing contexts"
-      info.context
-    }
-    _ -> panic as "Found more than one, or zero, browsing contexts"
-  }
-
-  new_webdriver(socket, context, config)
+pub fn get_config(webdriver: WebDriver(state)) -> config.ButterbeeConfig {
+  let assert Some(config) = webdriver.config as "Webdriver has no config"
+  config
 }
 
-///
-/// Navigates to the given url
-/// 
-/// # Example
-///
-/// This example navigates to the gleam website:
-///
-/// ```gleam
-/// let example =
-///   webdriver.new()
-///   |> webdriver.goto("https://gleam.run/")
-/// ```
-///
-pub fn goto(driver: WebDriver, url: String) -> WebDriver {
-  let params =
-    navigate.default(driver.context, url)
-    |> navigate.with_wait(readiness_state.Interactive)
-
-  let _ = browsing_context.navigate(driver.socket, params)
-
-  driver
-}
-
-///
-/// Waits for a given amount of time (in milliseconds) before continuing
-/// 
-/// # Example
-///
-/// This example waits for 2 seconds before continuing:
-///
-/// ```gleam
-/// let example =
-///   webdriver.new()
-///   |> webdriver.wait(2000)
-///   |> webdriver.goto("https://gleam.run/")
-/// ```
-///
-pub fn wait(state: value, duration: Int) -> value {
-  process.sleep(duration)
-  state
-}
-
-///
-/// Logs a message to the console, returns the value of the last function called
-/// 
-/// # Example
-///
-/// This example logs a message to the console:
-///
-/// ```gleam
-/// let example =
-///   webdriver.new()
-///   |> webdriver.log("Logging a message")
-///   |> webdriver.close()
-/// ```
-///
-pub fn log(state: value, message: String) -> value {
-  echo message
-  state
-}
-
-///
-/// Closes the webdriver session, closes the browser, and returns the value 
-/// of the last function called
-/// 
-/// # Example
-///
-/// This example closes the webdriver session, and returns "Gleam",
-/// the inner text of the element with the css selector `a.logo`:
-///
-/// ```gleam
-/// let example = webdriver.new()
-///   |> webdriver.goto("https://gleam.run/")
-///   |> query.node(by.css("a.logo"))
-///   |> nodes.inner_text()
-///   |> webdriver.close()
-/// ```
-///
-pub fn close(driver_with_value: #(WebDriver, value)) -> value {
-  let #(driver, value) = driver_with_value
-
-  browser.close(driver.socket)
-  socket.close(driver.socket)
-
-  value
-}
-
-///
-/// Returns the value of the test without closing the webdriver session 
-/// 
-/// # Example
-///
-/// This example returns "Gleam" without closing the session:
-///
-/// ```gleam
-/// let example = webdriver.new()
-///   |> webdriver.goto("https://gleam.run/")
-///   |> query.node(by.css("a.logo"))
-///   |> nodes.inner_text()
-///   |> webdriver.value()
-/// ```
-///
-pub fn value(driver_with_state: #(WebDriver, value)) -> value {
-  driver_with_state.1
+pub fn do(webdriver: WebDriver(state), action: fn(_) -> WebDriver(new_state)) {
+  action(webdriver)
 }

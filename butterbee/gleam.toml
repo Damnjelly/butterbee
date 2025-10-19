@@ -1,6 +1,6 @@
 name = "butterbee"
 version = "0.1.0"
-description = "A webdriver bidi cilent written in Gleam, for Gleam."
+description = "A webdriver bidi client written in Gleam, for Gleam."
 licences = ["Apache-2.0"]
 
 internal-modules = ["butterbee/internal/*"]
@@ -59,6 +59,6 @@ pprint = ">= 1.0.6 and < 2.0.0"
 data_dir = "/tmp/butterbee"
 
 [tools.butterbee.browser.firefox]
-flags = ["-headless"]
+# flags = ["-headless"]
 host = "127.0.0.1"
 port_range = [9222, 9282]

@@ -10,6 +10,7 @@
 
 import butterbee/internal/id
 import butterbee/internal/socket
+import butterbee/webdriver
 import butterbidi/definition
 import butterbidi/script/commands/call_function.{
   type CallFunctionParameters, call_function_parameters_to_json,
@@ -44,7 +45,7 @@ import gleam/result
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-script-callFunction)
 ///
 pub fn call_function(
-  socket: socket.WebDriverSocket,
+  driver: webdriver.WebDriver(state),
   params: CallFunctionParameters,
 ) -> Result(EvaluateResult, definition.ErrorResponse) {
   let command = definition.ScriptCommand(script_definition.CallFunction)
@@ -55,7 +56,7 @@ pub fn call_function(
       ]),
     )
 
-  socket.send_request(socket, request, command)
+  socket.send_request(webdriver.get_socket(driver), request, command)
   |> result.map(fn(response) {
     case response.result {
       definition.ScriptResult(result) -> result

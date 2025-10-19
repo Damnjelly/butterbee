@@ -9,7 +9,7 @@ import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode.{type Decoder}
 import gleam/json.{type Json}
 import gleam/list
-import gleam/option.{type Option}
+import gleam/option.{type Option, None}
 
 pub type Command {
   Command(id: Int, command_data: CommandData, extensible: List(#(String, Json)))
@@ -152,6 +152,17 @@ pub type ErrorResponse {
     message: String,
     stacktrace: Option(String),
     extensible: List(#(String, Json)),
+  )
+}
+
+pub fn new_error_response(error_type: String, message: String) -> ErrorResponse {
+  ErrorResponse(
+    error_type:,
+    id: 0,
+    error: errors.UnknownError,
+    message: message,
+    stacktrace: None,
+    extensible: [],
   )
 }
 

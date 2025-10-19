@@ -27,7 +27,7 @@ pub type ErrorCode {
   UnavailableNetworkData
   UnderspecifiedStoragePartition
   UnknownCommand
-  UnkownError
+  UnknownError
   UnsupportedOperation
 }
 
@@ -61,9 +61,9 @@ pub fn error_code_decoder() -> decode.Decoder(ErrorCode) {
     "underspecified storage partition" ->
       decode.success(UnderspecifiedStoragePartition)
     "unknown command" -> decode.success(UnknownCommand)
-    "unknown error" -> decode.success(UnkownError)
+    "unknown error" -> decode.success(UnknownError)
     "unsupported operation" -> decode.success(UnsupportedOperation)
-    _ -> decode.failure(UnkownError, "ErrorCode")
+    _ -> decode.failure(UnknownError, "ErrorCode")
   }
 }
 
@@ -95,7 +95,7 @@ pub fn error_code_to_string(error_code: ErrorCode) -> String {
     UnavailableNetworkData -> "unavailable network data"
     UnderspecifiedStoragePartition -> "underspecified storage partition"
     UnknownCommand -> "unknown command"
-    UnkownError -> "unknown error"
+    UnknownError -> "unknown error"
     UnsupportedOperation -> "unsupported operation"
   }
 }

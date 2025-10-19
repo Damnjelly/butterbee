@@ -1,9 +1,9 @@
 ////
 //// This module provides functionality for parsing and creating capabilities requests 
-//// from TOML configuration files for WebDriver BiDi sessions.
+//// from TOML configuration files for WebDriver(state) BiDi sessions.
 ////
 //// In browser automation contexts, **capabilities** define the desired properties 
-//// and features that a WebDriver session should support. They specify requirements 
+//// and features that a WebDriver(state) session should support. They specify requirements 
 //// like browser version, platform, extensions, timeouts, and other session-specific 
 //// configurations. Capabilities are used during session negotiation to match the 
 //// requested features with what the browser/driver can provide.
@@ -138,7 +138,7 @@ fn capability_request_from_toml(
     decode.run(dynamic_cap, new.extensible_capabilities_decoder())
     |> result.unwrap(dict.new())
 
-  // Parse standard WebDriver capabilities
+  // Parse standard WebDriver(state) capabilities
   let capabilities =
     decode.run(dynamic_cap, capability_request.capability_request_decoder())
     |> result.map(fn(capabilities) {

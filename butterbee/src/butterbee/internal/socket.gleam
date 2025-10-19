@@ -78,7 +78,7 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
       }
     })
 
-  use subject <- retry.until_ok(fn() { stratus.start(subject) })
+  let assert Ok(subject) = retry.until_ok(fn() { stratus.start(subject) })
 
   WebDriverSocket(subject)
 }

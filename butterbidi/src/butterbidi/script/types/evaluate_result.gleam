@@ -26,12 +26,12 @@ pub fn evaluate_result_decoder() -> Decoder(EvaluateResult) {
     _ ->
       log.error_and_continue(
         "Unknown evaluate result type: " <> result_type,
-        decode.failure(evaulate_result_failure, "Unknown evaluate result type"),
+        decode.failure(evaluate_result_failure, "Unknown evaluate result type"),
       )
   }
 }
 
-pub const evaulate_result_failure = ExceptionResult(
+pub const evaluate_result_failure = ExceptionResult(
   EvaluateResultException(
     result_type: Exception,
     exception_details: exception_details.ExceptionDetails(

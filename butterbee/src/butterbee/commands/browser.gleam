@@ -10,6 +10,7 @@
 
 import butterbee/internal/id
 import butterbee/internal/socket
+import butterbee/webdriver
 import butterbidi/browser/definition as browser_definition
 import butterbidi/definition
 
@@ -18,7 +19,7 @@ import butterbidi/definition
 /// 
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browser-close)
 /// 
-pub fn close(socket: socket.WebDriverSocket) -> Nil {
+pub fn close(driver: webdriver.WebDriver(state)) -> Nil {
   let command = definition.BrowserCommand(browser_definition.Close)
   let request =
     definition.command_to_json(
@@ -27,7 +28,7 @@ pub fn close(socket: socket.WebDriverSocket) -> Nil {
       ]),
     )
 
-  let _ = socket.send_request(socket, request, command)
+  let _ = socket.send_request(webdriver.get_socket(driver), request, command)
 
   Nil
 }

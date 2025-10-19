@@ -68,15 +68,10 @@ pub fn remote_value_decoder() -> Decoder(RemoteValue) {
 pub fn remote_value_to_string(remote_value: RemoteValue) -> String {
   case remote_value {
     PrimitiveProtocol(value) -> primitive_protocol_value.to_string(value)
-    ErrorRemote(value) ->
-      log.debug_and_continue(
-        "Expected PrimitiveProtocol, got ErrorRemote. Returning remote_type",
-        value.remote_type,
-      )
-    NodeRemote(value) ->
-      log.debug_and_continue(
-        "Expected PrimitiveProtocol, got NodeRemote. Returning remote_type",
-        value.remote_type,
+    _ ->
+      log.error_and_continue(
+        "Expected PrimitiveProtocol, got NodeRemote. Returning undefined",
+        primitive_protocol_value.to_string(Undefined(UndefinedValue(""))),
       )
   }
 }
@@ -113,6 +108,16 @@ pub type NodeRemoteValue {
     handle: Option(Uuid),
     internal_id: Option(String),
     value: Option(NodeProperties),
+  )
+}
+
+pub fn new_node_remote_value(remote_type: String) -> NodeRemoteValue {
+  NodeRemoteValue(
+    remote_type: remote_type,
+    shared_id: None,
+    handle: None,
+    internal_id: None,
+    value: None,
   )
 }
 

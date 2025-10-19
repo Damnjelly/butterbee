@@ -48,6 +48,8 @@
                   typescript-language-server
                   nixd
                   nixfmt
+                  typos-lsp
+                  marksman
                 ];
               in
               dependencies ++ runtimeDependencies ++ devDependencies;

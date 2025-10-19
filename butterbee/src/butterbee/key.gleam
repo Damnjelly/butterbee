@@ -6,6 +6,18 @@
 //// Please [open an issue](https://codeberg.org/gelei/butterbee/issues/new) if you find one.
 ////
 
+pub type MouseButton {
+  LeftClick
+  RightClick
+}
+
+pub fn mouse_button_to_int(click: MouseButton) -> Int {
+  case click {
+    LeftClick -> 0
+    RightClick -> 1
+  }
+}
+
 pub const enter: String = "\u{E007}"
 
 pub const tab: String = "\u{E004}"

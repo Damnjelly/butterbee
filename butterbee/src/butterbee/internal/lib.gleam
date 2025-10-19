@@ -9,6 +9,8 @@ import gleam/list
 import gleam/string
 import tom
 
+pub const definition_error = "Butterbee error"
+
 /// 
 /// Returns the first element of the list, or an error if the list is empty
 /// 

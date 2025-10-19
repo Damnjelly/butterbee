@@ -10,6 +10,7 @@
 
 import butterbee/internal/id
 import butterbee/internal/socket
+import butterbee/webdriver.{type WebDriver}
 import butterbidi/browsing_context/commands/get_tree.{
   get_tree_parameters_to_json,
 }
@@ -41,7 +42,7 @@ import gleam/result
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-getTree)
 ///
 pub fn get_tree(
-  socket: socket.WebDriverSocket,
+  driver: WebDriver(state),
   params: get_tree.GetTreeParameters,
 ) -> Result(get_tree.GetTreeResult, definition.ErrorResponse) {
   let command =
@@ -53,7 +54,7 @@ pub fn get_tree(
       ]),
     )
 
-  socket.send_request(socket, request, command)
+  socket.send_request(webdriver.get_socket(driver), request, command)
   |> result.map(fn(response) {
     case response.result {
       definition.BrowsingContextResult(result) ->
@@ -83,12 +84,9 @@ pub fn get_tree(
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-locateNodes)
 ///
 pub fn locate_nodes(
-  socket: socket.WebDriverSocket,
+  socket: WebDriver(state),
   params: locate_nodes.LocateNodesParameters,
-) -> #(
-  socket.WebDriverSocket,
-  Result(locate_nodes.LocateNodesResult, definition.ErrorResponse),
-) {
+) -> Result(locate_nodes.LocateNodesResult, definition.ErrorResponse) {
   let command =
     definition.BrowsingContextCommand(browsing_context_definition.LocateNodes)
 
@@ -100,7 +98,7 @@ pub fn locate_nodes(
     )
 
   let response =
-    socket.send_request(socket, request, command)
+    socket.send_request(webdriver.get_socket(socket), request, command)
     |> result.map(fn(response) {
       case response.result {
         definition.BrowsingContextResult(result) ->
@@ -114,7 +112,7 @@ pub fn locate_nodes(
       }
     })
 
-  #(socket, response)
+  response
 }
 
 ///
@@ -131,12 +129,9 @@ pub fn locate_nodes(
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-navigate)
 ///
 pub fn navigate(
-  socket: socket.WebDriverSocket,
+  driver: WebDriver(state),
   params: navigate.NavigateParameters,
-) -> #(
-  socket.WebDriverSocket,
-  Result(navigate.NavigateResult, definition.ErrorResponse),
-) {
+) -> Result(navigate.NavigateResult, definition.ErrorResponse) {
   let command =
     definition.BrowsingContextCommand(browsing_context_definition.Navigate)
 
@@ -160,20 +155,17 @@ pub fn navigate(
       ]),
     )
 
-  let response =
-    socket.send_request(socket, request, command)
-    |> result.map(fn(response) {
-      case response.result {
-        definition.BrowsingContextResult(result) ->
-          case result {
-            browsing_context_definition.NavigateResult(result) -> result
-            _ -> {
-              panic as "Unexpected navigate result type"
-            }
+  socket.send_request(webdriver.get_socket(driver), request, command)
+  |> result.map(fn(response) {
+    case response.result {
+      definition.BrowsingContextResult(result) ->
+        case result {
+          browsing_context_definition.NavigateResult(result) -> result
+          _ -> {
+            panic as "Unexpected navigate result type"
           }
-        _ -> panic as "Unexpected browsing_context result type"
-      }
-    })
-
-  #(socket, response)
+        }
+      _ -> panic as "Unexpected browsing_context result type"
+    }
+  })
 }

@@ -1,8 +1,14 @@
 import butterbee/by
-import butterbee/query
+import butterbee/get
 import butterbee/webdriver
 
-pub fn comments_field(webdriver: webdriver.WebDriver) {
-  webdriver
-  |> query.node(by.css("textarea#comments"))
+const comments_field_id = "textarea#comments"
+
+pub fn comments_field(
+  driver: webdriver.WebDriver(state),
+  action: fn(_) -> webdriver.WebDriver(new_state),
+) {
+  driver
+  |> get.node(by.css(comments_field_id))
+  |> action
 }
