@@ -1,12 +1,8 @@
 ---
 version: 1.4.1
-title: When javascript returns undefined, call_function should return an Undefined primitive value
-file: ./test/call_function_tests.gleam
-test_name: evaluate_result_undefined_test_
+title: When javascript returns undefined,\n  call_function should return an Undefined primitive value
 ---
-[
-  [1mOk[0m(SuccessResult[0m(EvaluateResultSuccess[0m(
-    Success[0m,
-    PrimitiveProtocol[0m(Undefined[0m(UndefinedValue[0m([38;5;2m"undefined"[0m))),
-  ))),
-]
+[1mOk[0m(SuccessResult[0m(EvaluateResultSuccess[0m(
+  Success[0m,
+  PrimitiveProtocol[0m(Undefined[0m(UndefinedValue[0m([38;5;2m"undefined"[0m))),
+)))

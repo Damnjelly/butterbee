@@ -61,8 +61,9 @@ const inner_text_function = "function(node) { return node.innerText; }"
 pub fn inner_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   WebDriver(String) {
   fn(driver) {
-    driver
-    |> call_function(inner_text_function)
+    let driver = call_function(driver, inner_text_function)
+
+    driver.state
     |> result.map(fn(evaluate_result) {
       case evaluate_result {
         evaluate_result.SuccessResult(success) ->
@@ -102,8 +103,11 @@ pub fn inner_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   fn(driver: WebDriver(List(remote_value.NodeRemoteValue))) {
     result.map(driver.state, fn(nodes) {
       list.map(nodes, fn(node) {
-        webdriver.map_state(Ok(node), driver)
-        |> call_function(inner_text_function)
+        let driver =
+          webdriver.map_state(Ok(node), driver)
+          |> call_function(inner_text_function)
+
+        driver.state
         |> result.map(fn(evaluate_result) {
           case evaluate_result {
             evaluate_result.SuccessResult(success) ->
@@ -150,7 +154,7 @@ pub fn inner_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
 pub fn call_function(
   driver: WebDriver(remote_value.NodeRemoteValue),
   function: String,
-) -> Result(EvaluateResult, definition.ErrorResponse) {
+) -> WebDriver(EvaluateResult) {
   let target = target.new_context_target(webdriver.get_context(driver))
   case webdriver.assert_state(driver).shared_id {
     Some(shared_id) -> {
@@ -169,4 +173,5 @@ pub fn call_function(
     None ->
       Error(definition.new_error_response(lib.definition_error, "No node found"))
   }
+  |> webdriver.map_state(driver)
 }

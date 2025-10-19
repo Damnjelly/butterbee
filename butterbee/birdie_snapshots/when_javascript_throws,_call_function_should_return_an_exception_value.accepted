@@ -1,35 +1,31 @@
 ---
 version: 1.4.1
-title: When javascript throws, call_function should return an exception value
-file: ./test/call_function_tests.gleam
-test_name: evaluate_result_error_test_
+title: When javascript throws,\n  call_function should return an exception value
 ---
-[
-  [1mOk[0m(ExceptionResult[0m(EvaluateResultException[0m(
-    Exception[0m,
-    ExceptionDetails[0m(
-      [38;5;3m39[0m,
-      ErrorRemote[0m(ErrorRemoteValue[0m(
-        [38;5;2m"error"[0m,
-        [1mNone[0m,
-        [1mNone[0m,
-      )),
-      [38;5;3m0[0m,
-      StackTrace[0m([
-        StackFrame[0m(
-          [38;5;3m39[0m,
-          [38;5;2m"test_exception"[0m,
-          [38;5;3m0[0m,
-          [38;5;2m"about:blank"[0m,
-        ),
-        StackFrame[0m(
-          [38;5;3m71[0m,
-          [38;5;2m""[0m,
-          [38;5;3m0[0m,
-          [38;5;2m"about:blank"[0m,
-        ),
-      ]),
-      [38;5;2m"Error: Test exception"[0m,
-    ),
-  ))),
-]
+[1mOk[0m(ExceptionResult[0m(EvaluateResultException[0m(
+  Exception[0m,
+  ExceptionDetails[0m(
+    [38;5;3m39[0m,
+    ErrorRemote[0m(ErrorRemoteValue[0m(
+      [38;5;2m"error"[0m,
+      [1mNone[0m,
+      [1mNone[0m,
+    )),
+    [38;5;3m0[0m,
+    StackTrace[0m([
+      StackFrame[0m(
+        [38;5;3m39[0m,
+        [38;5;2m"test_exception"[0m,
+        [38;5;3m0[0m,
+        [38;5;2m"about:blank"[0m,
+      ),
+      StackFrame[0m(
+        [38;5;3m71[0m,
+        [38;5;2m""[0m,
+        [38;5;3m0[0m,
+        [38;5;2m"about:blank"[0m,
+      ),
+    ]),
+    [38;5;2m"Error: Test exception"[0m,
+  ),
+)))

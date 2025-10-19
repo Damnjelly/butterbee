@@ -34,7 +34,7 @@ pub fn main() {
 
 pub fn minimal_example_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  let output =
+  let assert Ok(output) =
     driver.new(browser.Firefox)
     |> driver.goto("https://gleam.run/")
     |> get.node(by.xpath(
@@ -44,7 +44,7 @@ pub fn minimal_example_test_() {
     |> get.node(by.css("pre.log"))
     |> node.get(node.inner_text())
     |> driver.close()
-  assert output == Ok("Hello, Joe!\n")
+  assert output == "Hello, Joe!\n"
 }
 
 pub fn pretty_print(value: a) -> String {
