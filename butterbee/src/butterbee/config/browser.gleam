@@ -25,14 +25,9 @@
 //// ```
 ////
 
+import butterbee/internal/runner/firefox
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
-
-/// Butterbee will use this start url unless overridden
-pub const default_start_url: String = "about:blank"
-
-/// Butterbee will use this command unless overridden
-pub const default_cmd: String = "firefox"
 
 /// Butterbee will use this host url unless overridden 
 pub const default_host: String = "127.0.0.1"
@@ -48,7 +43,12 @@ pub const default_port: Int = 9222
 ///
 pub fn default() -> Dict(BrowserType, BrowserConfig) {
   dict.new()
-  |> dict.insert(Firefox, default_configuration)
+  |> dict.insert(Firefox, default_configuration(Firefox))
+}
+
+pub fn default_firefox() -> Dict(BrowserType, BrowserConfig) {
+  dict.new()
+  |> dict.insert(Firefox, default_configuration(Firefox))
 }
 
 pub type BrowserType {
@@ -93,13 +93,23 @@ pub type BrowserConfig {
   )
 }
 
-pub const default_configuration: BrowserConfig = BrowserConfig(
-  start_url: default_start_url,
-  cmd: default_cmd,
-  extra_flags: [],
-  host: default_host,
-  port_range: default_port_range,
-)
+pub fn default_configuration(browser_type: BrowserType) -> BrowserConfig {
+  let cmd = case browser_type {
+    Firefox -> firefox.default_cmd
+  }
+
+  let default_start_url = case browser_type {
+    Firefox -> firefox.default_start_url
+  }
+
+  BrowserConfig(
+    start_url: default_start_url,
+    cmd: cmd,
+    extra_flags: [],
+    host: default_host,
+    port_range: default_port_range,
+  )
+}
 
 pub fn with_start_url(config: BrowserConfig, start_url: String) -> BrowserConfig {
   BrowserConfig(..config, start_url:)
@@ -142,10 +152,10 @@ pub fn browser_config_decoder() -> decode.Decoder(
 pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {
   use start_url <- decode.optional_field(
     "start_url",
-    default_start_url,
+    firefox.default_start_url,
     decode.string,
   )
-  use cmd <- decode.optional_field("cmd", default_cmd, decode.string)
+  use cmd <- decode.optional_field("cmd", firefox.default_cmd, decode.string)
   use extra_flags <- decode.optional_field(
     "flags",
     [],

@@ -30,7 +30,7 @@
 //// ```
 ////
 
-import butterbee/config/browser
+import butterbee/config/browser.{Firefox}
 import butterbee/config/driver.{driver_config_decoder}
 import butterbee/internal/lib
 import butterbidi/session/types/capabilities_request.{
@@ -72,8 +72,25 @@ pub fn with_capabilities(
 
 pub fn with_browser_config(
   config: ButterbeeConfig,
-  browser_config: Dict(browser.BrowserType, browser.BrowserConfig),
+  browser_type: browser.BrowserType,
+  browser_config: browser.BrowserConfig,
 ) -> ButterbeeConfig {
+  let apply_config = fn(
+    dict: Dict(browser.BrowserType, browser.BrowserConfig),
+    browser_type: browser.BrowserType,
+    browser_config: browser.BrowserConfig,
+  ) {
+    case browser_type {
+      Firefox -> dict.insert(dict, browser_type, browser_config)
+    }
+  }
+
+  let browser_config = case config.browser_config {
+    None -> apply_config(dict.new(), browser_type, browser_config)
+    Some(existing_config) ->
+      apply_config(existing_config, browser_type, browser_config)
+  }
+
   ButterbeeConfig(..config, browser_config: Some(browser_config))
 }
 

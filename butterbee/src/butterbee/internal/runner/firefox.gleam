@@ -9,6 +9,12 @@ import gleam/result
 import gleam/string
 import simplifile
 
+/// Butterbee will use this command unless overridden
+pub const default_cmd = "firefox"
+
+/// Butterbee will use this start url unless overridden
+pub const default_start_url: String = "about:blank"
+
 const default_flags = [
   "-wait-for-browser", "-no-first-run", "-no-default-browser-check",
   "-no-remote", "-new-instance", "-juggler-pipe",

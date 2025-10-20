@@ -74,26 +74,8 @@ pub fn nodes(
   |> webdriver.map_state(driver)
 }
 
-///
-/// Query for a list of nodes from the position of another set of nodes.
-pub fn from_node(
-  driver: WebDriver(List(remote_value.NodeRemoteValue)),
-  locator: Locator,
-) -> WebDriver(remote_value.NodeRemoteValue) {
-  let driver = from_nodes(driver, locator)
-
-  let nodes = webdriver.assert_state(driver)
-
-  let err = "Found no, or more than one node: " <> string.inspect(nodes)
-  let assert True = list.length(nodes) == 1 as err
-
-  let assert Ok(node) = list.first(nodes) as err
-
-  webdriver.map_state(Ok(node), driver)
-}
-
 /// 
-/// Query for a list of nodes from the position of another set of nodes.
+/// Query for a list of nodes from the position of another nodes.
 /// 
 /// Will retry for a configurable amount of time to find a node.
 /// 
@@ -110,27 +92,40 @@ pub fn from_node(
 ///   |> query.refine(by.css("h2.package-name"))
 /// ```
 ///
-pub fn from_nodes(
-  driver: WebDriver(List(remote_value.NodeRemoteValue)),
+pub fn nodes_from_node(
+  driver: WebDriver(remote_value.NodeRemoteValue),
   locator: Locator,
 ) -> WebDriver(List(remote_value.NodeRemoteValue)) {
-  let shared_ids =
-    webdriver.assert_state(driver)
-    |> list.map(fn(node) {
-      let err = "Node does not have a shared id: " <> string.inspect(node)
-      let assert Some(shared_id) = node.shared_id as err
-      remote_reference.shared_reference_from_id(shared_id)
-    })
+  let node = webdriver.assert_state(driver)
+  let assert Some(shared_id) = node.shared_id
+    as "Node does not have a shared id"
 
   let params =
     locate_nodes.new(webdriver.get_context(driver), locator)
-    |> locate_nodes.with_start_nodes(shared_ids)
+    |> locate_nodes.with_start_nodes([
+      remote_reference.shared_reference_from_id(shared_id),
+    ])
 
   locate_nodes(driver, params)
   |> result.map(fn(locate_nodes) { locate_nodes.nodes })
   |> webdriver.map_state(driver)
 }
 
+pub fn node_from_nodes(
+  driver: WebDriver(List(remote_value.NodeRemoteValue)),
+  index: Int,
+) -> WebDriver(remote_value.NodeRemoteValue) {
+  driver.state
+  |> result.map(fn(nodes) {
+    let assert Ok(node) =
+      list.take(nodes, index + 1)
+      |> list.last()
+    node
+  })
+  |> webdriver.map_state(driver)
+}
+
+@internal
 pub fn locate_nodes(
   driver: WebDriver(state),
   params: locate_nodes.LocateNodesParameters,

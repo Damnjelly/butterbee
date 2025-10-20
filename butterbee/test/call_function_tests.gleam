@@ -1,21 +1,18 @@
 import birdie
 import butterbee/by
+import butterbee/config
 import butterbee/config/browser.{Firefox}
 import butterbee/driver
 import butterbee/get
 import butterbee/node
-import butterbee/webdriver
 import butterbee_test.{pretty_print, timeout}
 import butterbidi/definition.{type ErrorResponse}
 import butterbidi/script/types/evaluate_result.{
-  type EvaluateResult, EvaluateResultSuccess, ExceptionResult, SuccessResult,
+  type EvaluateResult, EvaluateResultSuccess, SuccessResult,
 }
 import butterbidi/script/types/remote_value.{NodeRemote, NodeRemoteValue}
-import butterlib/log
-import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
-import gleam/string
 import qcheck_gleeunit_utils/test_spec
 import youid/uuid
 
@@ -219,7 +216,15 @@ fn filter_uuid_from_remote_value(
 }
 
 fn call_with_function(function: String) -> Result(EvaluateResult, ErrorResponse) {
-  driver.new(Firefox)
+  let browser_config =
+    browser.default_configuration(browser.Firefox)
+    |> browser.with_extra_flags(["-headless"])
+
+  let config =
+    config.default
+    |> config.with_browser_config(browser.Firefox, browser_config)
+
+  driver.new_with_config(Firefox, config)
   |> get.node(by.xpath("/html"))
   |> node.call_function(function)
   |> driver.close()

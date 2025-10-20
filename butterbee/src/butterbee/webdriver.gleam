@@ -84,6 +84,12 @@ pub fn get_config(webdriver: WebDriver(state)) -> config.ButterbeeConfig {
   config
 }
 
+pub fn get_state(
+  webdriver: WebDriver(state),
+) -> Result(state, definition.ErrorResponse) {
+  webdriver.state
+}
+
 pub fn do(webdriver: WebDriver(state), action: fn(_) -> WebDriver(new_state)) {
   action(webdriver)
 }

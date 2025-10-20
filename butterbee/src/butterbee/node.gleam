@@ -22,25 +22,29 @@ import gleam/string
 pub fn get(
   driver: WebDriver(remote_value.NodeRemoteValue),
   action: fn(_) -> WebDriver(new_state),
-) {
+) -> WebDriver(new_state) {
   webdriver.do(driver, action)
 }
 
 pub fn get_all(
   driver: WebDriver(List(remote_value.NodeRemoteValue)),
   action: fn(_) -> WebDriver(new_state),
-) {
+) -> WebDriver(new_state) {
   webdriver.do(driver, action)
 }
 
 pub fn do(
   driver: WebDriver(remote_value.NodeRemoteValue),
   action: fn(_) -> WebDriver(new_state),
-) {
+) -> WebDriver(new_state) {
   webdriver.do(driver, action)
 }
 
-const inner_text_function = "function(node) { return node.innerText; }"
+const any_text_function: String = "
+    function(node) { 
+      return node.innerText || node.textContent || node.value || null;
+    }
+  "
 
 ///
 /// Get the inner text of the node.
@@ -58,10 +62,10 @@ const inner_text_function = "function(node) { return node.innerText; }"
 ///   |> nodes.inner_text()
 /// ```
 ///
-pub fn inner_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
+pub fn any_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   WebDriver(String) {
   fn(driver) {
-    let driver = call_function(driver, inner_text_function)
+    let driver = call_function(driver, any_text_function)
 
     driver.state
     |> result.map(fn(evaluate_result) {
@@ -98,14 +102,14 @@ pub fn inner_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
 ///
 // TODO: Implement ArrayRemoteValue and create a function that  
 // takes a list of nodes and returns a list of inner texts
-pub fn inner_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
+pub fn any_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   WebDriver(List(String)) {
   fn(driver: WebDriver(List(remote_value.NodeRemoteValue))) {
     result.map(driver.state, fn(nodes) {
       list.map(nodes, fn(node) {
         let driver =
           webdriver.map_state(Ok(node), driver)
-          |> call_function(inner_text_function)
+          |> call_function(any_text_function)
 
         driver.state
         |> result.map(fn(evaluate_result) {

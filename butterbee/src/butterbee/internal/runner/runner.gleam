@@ -25,7 +25,9 @@ pub fn new(
     config.browser_config
     |> option.unwrap(browser_config.default())
     |> dict.get(browser_to_run)
-    |> result.unwrap(browser_config.default_configuration)
+    |> result.unwrap(browser_config.default_configuration(
+      browser_config.Firefox,
+    ))
 
   use request <- result.try({
     browser.new_port()
