@@ -5,7 +5,7 @@ import gleam/order
 import gleam/time/duration
 import gleam/time/timestamp.{type Timestamp}
 
-const max_wait_time = 20_000
+const max_wait_time = 4000
 
 ///
 /// Retry a function until it returns a result that satisfies a condition
@@ -13,6 +13,7 @@ const max_wait_time = 20_000
 pub fn until_ok(
   retry_function: fn() -> Result(return_type, b),
 ) -> Result(return_type, b) {
+  let start_time = timestamp.system_time()
   result_loop(
     retry_function,
     fn(r) {
@@ -23,7 +24,7 @@ pub fn until_ok(
         // Error, continue retrying
       }
     },
-    timestamp.system_time(),
+    start_time,
     1,
   )
 }
@@ -37,8 +38,13 @@ fn result_loop(
   let result = retry_function()
   case should_continue(result) {
     False -> result
-    True ->
-      case timestamp.compare(timeout, timestamp.system_time()) {
+    True -> {
+      case
+        duration.compare(
+          timestamp.difference(timeout, timestamp.system_time()),
+          duration.milliseconds(max_wait_time),
+        )
+      {
         order.Gt | order.Eq ->
           log.warning_and_continue("Retry timed out", result)
         order.Lt -> {
@@ -47,6 +53,7 @@ fn result_loop(
           result_loop(retry_function, should_continue, timeout, attempts + 1)
         }
       }
+    }
   }
 }
 
