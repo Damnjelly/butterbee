@@ -5,6 +5,7 @@ import butterbee/internal/test_page
 import butterbee/key
 import butterbee/node
 import butterbee/page
+import butterbee/page_module/node_select
 import butterbee_test
 import gleam/string
 import qcheck_gleeunit_utils/test_spec
@@ -36,9 +37,35 @@ pub fn enter_keys_test_() {
     |> test_page.comments_field(action.enter_keys(
       "line1" <> key.enter <> "line2" <> key.enter,
     ))
-    |> test_page.comments_field(node.any_text())
+    |> test_page.comments_field(node.text())
     |> driver.close()
   assert comment == "line1\nline2\n"
+}
+
+pub fn select_navigation_test_() {
+  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+
+  let assert Ok(country) =
+    driver.new(Firefox)
+    |> test_page.goto()
+    |> test_page.country_dropdown(node_select.option("Canada"))
+    |> test_page.country_dropdown(node.value())
+    |> driver.close()
+  assert country == "Canada"
+}
+
+pub fn select_key_navigation_test_() {
+  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+
+  let assert Ok(country) =
+    driver.new(Firefox)
+    |> test_page.goto()
+    |> test_page.country_dropdown(action.click(key.LeftClick))
+    |> test_page.country_dropdown(action.enter_keys(key.arrow_down))
+    |> test_page.country_dropdown(action.enter_keys(key.enter))
+    |> test_page.country_dropdown(node.value())
+    |> driver.close()
+  assert country == "United States"
 }
 //
 // pub fn button_test_() {
@@ -57,13 +84,3 @@ pub fn enter_keys_test_() {
 //   assert button == "Submit"
 // }
 //
-// pub fn dropdown_test_() {
-//   use <- test_spec.make_with_timeout(butterbee_test.timeout)
-//
-//   let assert Ok(country) =
-//     driver.new(Firefox)
-//     |> test_page.country_dropdown(action.click(key.DownArrow))
-//     |> test_page.country_dropdown(node.inner_text())
-//     |> driver.close()
-//   assert country == "Canada"
-// }

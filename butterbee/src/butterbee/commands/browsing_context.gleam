@@ -8,6 +8,7 @@
 //// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////
 
+import butterbee/internal/error
 import butterbee/internal/id
 import butterbee/internal/socket
 import butterbee/webdriver.{type WebDriver}
@@ -44,7 +45,7 @@ import gleam/result
 pub fn get_tree(
   driver: WebDriver(state),
   params: get_tree.GetTreeParameters,
-) -> Result(get_tree.GetTreeResult, definition.ErrorResponse) {
+) -> Result(get_tree.GetTreeResult, error.ButterbeeError) {
   let command =
     definition.BrowsingContextCommand(browsing_context_definition.GetTree)
   let request =
@@ -53,20 +54,18 @@ pub fn get_tree(
         #("params", get_tree_parameters_to_json(params)),
       ]),
     )
+  use socket <- result.try({ webdriver.get_socket(driver) })
 
-  socket.send_request(webdriver.get_socket(driver), request, command)
-  |> result.map(fn(response) {
-    case response.result {
-      definition.BrowsingContextResult(result) ->
-        case result {
-          browsing_context_definition.GetTreeResult(result) -> result
-          _ -> {
-            panic as "Unexpected get_tree result type"
-          }
-        }
-      _ -> panic as "Unexpected browsing_context result type"
-    }
-  })
+  use response <- result.try({ socket.send_request(socket, request, command) })
+
+  case response.result {
+    definition.BrowsingContextResult(result) ->
+      case result {
+        browsing_context_definition.GetTreeResult(result) -> Ok(result)
+        _ -> Error(error.UnexpectedGetTreeResultType)
+      }
+    _ -> Error(error.UnexpectedBrowsingContextResultType)
+  }
 }
 
 ///
@@ -84,9 +83,9 @@ pub fn get_tree(
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-locateNodes)
 ///
 pub fn locate_nodes(
-  socket: WebDriver(state),
+  driver: WebDriver(state),
   params: locate_nodes.LocateNodesParameters,
-) -> Result(locate_nodes.LocateNodesResult, definition.ErrorResponse) {
+) -> Result(locate_nodes.LocateNodesResult, error.ButterbeeError) {
   let command =
     definition.BrowsingContextCommand(browsing_context_definition.LocateNodes)
 
@@ -97,22 +96,18 @@ pub fn locate_nodes(
       ]),
     )
 
-  let response =
-    socket.send_request(webdriver.get_socket(socket), request, command)
-    |> result.map(fn(response) {
-      case response.result {
-        definition.BrowsingContextResult(result) ->
-          case result {
-            browsing_context_definition.LocateNodesResult(result) -> result
-            _ -> {
-              panic as "Unexpected locate_nodes result type"
-            }
-          }
-        _ -> panic as "Unexpected browsing_context result type"
-      }
-    })
+  use socket <- result.try({ webdriver.get_socket(driver) })
 
-  response
+  use response <- result.try({ socket.send_request(socket, request, command) })
+
+  case response.result {
+    definition.BrowsingContextResult(result) ->
+      case result {
+        browsing_context_definition.LocateNodesResult(result) -> Ok(result)
+        _ -> Error(error.UnexpectedBrowsingContextResultType)
+      }
+    _ -> Error(error.UnexpectedBrowsingContextResultType)
+  }
 }
 
 ///
@@ -131,7 +126,7 @@ pub fn locate_nodes(
 pub fn navigate(
   driver: WebDriver(state),
   params: navigate.NavigateParameters,
-) -> Result(navigate.NavigateResult, definition.ErrorResponse) {
+) -> Result(navigate.NavigateResult, error.ButterbeeError) {
   let command =
     definition.BrowsingContextCommand(browsing_context_definition.Navigate)
 
@@ -155,17 +150,16 @@ pub fn navigate(
       ]),
     )
 
-  socket.send_request(webdriver.get_socket(driver), request, command)
-  |> result.map(fn(response) {
-    case response.result {
-      definition.BrowsingContextResult(result) ->
-        case result {
-          browsing_context_definition.NavigateResult(result) -> result
-          _ -> {
-            panic as "Unexpected navigate result type"
-          }
-        }
-      _ -> panic as "Unexpected browsing_context result type"
-    }
-  })
+  use socket <- result.try({ webdriver.get_socket(driver) })
+
+  use response <- result.try({ socket.send_request(socket, request, command) })
+
+  case response.result {
+    definition.BrowsingContextResult(result) ->
+      case result {
+        browsing_context_definition.NavigateResult(result) -> Ok(result)
+        _ -> Error(error.UnexpectedBrowsingContextResultType)
+      }
+    _ -> Error(error.UnexpectedBrowsingContextResultType)
+  }
 }

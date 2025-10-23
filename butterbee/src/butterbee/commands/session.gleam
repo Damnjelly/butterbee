@@ -8,6 +8,7 @@
 //// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////
 
+import butterbee/internal/error
 import butterbee/internal/id
 import butterbee/internal/socket
 import butterbidi/definition
@@ -28,32 +29,36 @@ import gleam/result
 ///
 pub fn status(
   request: Request(String),
-) -> Result(status.StatusResult, definition.ErrorResponse) {
-  let socket = socket.new(request)
-  let command = definition.SessionCommand(session_definition.Status)
-  let request =
-    definition.command_to_json(
-      definition.Command(id.from_unix(), command, [
-        #("params", definition.empty_params_to_json(definition.EmptyParams([]))),
-      ]),
-    )
+) -> Result(status.StatusResult, error.ButterbeeError) {
+  case socket.new(request) {
+    Error(error) -> Error(error)
+    Ok(socket) -> {
+      let command = definition.SessionCommand(session_definition.Status)
+      let request =
+        definition.command_to_json(
+          definition.Command(id.from_unix(), command, [
+            #(
+              "params",
+              definition.empty_params_to_json(definition.EmptyParams([])),
+            ),
+          ]),
+        )
 
-  let response =
-    socket.send_request(socket, request, command)
-    |> result.map(fn(response) {
-      case response.result {
-        definition.SessionResult(result) ->
-          case result {
-            session_definition.StatusResult(result) -> result
-            _ -> {
-              panic as "Unexpected status result type"
-            }
+      case socket.send_request(socket, request, command) {
+        Error(error) -> Error(error)
+        Ok(response) -> {
+          case response.result {
+            definition.SessionResult(result) ->
+              case result {
+                session_definition.StatusResult(result) -> Ok(result)
+                _ -> Error(error.UnexpectedStatusResultType)
+              }
+            _ -> Error(error.UnexpectedSessionResultType)
           }
-        _ -> panic as "Unexpected session result type"
+        }
       }
-    })
-
-  response
+    }
+  }
 }
 
 ///
@@ -74,32 +79,33 @@ pub fn status(
 pub fn new(
   request: Request(String),
   capabilities_request: CapabilitiesRequest,
-) -> #(socket.WebDriverSocket, Result(new.NewResult, definition.ErrorResponse)) {
-  let socket = socket.new(request)
-  let command = definition.SessionCommand(session_definition.New)
-  let request =
-    definition.command_to_json(
-      definition.Command(id.from_unix(), command, [
-        #("params", capabilities_request_to_json(capabilities_request)),
-      ]),
-    )
-
-  let response =
-    socket.send_request(socket, request, command)
-    |> result.map(fn(response) {
-      case response.result {
-        definition.SessionResult(result) ->
-          case result {
-            session_definition.NewResult(result) -> result
-            _ -> {
-              panic as "Unexpected new result type"
-            }
+) -> Result(#(socket.WebDriverSocket, new.NewResult), error.ButterbeeError) {
+  case socket.new(request) {
+    Error(error) -> Error(error)
+    Ok(socket) -> {
+      let command = definition.SessionCommand(session_definition.New)
+      let request =
+        definition.command_to_json(
+          definition.Command(id.from_unix(), command, [
+            #("params", capabilities_request_to_json(capabilities_request)),
+          ]),
+        )
+      case socket.send_request(socket, request, command) {
+        Error(error) -> Error(error)
+        Ok(response) -> {
+          case response.result {
+            definition.SessionResult(result) ->
+              case result {
+                session_definition.NewResult(result) -> Ok(result)
+                _ -> Error(error.UnexpectedNewResultType)
+              }
+            _ -> Error(error.UnexpectedSessionResultType)
           }
-        _ -> panic as "Unexpected session result type"
+          |> result.map(fn(new_result) { #(socket, new_result) })
+        }
       }
-    })
-
-  #(socket, response)
+    }
+  }
 }
 
 ///

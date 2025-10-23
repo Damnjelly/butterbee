@@ -3,18 +3,16 @@
 ////
 
 import butterbee/commands/browsing_context
+import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/webdriver.{type WebDriver}
 import butterbidi/browsing_context/commands/locate_nodes
 import butterbidi/browsing_context/types/locator.{type Locator}
-import butterbidi/definition
 import butterbidi/script/types/remote_reference
 import butterbidi/script/types/remote_value
-import butterlib/log
 import gleam/list
-import gleam/option.{Some}
+import gleam/option
 import gleam/result
-import gleam/string
 
 ///
 /// Finds a node matching the given locator, if multiple nodes are found, the first node is returned.
@@ -38,14 +36,17 @@ pub fn node(
 ) -> WebDriver(remote_value.NodeRemoteValue) {
   let driver = nodes(driver, locator)
 
-  let nodes = webdriver.assert_state(driver)
-
-  let err = "Found no, or more than one node: " <> string.inspect(nodes)
-  let assert True = list.length(nodes) == 1 as err
-
-  let assert Ok(node) = list.first(nodes) as err
-
-  webdriver.map_state(Ok(node), driver)
+  result.try(driver.state, fn(nodes) {
+    case list.length(nodes) {
+      1 ->
+        case list.first(nodes) {
+          Ok(node) -> Ok(node)
+          Error(_) -> Error(error.NoNodeFound)
+        }
+      _ -> Error(error.MoreThanOneNodeFound)
+    }
+  })
+  |> webdriver.map_state(driver)
 }
 
 ///
@@ -67,10 +68,51 @@ pub fn nodes(
   driver: WebDriver(state),
   locator: Locator,
 ) -> WebDriver(List(remote_value.NodeRemoteValue)) {
-  let params = locate_nodes.new(webdriver.get_context(driver), locator)
+  result.try(
+    {
+      driver.context
+      |> option.to_result(error.DriverDoesNotHaveContext)
+    },
+    fn(context) {
+      let params = locate_nodes.new(context, locator)
 
-  locate_nodes(driver, params)
-  |> result.map(fn(locate_nodes) { locate_nodes.nodes })
+      locate_nodes(driver, params)
+      |> result.map(fn(locate_nodes) { locate_nodes.nodes })
+    },
+  )
+  |> webdriver.map_state(driver)
+}
+
+pub fn from_node(
+  driver: WebDriver(remote_value.NodeRemoteValue),
+  locator: Locator,
+) -> WebDriver(remote_value.NodeRemoteValue) {
+  result.try({ driver.state }, fn(node) {
+    use shared_id <- result.try({
+      node.shared_id
+      |> option.to_result(error.NodeDoesNotHaveSharedId)
+    })
+
+    use context <- result.try({ webdriver.get_context(driver) })
+
+    let params =
+      locate_nodes.new(context, locator)
+      |> locate_nodes.with_start_nodes([
+        remote_reference.shared_reference_from_id(shared_id),
+      ])
+
+    use locate_nodes <- result.try({ locate_nodes(driver, params) })
+
+    let nodes = locate_nodes.nodes
+    case list.length(nodes) {
+      1 ->
+        case list.first(nodes) {
+          Ok(node) -> Ok(node)
+          Error(_) -> Error(error.NoNodeFound)
+        }
+      _ -> Error(error.MoreThanOneNodeFound)
+    }
+  })
   |> webdriver.map_state(driver)
 }
 
@@ -96,18 +138,23 @@ pub fn nodes_from_node(
   driver: WebDriver(remote_value.NodeRemoteValue),
   locator: Locator,
 ) -> WebDriver(List(remote_value.NodeRemoteValue)) {
-  let node = webdriver.assert_state(driver)
-  let assert Some(shared_id) = node.shared_id
-    as "Node does not have a shared id"
+  result.try({ driver.state }, fn(node) {
+    use shared_id <- result.try({
+      node.shared_id
+      |> option.to_result(error.NodeDoesNotHaveSharedId)
+    })
 
-  let params =
-    locate_nodes.new(webdriver.get_context(driver), locator)
-    |> locate_nodes.with_start_nodes([
-      remote_reference.shared_reference_from_id(shared_id),
-    ])
+    use context <- result.try({ webdriver.get_context(driver) })
 
-  locate_nodes(driver, params)
-  |> result.map(fn(locate_nodes) { locate_nodes.nodes })
+    let params =
+      locate_nodes.new(context, locator)
+      |> locate_nodes.with_start_nodes([
+        remote_reference.shared_reference_from_id(shared_id),
+      ])
+
+    locate_nodes(driver, params)
+    |> result.map(fn(locate_nodes) { locate_nodes.nodes })
+  })
   |> webdriver.map_state(driver)
 }
 
@@ -115,39 +162,28 @@ pub fn node_from_nodes(
   driver: WebDriver(List(remote_value.NodeRemoteValue)),
   index: Int,
 ) -> WebDriver(remote_value.NodeRemoteValue) {
-  driver.state
-  |> result.map(fn(nodes) {
-    let assert Ok(node) =
-      list.take(nodes, index + 1)
-      |> list.last()
-    node
-  })
+  case driver.state {
+    Error(_) -> Error(error.DriverDoesNotHaveState)
+    Ok(nodes) -> {
+      list.last(list.take(nodes, index + 1))
+      |> result.map_error(fn(_) { error.NoNodeFound })
+    }
+  }
   |> webdriver.map_state(driver)
 }
 
-@internal
 pub fn locate_nodes(
   driver: WebDriver(state),
   params: locate_nodes.LocateNodesParameters,
-) -> Result(locate_nodes.LocateNodesResult, definition.ErrorResponse) {
+) -> Result(locate_nodes.LocateNodesResult, error.ButterbeeError) {
   retry.until_ok(fn() {
     case browsing_context.locate_nodes(driver, params) {
       Ok(locate_nodes_ok) ->
         case list.is_empty(locate_nodes_ok.nodes) {
           False -> Ok(locate_nodes_ok)
-          True ->
-            Error(definition.new_error_response(
-              "Butterbee error",
-              "No nodes found",
-            ))
+          True -> Error(error.NoNodeFound)
         }
-      Error(locate_nodes_error) ->
-        log.debug_and_continue(
-          "Locating nodes failed, error: "
-            <> string.inspect(locate_nodes_error)
-            <> " retrying",
-          Error(locate_nodes_error),
-        )
+      Error(error) -> Error(error)
     }
   })
 }

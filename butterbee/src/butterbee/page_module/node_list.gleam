@@ -25,13 +25,10 @@ pub fn perform_action(
   case on_element {
     List -> get.node(driver, list_locator)
     Row(row) -> {
-      let assert Ok(node) =
-        driver
-        |> get.node(list_locator)
-        |> get.nodes_from_node(list_item_locator)
-        |> get.node_from_nodes(row + 1)
-        |> webdriver.get_state()
-      webdriver.map_state(Ok(node), driver)
+      driver
+      |> get.node(list_locator)
+      |> get.nodes_from_node(list_item_locator)
+      |> get.node_from_nodes(row + 1)
     }
   }
   |> action

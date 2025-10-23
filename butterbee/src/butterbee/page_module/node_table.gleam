@@ -27,24 +27,18 @@ pub fn perform_action(
   case on_element {
     Table -> get.node(driver, table_locator)
     Row(row) -> {
-      let assert Ok(node) =
-        driver
-        |> get.node(table_locator)
-        |> get.nodes_from_node(table_row_locator)
-        |> get.node_from_nodes(row + 1)
-        |> webdriver.get_state()
-      webdriver.map_state(Ok(node), driver)
+      driver
+      |> get.node(table_locator)
+      |> get.nodes_from_node(table_row_locator)
+      |> get.node_from_nodes(row + 1)
     }
     Cell(row, column) -> {
-      let assert Ok(node) =
-        driver
-        |> get.node(table_locator)
-        |> get.nodes_from_node(table_row_locator)
-        |> get.node_from_nodes(row + 1)
-        |> get.nodes_from_node(table_cell_locator)
-        |> get.node_from_nodes(column + 1)
-        |> webdriver.get_state()
-      webdriver.map_state(Ok(node), driver)
+      driver
+      |> get.node(table_locator)
+      |> get.nodes_from_node(table_row_locator)
+      |> get.node_from_nodes(row + 1)
+      |> get.nodes_from_node(table_cell_locator)
+      |> get.node_from_nodes(column + 1)
     }
   }
   |> action

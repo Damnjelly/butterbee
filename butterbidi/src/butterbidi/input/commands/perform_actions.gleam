@@ -52,44 +52,39 @@ fn source_actions_to_json(source_actions: SourceActions) -> Json {
   }
 }
 
-pub fn key_actions(id: String, actions: List(KeySourceAction)) -> SourceActions {
+pub fn with_key_actions(
+  id: String,
+  actions: List(KeySourceAction),
+) -> SourceActions {
   KeySource(KeySourceActions(id, actions))
 }
 
-pub fn pointer_actions(
+pub fn key_action(
+  actions: List(KeySourceAction),
+  action: KeySourceAction,
+) -> List(KeySourceAction) {
+  list.append(actions, [action])
+}
+
+pub fn key_actions(
+  key_actions: List(KeySourceAction),
+  actions: List(KeySourceAction),
+) {
+  list.append(key_actions, actions)
+}
+
+pub fn with_pointer_actions(
   id: String,
   actions: List(PointerSourceAction),
 ) -> SourceActions {
   PointerSource(PointerSourceActions(id, None, actions))
 }
 
-pub fn with_parameters(
-  source_actions: SourceActions,
-  parameters: PointerParameters,
-) -> SourceActions {
-  case source_actions {
-    PointerSource(pointer_source_actions) ->
-      PointerSource(
-        PointerSourceActions(
-          ..pointer_source_actions,
-          parameters: Some(parameters),
-        ),
-      )
-    _ -> panic as "#Expected pointer source actions"
-  }
-}
-
-pub fn with_pointer_actions(
-  source_actions: SourceActions,
+pub fn pointer_action(
   actions: List(PointerSourceAction),
-) -> SourceActions {
-  case source_actions {
-    PointerSource(pointer_source_actions) ->
-      PointerSource(
-        PointerSourceActions(..pointer_source_actions, actions: actions),
-      )
-    _ -> panic as "#Expected pointer source actions"
-  }
+  action: PointerSourceAction,
+) -> List(PointerSourceAction) {
+  list.append(actions, [action])
 }
 
 pub type KeySourceActions {

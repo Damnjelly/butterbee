@@ -8,18 +8,22 @@
 //// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////
 
+import butterbee/internal/error
 import butterbee/internal/id
 import butterbee/internal/socket
 import butterbee/webdriver
 import butterbidi/browser/definition as browser_definition
 import butterbidi/definition
+import gleam/result
 
 /// 
 /// Closes the current browser.
 /// 
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browser-close)
 /// 
-pub fn close(driver: webdriver.WebDriver(state)) -> Nil {
+pub fn close(
+  driver: webdriver.WebDriver(state),
+) -> Result(definition.CommandResponse, error.ButterbeeError) {
   let command = definition.BrowserCommand(browser_definition.Close)
   let request =
     definition.command_to_json(
@@ -28,7 +32,7 @@ pub fn close(driver: webdriver.WebDriver(state)) -> Nil {
       ]),
     )
 
-  let _ = socket.send_request(webdriver.get_socket(driver), request, command)
+  use socket <- result.try({ webdriver.get_socket(driver) })
 
-  Nil
+  socket.send_request(socket, request, command)
 }

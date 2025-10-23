@@ -3,10 +3,9 @@
 ////
 
 import butterbee/commands/script
-import butterbee/internal/lib
+import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/webdriver.{type WebDriver}
-import butterbidi/definition
 import butterbidi/script/commands/call_function
 import butterbidi/script/types/evaluate_result.{type EvaluateResult}
 import butterbidi/script/types/local_value
@@ -15,7 +14,7 @@ import butterbidi/script/types/remote_value
 import butterbidi/script/types/target
 import butterlib/log
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option
 import gleam/result
 import gleam/string
 
@@ -36,8 +35,9 @@ pub fn get_all(
 pub fn do(
   driver: WebDriver(remote_value.NodeRemoteValue),
   action: fn(_) -> WebDriver(new_state),
-) -> WebDriver(new_state) {
+) -> WebDriver(remote_value.NodeRemoteValue) {
   webdriver.do(driver, action)
+  driver
 }
 
 const any_text_function: String = "
@@ -62,25 +62,11 @@ const any_text_function: String = "
 ///   |> nodes.inner_text()
 /// ```
 ///
-pub fn any_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
+pub fn text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   WebDriver(String) {
-  fn(driver) {
-    let driver = call_function(driver, any_text_function)
-
-    driver.state
-    |> result.map(fn(evaluate_result) {
-      case evaluate_result {
-        evaluate_result.SuccessResult(success) ->
-          remote_value.remote_value_to_string(success.result)
-        evaluate_result.ExceptionResult(exception) ->
-          log.error_and_continue(
-            "Error calling function: " <> string.inspect(exception),
-            remote_value.remote_value_to_string(
-              exception.exception_details.exception,
-            ),
-          )
-      }
-    })
+  fn(driver: WebDriver(remote_value.NodeRemoteValue)) -> WebDriver(String) {
+    call_function(driver, any_text_function)
+    |> parse_result()
     |> webdriver.map_state(driver)
   }
 }
@@ -102,16 +88,118 @@ pub fn any_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
 ///
 // TODO: Implement ArrayRemoteValue and create a function that  
 // takes a list of nodes and returns a list of inner texts
-pub fn any_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
+pub fn texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   WebDriver(List(String)) {
   fn(driver: WebDriver(List(remote_value.NodeRemoteValue))) {
     result.map(driver.state, fn(nodes) {
       list.map(nodes, fn(node) {
-        let driver =
-          webdriver.map_state(Ok(node), driver)
-          |> call_function(any_text_function)
+        webdriver.map_state(Ok(node), driver)
+        |> call_function(any_text_function)
+        |> result.map(fn(evaluate_result) {
+          case evaluate_result {
+            evaluate_result.SuccessResult(success) ->
+              remote_value.remote_value_to_string(success.result)
+            evaluate_result.ExceptionResult(exception) ->
+              log.error_and_continue(
+                "Error calling function: " <> string.inspect(exception),
+                remote_value.remote_value_to_string(
+                  exception.exception_details.exception,
+                ),
+              )
+          }
+        })
+      })
+      |> list.map(fn(result_list) {
+        case result_list {
+          Ok(result) -> result
+          Error(error) ->
+            log.error_and_continue(
+              "Could not get inner text from node, error: "
+                <> string.inspect(error)
+                <> ". Returning empty string",
+              "",
+            )
+        }
+      })
+    })
+    |> webdriver.map_state(driver)
+  }
+}
 
-        driver.state
+const inner_text_function: String = "
+    function(node) { 
+      return node.innerText;
+    }
+  "
+
+pub fn inner_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
+  WebDriver(String) {
+  fn(driver: WebDriver(remote_value.NodeRemoteValue)) {
+    call_function(driver, inner_text_function)
+    |> parse_result()
+    |> webdriver.map_state(driver)
+  }
+}
+
+pub fn inner_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
+  WebDriver(List(String)) {
+  fn(driver: WebDriver(List(remote_value.NodeRemoteValue))) {
+    result.map(driver.state, fn(nodes) {
+      list.map(nodes, fn(node) {
+        webdriver.map_state(Ok(node), driver)
+        |> call_function(inner_text_function)
+        |> result.map(fn(evaluate_result) {
+          case evaluate_result {
+            evaluate_result.SuccessResult(success) ->
+              remote_value.remote_value_to_string(success.result)
+            evaluate_result.ExceptionResult(exception) ->
+              log.error_and_continue(
+                "Error calling function: " <> string.inspect(exception),
+                remote_value.remote_value_to_string(
+                  exception.exception_details.exception,
+                ),
+              )
+          }
+        })
+      })
+      |> list.map(fn(result_list) {
+        case result_list {
+          Ok(result) -> result
+          Error(error) ->
+            log.error_and_continue(
+              "Could not get inner text from node, error: "
+                <> string.inspect(error)
+                <> ". Returning empty string",
+              "",
+            )
+        }
+      })
+    })
+    |> webdriver.map_state(driver)
+  }
+}
+
+const value_function: String = "
+    function(node) { 
+      return node.value;
+    }
+  "
+
+pub fn value() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
+  WebDriver(String) {
+  fn(driver: WebDriver(remote_value.NodeRemoteValue)) {
+    call_function(driver, value_function)
+    |> parse_result()
+    |> webdriver.map_state(driver)
+  }
+}
+
+pub fn values() {
+  fn(driver: WebDriver(List(remote_value.NodeRemoteValue))) {
+    result.map(driver.state, fn(nodes) {
+      list.map(nodes, fn(node) {
+        webdriver.map_state(Ok(node), driver)
+        |> call_function(value_function)
         |> result.map(fn(evaluate_result) {
           case evaluate_result {
             evaluate_result.SuccessResult(success) ->
@@ -158,10 +246,18 @@ pub fn any_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
 pub fn call_function(
   driver: WebDriver(remote_value.NodeRemoteValue),
   function: String,
-) -> WebDriver(EvaluateResult) {
-  let target = target.new_context_target(webdriver.get_context(driver))
-  case webdriver.assert_state(driver).shared_id {
-    Some(shared_id) -> {
+) -> Result(EvaluateResult, error.ButterbeeError) {
+  case webdriver.get_context(driver) {
+    Error(error) -> Error(error)
+    Ok(context) -> {
+      use state <- result.try({ driver.state })
+
+      use shared_id <- result.try({
+        state.shared_id
+        |> option.to_result(error.NodeDoesNotHaveSharedId)
+      })
+      let target = target.new_context_target(context)
+
       let node =
         shared_id
         |> remote_reference.remote_reference_from_id()
@@ -174,8 +270,21 @@ pub fn call_function(
 
       retry.until_ok(fn() { script.call_function(driver, params) })
     }
-    None ->
-      Error(definition.new_error_response(lib.definition_error, "No node found"))
   }
-  |> webdriver.map_state(driver)
+}
+
+pub fn parse_result(result: Result(EvaluateResult, error.ButterbeeError)) {
+  case result {
+    Error(error) -> Error(error)
+    Ok(evaluate_result) ->
+      case evaluate_result {
+        evaluate_result.SuccessResult(success) ->
+          Ok(remote_value.remote_value_to_string(success.result))
+        evaluate_result.ExceptionResult(exception) -> {
+          Ok(remote_value.remote_value_to_string(
+            exception.exception_details.exception,
+          ))
+        }
+      }
+  }
 }

@@ -36,7 +36,7 @@ pub fn minimal_example_test_() {
     ))
     |> node.do(action.click(key.LeftClick))
     |> get.node(by.css("pre.log"))
-    |> node.get(node.any_text())
+    |> node.get(node.text())
     |> driver.close()
   assert output == "Hello, Joe!\n"
 }

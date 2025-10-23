@@ -24,10 +24,12 @@ pub type TypedJson {
 }
 
 pub fn pretty_json(json msg: String) -> String {
-  let assert Ok(json) = json.parse(msg, decode.dynamic)
-
-  dynamic_to_doc(json)
-  |> doc.to_string(line_length)
+  case json.parse(msg, decode.dynamic) {
+    Error(error) -> "Error decoding json: " <> string.inspect(error)
+    Ok(json) ->
+      dynamic_to_doc(json)
+      |> doc.to_string(line_length)
+  }
 }
 
 pub fn dynamic_to_doc(json: Dynamic) -> Document {

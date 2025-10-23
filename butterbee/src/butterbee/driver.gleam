@@ -8,6 +8,7 @@ import butterbee/commands/session
 import butterbee/config
 import butterbee/config/browser as browser_config
 import butterbee/config/capabilities as capabilities_config
+import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/internal/runner/runner
 import butterbee/internal/socket
@@ -17,11 +18,9 @@ import butterbidi/browsing_context/commands/navigate
 import butterbidi/browsing_context/types/browsing_context as _
 import butterbidi/browsing_context/types/info
 import butterbidi/browsing_context/types/readiness_state
-import butterbidi/definition
 import butterlib/log
 import gleam/erlang/process
-import gleam/list
-import gleam/option.{Some}
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleam/uri
@@ -31,7 +30,7 @@ import gleam/uri
 /// using the configuration in the gleam.toml file.
 ///  WebDriver holds the browsing context info in its state
 /// 
-pub fn new(browser: browser_config.BrowserType) -> WebDriver(info.InfoList) {
+pub fn new(browser: browser_config.BrowserType) {
   let config = case config.parse_config("gleam.toml") {
     Ok(config) -> config
     Error(error) ->
@@ -48,9 +47,9 @@ pub fn new(browser: browser_config.BrowserType) -> WebDriver(info.InfoList) {
 /// Start a new webdriver session connect to the browser session, using the ButterbeeConfig type
 ///
 pub fn new_with_config(
-  browser: browser_config.BrowserType,
+  browser_type: browser_config.BrowserType,
   config: config.ButterbeeConfig,
-) -> WebDriver(info.InfoList) {
+) -> WebDriver(info.Info) {
   log.debug(
     "Starting webdriver session with config: " <> string.inspect(config),
   )
@@ -58,52 +57,67 @@ pub fn new_with_config(
     webdriver.new()
     |> webdriver.with_config(config)
 
-  // Start browser
-  let assert Ok(browser) = runner.new(browser, config)
+  let new = case driver.config {
+    None -> Error(error.DriverDoesNotHaveConfig)
+    Some(config) -> {
+      // Start browser
+      use browser <- result.try({ runner.new(browser_type, config) })
 
-  let capabilities =
-    config.capabilities
-    |> option.unwrap(capabilities_config.default)
+      let capabilities =
+        config.capabilities
+        |> option.unwrap(capabilities_config.default)
 
-  let assert Some(request) = browser.request
+      use request <- result.try({
+        browser.request
+        |> option.to_result(error.BrowserDoesNotHaveRequest)
+      })
 
-  // Check if browser is ready
-  let assert Ok(_) = retry.until_ok(fn() { session.status(request) })
+      // Check if browser is ready
+      use _ <- result.try({ retry.until_ok(fn() { session.status(request) }) })
 
-  // Start webdriver session
-  let #(socket, session) = session.new(request, capabilities)
-
-  let driver =
-    driver
-    |> webdriver.with_socket(socket)
-
-  let assert Ok(_response) = session
-
-  // Get initial browsing context
-  let get_tree_parameters =
-    get_tree.default
-    |> get_tree.with_max_depth(1)
-
-  let result =
-    retry.until_ok(fn() {
-      browsing_context.get_tree(driver, get_tree_parameters)
-    })
-    |> result.map(fn(get_tree_result) { get_tree_result.contexts })
-
-  let assert Ok(info_list) = result
-
-  let context = case list.length(info_list.list) {
-    1 -> {
-      let assert Ok(info) = list.first(info_list.list)
-        as "Found no browsing contexts"
-      info.context
+      // Start webdriver session
+      session.new(request, capabilities)
     }
-    _ -> panic as "Found more than one, or zero, browsing contexts"
   }
 
-  driver
-  |> webdriver.with_state(result)
-  |> webdriver.with_context(context)
+  case new {
+    Error(error) -> webdriver.with_state(driver, Error(error))
+    Ok(new) -> {
+      let #(socket, session) = new
+
+      let driver =
+        driver
+        |> webdriver.with_socket(socket)
+        |> webdriver.with_state(Ok(session))
+
+      // Get initial browsing context
+      let get_tree_parameters =
+        get_tree.default
+        |> get_tree.with_max_depth(1)
+
+      let get_tree =
+        retry.until_ok(fn() {
+          browsing_context.get_tree(driver, get_tree_parameters)
+        })
+
+      let info = case get_tree {
+        Error(error) -> Error(error)
+        Ok(get_tree) -> {
+          case get_tree.contexts.list {
+            [info] -> Ok(info)
+            _ -> Error(error.NoBrowsingContexts)
+          }
+        }
+      }
+
+      case info {
+        Ok(info) ->
+          webdriver.with_context(driver, info.context)
+          |> webdriver.with_state(Ok(info))
+        Error(error) -> webdriver.with_state(driver, Error(error))
+      }
+    }
+  }
 }
 
 ///
@@ -123,23 +137,30 @@ pub fn goto(
   driver: WebDriver(state),
   url: String,
 ) -> WebDriver(navigate.NavigateResult) {
-  let err = "Could not parse url: " <> url
-  let assert Ok(uri) = uri.parse(url) as err
+  let result = case uri.parse(url) {
+    Error(Nil) -> Error(error.CouldNotParseUrl(url))
+    Ok(uri) -> {
+      let driver =
+        driver
+        |> webdriver.with_state(Ok(uri))
 
-  let driver =
-    driver
-    |> webdriver.with_state(Ok(uri))
+      case driver.state {
+        Error(error) -> Error(error)
+        Ok(uri) -> {
+          let url = uri.to_string(uri)
+          use context <- result.try({ webdriver.get_context(driver) })
+          let params =
+            navigate.default(context, url)
+            |> navigate.with_wait(readiness_state.Interactive)
 
-  let url =
-    webdriver.assert_state(driver)
-    |> uri.to_string()
+          browsing_context.navigate(driver, params)
+        }
+      }
+    }
+  }
 
-  let params =
-    navigate.default(webdriver.get_context(driver), url)
-    |> navigate.with_wait(readiness_state.Interactive)
-
-  browsing_context.navigate(driver, params)
-  |> webdriver.map_state(driver)
+  driver
+  |> webdriver.with_state(result)
 }
 
 ///
@@ -156,7 +177,7 @@ pub fn goto(
 ///   |> driver.goto("https://gleam.run/")
 /// ```
 ///
-pub fn wait(state: s, duration: Int) -> s {
+pub fn wait(state: state, duration: Int) -> state {
   process.sleep(duration)
   state
 }
@@ -177,12 +198,10 @@ pub fn wait(state: s, duration: Int) -> s {
 ///   |> driver.close()
 /// ```
 ///
-pub fn close(
-  driver: WebDriver(state),
-) -> Result(state, definition.ErrorResponse) {
-  browser.close(driver)
-  socket.close(webdriver.get_socket(driver))
-
+pub fn close(driver: WebDriver(state)) {
+  let _ = browser.close(driver)
+  use socket <- result.try({ webdriver.get_socket(driver) })
+  socket.close(socket)
   driver.state
 }
 
@@ -201,8 +220,6 @@ pub fn close(
 ///   |> driver.value()
 /// ```
 ///
-pub fn value(
-  driver: WebDriver(state),
-) -> Result(state, definition.ErrorResponse) {
+pub fn value(driver: WebDriver(state)) {
   driver.state
 }

@@ -1,15 +1,17 @@
 //// The socket module contains the websocket connection to the webdriver server
 
+import butterbee/internal/error
 import butterbee/internal/glam
 import butterbee/internal/retry
 import butterbidi/definition
 import butterlib/log
-import gleam/dict
+import gleam/dict.{type Dict}
 import gleam/dynamic/decode.{type Decoder}
 import gleam/erlang/process
 import gleam/http/request.{type Request}
 import gleam/json.{type Json}
 import gleam/otp/actor
+import gleam/result
 import gleam/uri
 import stratus
 
@@ -26,13 +28,14 @@ pub type WebDriverSocket {
   )
 }
 
-// TODO: Less asserts
-pub fn new(request: Request(String)) -> WebDriverSocket {
+pub fn new(
+  request: Request(String),
+) -> Result(WebDriverSocket, error.ButterbeeError) {
   log.debug(
     "Connecting to WebDriver server at "
     <> request.to_uri(request) |> uri.to_string(),
   )
-  let state = dict.new()
+  let state = Ok(dict.new())
 
   let subject =
     stratus.new(request, state)
@@ -40,47 +43,91 @@ pub fn new(request: Request(String)) -> WebDriverSocket {
       case msg {
         stratus.Text(msg) -> {
           log_response(msg)
-          let assert Ok(result) = json.parse(msg, definition.message_decoder())
-            as "Failed to parse webdriver response"
-          case result {
-            definition.Success -> {
-              let assert Ok(id) = json.parse(msg, id_decoder())
-              let assert Ok(subject) = dict.get(state, id)
-                as "Failed to find corresponding response"
-              process.send(subject, Ok(msg))
-              stratus.continue(state |> dict.drop([id]))
-            }
-            definition.Error -> {
-              let assert Ok(id) = json.parse(msg, id_decoder())
-              let assert Ok(subject) = dict.get(state, id)
-                as "Failed to find corresponding response"
-              process.send(subject, Error(msg))
-              stratus.continue(state |> dict.drop([id]))
+
+          let state = case state {
+            Error(error) -> Error(error)
+            Ok(state) -> {
+              use id <- result.try({
+                json.parse(msg, id_decoder())
+                |> result.map_error(error.CouldNotGetIdFromSocketResponse)
+              })
+
+              use subject <- result.try({
+                get_subject(state, id)
+                |> result.map_error(fn(_) {
+                  error.ResponseDoesNotHaveCorrespondingRequestId(id)
+                })
+              })
+
+              use result <- result.try({
+                json.parse(msg, definition.message_decoder())
+                |> result.map_error(error.CouldNotParseSocketResponse)
+              })
+
+              let msg = case result {
+                definition.Success -> Ok(msg)
+                definition.Error -> Error(msg)
+              }
+
+              process.send(subject, msg)
+              Ok(state |> dict.drop([id]))
             }
           }
+          stratus.continue(state)
         }
         stratus.Binary(_) -> stratus.continue(state)
         stratus.User(SendCommand(subject, request)) -> {
-          let id_d = {
+          let id_decoder = {
             use id <- decode.field("id", decode.int)
             decode.success(id)
           }
-          let assert Ok(id) = json.parse(request, id_d)
-          log_request(request)
-          let assert Ok(_) = stratus.send_text_message(conn, request)
-            as "Failed to send webdriver request"
-          stratus.continue(dict.insert(state, id, subject))
+
+          let state = case state {
+            Error(error) -> Error(error)
+            Ok(state) -> {
+              use id <- result.try({
+                json.parse(request, id_decoder)
+                |> result.map_error(error.CouldNotGetIdFromSendCommand)
+              })
+
+              log_request(request)
+
+              use _ <- result.try({
+                stratus.send_text_message(conn, request)
+                |> result.map_error(error.CouldNotSendWebSocketRequest)
+              })
+
+              Ok(dict.insert(state, id, subject))
+            }
+          }
+          stratus.continue(state)
         }
         stratus.User(Close) -> {
-          let assert Ok(_) = stratus.close(conn)
+          let _ = stratus.close(conn)
           stratus.stop()
         }
       }
     })
 
-  let assert Ok(subject) = retry.until_ok(fn() { stratus.start(subject) })
+  use subject <- result.try({
+    retry.until_ok(fn() { stratus.start(subject) })
+    |> result.map_error(error.CouldNotStartWebSocket)
+  })
 
-  WebDriverSocket(subject)
+  Ok(WebDriverSocket(subject))
+}
+
+fn get_subject(
+  state: Dict(Int, process.Subject(Result(String, String))),
+  id: Int,
+) -> Result(process.Subject(Result(String, String)), error.ButterbeeError) {
+  use subject <- result.try({
+    dict.get(state, id)
+    |> result.map_error(fn(_) {
+      error.ResponseDoesNotHaveCorrespondingRequestId(id)
+    })
+  })
+  Ok(subject)
 }
 
 fn id_decoder() -> Decoder(Int) {
@@ -100,7 +147,7 @@ pub fn send_request(
   socket: WebDriverSocket,
   request: Json,
   command: definition.CommandData,
-) -> Result(definition.CommandResponse, definition.ErrorResponse) {
+) -> Result(definition.CommandResponse, error.ButterbeeError) {
   let result =
     process.call(socket.actor.data, request_timeout, fn(subject) {
       stratus.to_user_message(SendCommand(subject, json.to_string(request)))
@@ -108,16 +155,20 @@ pub fn send_request(
 
   case result {
     Ok(result) -> {
-      let assert Ok(result) =
+      use result <- result.try({
         json.parse(result, definition.command_response_decoder(command))
+        |> result.map_error(error.CouldNotParseResponse)
+      })
 
       Ok(result)
     }
     Error(error) -> {
-      let assert Ok(error) =
+      use error <- result.try({
         json.parse(error, definition.error_response_decoder())
+        |> result.map_error(error.CouldNotParseResponse)
+      })
 
-      Error(error)
+      Error(error.BidiError(error))
     }
   }
 }

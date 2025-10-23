@@ -78,9 +78,15 @@ pub fn new(
 /// TODO: Should maybe be a shell script for better lifetime management
 ///
 fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
-  let assert Some(#(cmd, flags)) = browser.cmd
+  use #(cmd, flags) <- result.try({
+    browser.cmd
+    |> option.to_result(error.BrowserDoesNotHaveCmd)
+  })
 
-  let assert Some(profile_dir) = browser.profile_dir
+  use profile_dir <- result.try({
+    browser.profile_dir
+    |> option.to_result(error.BrowserDoesNotHaveProfileDir)
+  })
 
   log.info("Starting " <> cmd <> " with flags: " <> string.inspect(flags))
 
@@ -94,8 +100,11 @@ fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
 
     // INFO: This run after the browser  closes
     log.debug("Cleaning up profile directory")
-    let assert Ok(_) = simplifile.delete(profile_dir)
-      as "Failed to delete profile directory"
+    let _ = case simplifile.delete(profile_dir) {
+      Ok(_) -> Ok(Nil)
+      Error(error) -> Error(error.CouldNotDeleteProfileDir(error))
+    }
+
     Some("Done")
   })
 

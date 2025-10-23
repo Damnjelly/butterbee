@@ -3,6 +3,7 @@
 ////
 
 import butterbee/commands/input
+import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/key
 import butterbee/node
@@ -11,9 +12,9 @@ import butterbidi/definition
 import butterbidi/input/commands/perform_actions
 import butterbidi/script/types/remote_reference
 import butterbidi/script/types/remote_value
-import butterlib/log
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{None}
+import gleam/result
 import gleam/string
 import youid/uuid.{type Uuid}
 
@@ -37,36 +38,31 @@ pub fn click(
 ) -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   WebDriver(definition.CommandResponse) {
   fn(driver: WebDriver(remote_value.NodeRemoteValue)) {
-    let assert Some(shared_id) = webdriver.assert_state(driver).shared_id
-      as "Node does not have a shared id"
+    case driver.state {
+      Error(error) -> Error(error)
+      Ok(node_remote_value) -> {
+        use shared_id <- result.try({
+          node_remote_value.shared_id
+          |> option.to_result(error.NodeDoesNotHaveSharedId)
+        })
 
-    let params =
-      perform_actions.default(webdriver.get_context(driver))
-      |> perform_actions.with_actions([
-        {
-          perform_actions.pointer_actions("mouse", [
-            move_to_element(shared_id),
-            perform_actions.pointer_down_action(key.mouse_button_to_int(
-              mouse_button,
-            )),
-            perform_actions.pointer_up_action(key.mouse_button_to_int(
-              mouse_button,
-            )),
+        use context <- result.try({ webdriver.get_context(driver) })
+
+        let params =
+          perform_actions.default(context)
+          |> perform_actions.with_actions([
+            perform_actions.with_pointer_actions(
+              "mouse action",
+              list.new()
+                |> list.append(move_to_element(shared_id))
+                |> list.append(
+                  click_action(key.mouse_button_to_int(mouse_button)),
+                ),
+            ),
           ])
-        },
-      ])
 
-    case
-      retry.until_ok(fn() {
-        input.perform_actions(webdriver.get_socket(driver), params).1
-      })
-    {
-      Ok(a) -> Ok(a)
-      Error(b) ->
-        log.debug_and_continue(
-          "Click failed, error: " <> string.inspect(b) <> " retrying",
-          Error(b),
-        )
+        perform(driver, params)
+      }
     }
     |> webdriver.map_state(driver)
   }
@@ -96,26 +92,20 @@ pub fn enter_keys(
 
     let _ = node.do(driver, click(key.LeftClick))
 
-    let params =
-      perform_actions.default(webdriver.get_context(driver))
-      |> perform_actions.with_actions([
-        perform_actions.key_actions(
-          "entering " <> keys,
-          enter_keys_action(key_list),
-        ),
-      ])
+    case webdriver.get_context(driver) {
+      Error(error) -> Error(error)
+      Ok(context) -> {
+        let params =
+          perform_actions.default(context)
+          |> perform_actions.with_actions([
+            perform_actions.with_key_actions(
+              "entering " <> keys,
+              list.new() |> list.append(enter_keys_action(key_list)),
+            ),
+          ])
 
-    case
-      retry.until_ok(fn() {
-        input.perform_actions(webdriver.get_socket(driver), params).1
-      })
-    {
-      Ok(a) -> Ok(a)
-      Error(b) ->
-        log.debug_and_continue(
-          "Click failed, error: " <> string.inspect(b) <> " retrying",
-          Error(b),
-        )
+        perform(driver, params)
+      }
     }
     |> webdriver.map_state(driver)
   }
@@ -124,25 +114,50 @@ pub fn enter_keys(
 ///
 /// A helper function that moves the mouse to the given node
 ///
-fn move_to_element(shared_id: Uuid) -> perform_actions.PointerSourceAction {
-  perform_actions.pointer_move_action(
-    0,
-    0,
-    None,
-    perform_actions.element_origin(remote_reference.shared_reference_from_id(
-      shared_id,
-    )),
-  )
+pub fn move_to_element(
+  shared_id: Uuid,
+) -> List(perform_actions.PointerSourceAction) {
+  [
+    perform_actions.pointer_move_action(
+      0,
+      0,
+      None,
+      perform_actions.element_origin(remote_reference.shared_reference_from_id(
+        shared_id,
+      )),
+    ),
+  ]
+}
+
+pub fn click_action(
+  mouse_button: Int,
+) -> List(perform_actions.PointerSourceAction) {
+  [
+    perform_actions.pointer_down_action(mouse_button),
+    perform_actions.pointer_up_action(mouse_button),
+  ]
 }
 
 ///
 /// A helper function to convert a list of keysactions that simulates the user pressing the keys
 ///
-fn enter_keys_action(
+pub fn enter_keys_action(
   keys: List(String),
 ) -> List(perform_actions.KeySourceAction) {
   list.map(keys, fn(key) {
     [perform_actions.key_down_action(key), perform_actions.key_up_action(key)]
   })
   |> list.flatten()
+}
+
+pub fn perform(
+  driver: WebDriver(remote_value.NodeRemoteValue),
+  params: perform_actions.PerformActionsParameters,
+) -> Result(definition.CommandResponse, error.ButterbeeError) {
+  case webdriver.get_socket(driver) {
+    Error(error) -> Error(error)
+    Ok(socket) -> {
+      retry.until_ok(fn() { input.perform_actions(socket, params).1 })
+    }
+  }
 }

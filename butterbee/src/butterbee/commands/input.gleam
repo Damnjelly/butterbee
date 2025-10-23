@@ -8,6 +8,7 @@
 //// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////
 
+import butterbee/internal/error
 import butterbee/internal/id
 import butterbee/internal/socket
 import butterbidi/definition
@@ -42,7 +43,7 @@ pub fn perform_actions(
   params: perform_actions.PerformActionsParameters,
 ) -> #(
   socket.WebDriverSocket,
-  Result(definition.CommandResponse, definition.ErrorResponse),
+  Result(definition.CommandResponse, error.ButterbeeError),
 ) {
   let command = definition.InputCommand(input_definition.PerformActions)
   let request =

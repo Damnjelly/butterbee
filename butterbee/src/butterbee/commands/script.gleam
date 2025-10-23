@@ -8,6 +8,7 @@
 //// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
 ////  
 
+import butterbee/internal/error
 import butterbee/internal/id
 import butterbee/internal/socket
 import butterbee/webdriver
@@ -47,7 +48,7 @@ import gleam/result
 pub fn call_function(
   driver: webdriver.WebDriver(state),
   params: CallFunctionParameters,
-) -> Result(EvaluateResult, definition.ErrorResponse) {
+) -> Result(EvaluateResult, error.ButterbeeError) {
   let command = definition.ScriptCommand(script_definition.CallFunction)
   let request =
     definition.command_to_json(
@@ -56,11 +57,15 @@ pub fn call_function(
       ]),
     )
 
-  socket.send_request(webdriver.get_socket(driver), request, command)
-  |> result.map(fn(response) {
-    case response.result {
-      definition.ScriptResult(result) -> result
-      _ -> panic as "Unexpected script result type"
-    }.evaluate_result
-  })
+  use socket <- result.try({ webdriver.get_socket(driver) })
+
+  case socket.send_request(socket, request, command) {
+    Error(error) -> Error(error)
+    Ok(response) -> {
+      case response.result {
+        definition.ScriptResult(result) -> Ok(result.evaluate_result)
+        _ -> Error(error.UnexpectedScriptResultType)
+      }
+    }
+  }
 }

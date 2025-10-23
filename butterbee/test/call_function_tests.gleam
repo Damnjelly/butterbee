@@ -4,9 +4,10 @@ import butterbee/config
 import butterbee/config/browser.{Firefox}
 import butterbee/driver
 import butterbee/get
+import butterbee/internal/error.{type ButterbeeError}
 import butterbee/node
+import butterbee/webdriver
 import butterbee_test.{pretty_print, timeout}
-import butterbidi/definition.{type ErrorResponse}
 import butterbidi/script/types/evaluate_result.{
   type EvaluateResult, EvaluateResultSuccess, SuccessResult,
 }
@@ -195,8 +196,8 @@ pub fn evaluate_result_bigint_large_test_() {
 }
 
 fn filter_uuid_from_remote_value(
-  result: Result(EvaluateResult, ErrorResponse),
-) -> Result(EvaluateResult, ErrorResponse) {
+  result: Result(EvaluateResult, ButterbeeError),
+) -> Result(EvaluateResult, ButterbeeError) {
   result.map(result, fn(evaluate_result) {
     case evaluate_result {
       SuccessResult(EvaluateResultSuccess(t, NodeRemote(node_remote_value))) -> {
@@ -215,7 +216,9 @@ fn filter_uuid_from_remote_value(
   })
 }
 
-fn call_with_function(function: String) -> Result(EvaluateResult, ErrorResponse) {
+fn call_with_function(
+  function: String,
+) -> Result(EvaluateResult, ButterbeeError) {
   let browser_config =
     browser.default_configuration(browser.Firefox)
     |> browser.with_extra_flags(["-headless"])
@@ -224,8 +227,11 @@ fn call_with_function(function: String) -> Result(EvaluateResult, ErrorResponse)
     config.default
     |> config.with_browser_config(browser.Firefox, browser_config)
 
-  driver.new_with_config(Firefox, config)
+  let driver = driver.new_with_config(Firefox, config)
+
+  driver
   |> get.node(by.xpath("/html"))
   |> node.call_function(function)
+  |> webdriver.map_state(driver)
   |> driver.close()
 }
