@@ -28,7 +28,7 @@ pub fn perform_action(
       driver
       |> get.node(list_locator)
       |> get.nodes_from_node(list_item_locator)
-      |> get.node_from_nodes(row + 1)
+      |> get.node_from_nodes(row)
     }
   }
   |> action

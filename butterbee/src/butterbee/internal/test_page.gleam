@@ -3,6 +3,7 @@ import butterbee/driver
 import butterbee/page_module/node_element
 import butterbee/page_module/node_list.{type NodeList}
 import butterbee/page_module/node_select
+import butterbee/page_module/node_table.{type NodeTable}
 import butterbee/webdriver.{type WebDriver}
 import simplifile
 
@@ -83,14 +84,28 @@ pub fn clear_form_button(
   |> node_element.perform_action(driver, action)
 }
 
+pub fn data_table(
+  driver: WebDriver(state),
+  on_element: NodeTable,
+  action: fn(_) -> WebDriver(new_state),
+) {
+  node_table.define(
+    table: by.xpath("//table"),
+    table_row: by.css("tr"),
+    table_cell: by.xpath("//td"),
+    table_width: 3,
+  )
+  |> node_table.perform_action(driver, on_element, action)
+}
+
 pub fn test_list(
   driver: WebDriver(state),
   on_element: NodeList,
   action: fn(_) -> WebDriver(new_state),
 ) {
   node_list.define(
-    list: by.css("//ul[@id='testList']"),
-    list_item: by.css("/li"),
+    list: by.xpath("//ul[@id='testList']"),
+    list_item: by.xpath("//li"),
   )
   |> node_list.perform_action(driver, on_element, action)
 }
