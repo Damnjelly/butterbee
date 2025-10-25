@@ -5,12 +5,13 @@ import butterbee/config/browser.{Firefox}
 import butterbee/driver
 import butterbee/get
 import butterbee/internal/error.{type ButterbeeError}
-import butterbee/node
+import butterbee/internal/function
 import butterbee/webdriver
 import butterbee_test.{pretty_print, timeout}
 import butterbidi/script/types/evaluate_result.{
   type EvaluateResult, EvaluateResultSuccess, SuccessResult,
 }
+import butterbidi/script/types/local_value.{type LocalValue}
 import butterbidi/script/types/remote_value.{NodeRemote, NodeRemoteValue}
 import gleam/option.{None, Some}
 import gleam/result
@@ -19,8 +20,8 @@ import youid/uuid
 
 pub fn evaluate_result_error_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_exception(node) { throw new Error('Test exception'); }"
-  |> call_with_function
+  "function test_exception() { throw new Error('Test exception'); }"
+  |> call_with_function([])
   |> filter_uuid_from_remote_value
   |> pretty_print
   |> birdie.snap(
@@ -31,8 +32,8 @@ pub fn evaluate_result_error_test_() {
 
 pub fn evaluate_result_node_value_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_node_value(node) { return node; }"
-  |> call_with_function
+  "function test_node_value() { return this; }"
+  |> call_with_function([])
   |> filter_uuid_from_remote_value
   |> pretty_print
   |> birdie.snap(
@@ -43,8 +44,8 @@ pub fn evaluate_result_node_value_test_() {
 
 pub fn evaluate_result_undefined_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_undefined(node) { return undefined; }"
-  |> call_with_function
+  "function test_undefined() { return undefined; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns undefined,
@@ -54,8 +55,8 @@ pub fn evaluate_result_undefined_test_() {
 
 pub fn evaluate_result_null_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_null(node) { return null; }"
-  |> call_with_function
+  "function test_null() { return null; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns null,
@@ -65,8 +66,8 @@ pub fn evaluate_result_null_test_() {
 
 pub fn evaluate_result_string_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_string(node) { return 'Hello World'; }"
-  |> call_with_function
+  "function test_string() { return 'Hello World'; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns a string,
@@ -76,8 +77,8 @@ pub fn evaluate_result_string_test_() {
 
 pub fn evaluate_result_empty_string_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_empty_string(node) { return ''; }"
-  |> call_with_function
+  "function test_empty_string() { return ''; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns an empty string,
@@ -87,8 +88,8 @@ pub fn evaluate_result_empty_string_test_() {
 
 pub fn evaluate_result_integer_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_integer(node) { return 42; }"
-  |> call_with_function
+  "function test_integer() { return 42; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns an integer,
@@ -98,8 +99,8 @@ pub fn evaluate_result_integer_test_() {
 
 pub fn evaluate_result_float_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_float(node) { return 3.14159; }"
-  |> call_with_function
+  "function test_float() { return 3.14159; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns a float,
@@ -109,8 +110,8 @@ pub fn evaluate_result_float_test_() {
 
 pub fn evaluate_result_negative_zero_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_negative_zero(node) { return -0; }"
-  |> call_with_function
+  "function test_negative_zero() { return -0; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns negative zero,
@@ -120,8 +121,8 @@ pub fn evaluate_result_negative_zero_test_() {
 
 pub fn evaluate_result_infinity_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_infinity(node) { return Infinity; }"
-  |> call_with_function
+  "function test_infinity() { return Infinity; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns Infinity,
@@ -131,8 +132,8 @@ pub fn evaluate_result_infinity_test_() {
 
 pub fn evaluate_result_negative_infinity_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_negative_infinity(node) { return -Infinity; }"
-  |> call_with_function
+  "function test_negative_infinity() { return -Infinity; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns negative Infinity,
@@ -142,8 +143,8 @@ pub fn evaluate_result_negative_infinity_test_() {
 
 pub fn evaluate_result_nan_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_nan(node) { return NaN; }"
-  |> call_with_function
+  "function test_nan() { return NaN; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns NaN,
@@ -153,8 +154,8 @@ pub fn evaluate_result_nan_test_() {
 
 pub fn evaluate_result_boolean_true_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_boolean_true(node) { return true; }"
-  |> call_with_function
+  "function test_boolean_true() { return true; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns true,
@@ -164,8 +165,8 @@ pub fn evaluate_result_boolean_true_test_() {
 
 pub fn evaluate_result_boolean_false_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_boolean_false(node) { return false; }"
-  |> call_with_function
+  "function test_boolean_false() { return false; }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns false,
@@ -175,8 +176,8 @@ pub fn evaluate_result_boolean_false_test_() {
 
 pub fn evaluate_result_bigint_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_bigint(node) { return BigInt('9007199254740991'); }"
-  |> call_with_function
+  "function test_bigint() { return BigInt('9007199254740991'); }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns a BigInt,
@@ -186,12 +187,67 @@ pub fn evaluate_result_bigint_test_() {
 
 pub fn evaluate_result_bigint_large_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_bigint_large(node) { return BigInt('123456789012345678901234567890'); }"
-  |> call_with_function
+  "function test_bigint_large() { return BigInt('123456789012345678901234567890'); }"
+  |> call_with_function([])
   |> pretty_print
   |> birdie.snap(
     title: "When javascript returns a large BigInt,
   call_function should return a BigInt primitive value",
+  )
+}
+
+pub fn evaluate_result_array_test_() {
+  use <- test_spec.make_with_timeout(timeout)
+  "function test_array() { return [1, 2, 3]; }"
+  |> call_with_function([])
+  |> pretty_print
+  |> birdie.snap(
+    title: "When javascript returns an array,
+  call_function should return an array primitive value",
+  )
+}
+
+pub fn int_parameter_test_() {
+  use <- test_spec.make_with_timeout(timeout)
+  "function test_int_parameter(a) { return a; }"
+  |> call_with_function([local_value.int(42)])
+  |> pretty_print
+  |> birdie.snap(
+    title: "When javascript returns an int parameter,
+  call_function should return an int primitive value",
+  )
+}
+
+pub fn float_parameter_test_() {
+  use <- test_spec.make_with_timeout(timeout)
+  "function test_float_parameter(a) { return a; }"
+  |> call_with_function([local_value.float(42.5)])
+  |> pretty_print
+  |> birdie.snap(
+    title: "When javascript returns a float parameter,
+  call_function should return a float primitive value",
+  )
+}
+
+pub fn string_parameter_test_() {
+  use <- test_spec.make_with_timeout(timeout)
+  "function test_string_parameter(a) { return a; }"
+  |> call_with_function([local_value.string("Hello World")])
+  |> pretty_print
+  |> birdie.snap(
+    title: "When javascript returns a string parameter,
+  call_function should return a string primitive value",
+  )
+}
+
+pub fn boolean_parameter_test_() {
+  use <- test_spec.make_with_timeout(timeout)
+  "function test_boolean_parameter(a) { return a; }"
+  |> call_with_function([local_value.boolean(True)])
+  |> pretty_print
+  |> birdie.snap(
+    title: "When javascript returns a boolean parameter,
+  call_function should return a boolean primitive value",
   )
 }
 
@@ -218,6 +274,7 @@ fn filter_uuid_from_remote_value(
 
 fn call_with_function(
   function: String,
+  arguments: List(LocalValue),
 ) -> Result(EvaluateResult, ButterbeeError) {
   let browser_config =
     browser.default_configuration(browser.Firefox)
@@ -231,7 +288,7 @@ fn call_with_function(
 
   driver
   |> get.node(by.xpath("/html"))
-  |> node.call_function(function)
+  |> function.on_node(arguments, function)
   |> webdriver.map_state(driver)
   |> driver.close()
 }

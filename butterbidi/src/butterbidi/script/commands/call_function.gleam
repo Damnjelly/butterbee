@@ -11,7 +11,7 @@ pub type CallFunctionParameters {
     arguments: Option(List(LocalValue)),
     //TODO: result_ownership: Option(ResultOwnership),
     //TODO: serialization_options: Option(SerializationOptions),
-    //TODO: this: Option(LocalValue),
+    this: Option(LocalValue),
     //TODO: user_activation: Option(Bool),
   )
 }
@@ -24,6 +24,7 @@ pub fn call_function_parameters_to_json(
     await_promise:,
     target:,
     arguments:,
+    this:,
   ) = call_function_parameters
   json.object([
     #("functionDeclaration", json.string(function_declaration)),
@@ -32,6 +33,10 @@ pub fn call_function_parameters_to_json(
     #("arguments", case arguments {
       option.None -> json.null()
       option.Some(value) -> json.array(value, local_value_to_json)
+    }),
+    #("this", case this {
+      option.None -> json.null()
+      option.Some(value) -> local_value_to_json(value)
     }),
   ])
 }
@@ -42,6 +47,7 @@ pub fn new(target: Target) -> CallFunctionParameters {
     await_promise: False,
     target: target,
     arguments: None,
+    this: None,
   )
 }
 
@@ -66,4 +72,11 @@ pub fn with_arguments(
   arguments: List(LocalValue),
 ) -> CallFunctionParameters {
   CallFunctionParameters(..call_function_parameters, arguments: Some(arguments))
+}
+
+pub fn with_this(
+  call_function_parameters: CallFunctionParameters,
+  this: LocalValue,
+) -> CallFunctionParameters {
+  CallFunctionParameters(..call_function_parameters, this: Some(this))
 }

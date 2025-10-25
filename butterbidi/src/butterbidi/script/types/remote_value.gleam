@@ -11,12 +11,15 @@ import butterbidi/script/types/primitive_protocol_value.{
 import butterlib/log
 import gleam/dict
 import gleam/dynamic/decode.{type Decoder}
-import gleam/option.{type Option, None}
+import gleam/list
+import gleam/option.{type Option, None, Some}
+import gleam/string
 import internal/decoders
 import youid/uuid.{type Uuid}
 
 pub type RemoteValue {
   PrimitiveProtocol(PrimitiveProtocolValue)
+  ArrayRemote(ArrayRemoteValue)
   ErrorRemote(ErrorRemoteValue)
   NodeRemote(NodeRemoteValue)
 }
@@ -53,27 +56,102 @@ pub fn remote_value_decoder() -> Decoder(RemoteValue) {
       )
     }
     "error" -> error_remote_value_decoder()
+    "array" -> array_remote_value_decoder()
     "node" -> node_remote_decoder()
     _ ->
       log.error_and_continue(
         "Unknown remote value type: " <> remote_type,
         decode.failure(
-          NodeRemote(NodeRemoteValue("", None, None, None, None)),
+          ErrorRemote(ErrorRemoteValue(remote_type, None, None)),
           "Unknown remote value type",
         ),
       )
   }
 }
 
-pub fn remote_value_to_string(remote_value: RemoteValue) -> String {
+pub fn to_string(remote_value: RemoteValue) -> String {
   case remote_value {
-    PrimitiveProtocol(value) -> primitive_protocol_value.to_string(value)
+    PrimitiveProtocol(primitive) ->
+      primitive_protocol_value.to_string(primitive)
     _ ->
       log.error_and_continue(
-        "Expected PrimitiveProtocol, got NodeRemote. Returning undefined",
+        "Expected Primitive, got: "
+          <> string.inspect(remote_value)
+          <> ". Returning undefined",
         primitive_protocol_value.to_string(Undefined(UndefinedValue(""))),
       )
   }
+}
+
+pub fn to_string_list(remote_value: RemoteValue) -> List(String) {
+  case remote_value {
+    ArrayRemote(array) ->
+      case array.value {
+        None ->
+          log.error_and_continue(
+            "Expected Primitive, got: "
+              <> string.inspect(remote_value)
+              <> ". Returning undefined",
+            [],
+          )
+        Some(list) ->
+          list.map(list.value, fn(remote_value) { to_string(remote_value) })
+      }
+    _ -> log.error_and_continue("Expected Array, Returning empty list", [])
+  }
+}
+
+pub fn to_bool(remote_value: RemoteValue) -> Bool {
+  case remote_value {
+    PrimitiveProtocol(primitive) -> primitive_protocol_value.to_bool(primitive)
+    _ ->
+      log.error_and_continue(
+        "Expected Primitive, got: "
+          <> string.inspect(remote_value)
+          <> ". Returning undefined",
+        False,
+      )
+  }
+}
+
+pub type ListRemoteValue {
+  ListRemoteValue(value: List(RemoteValue))
+}
+
+pub fn list_remote_value_decoder() -> Decoder(ListRemoteValue) {
+  use value <- decode.then(decode.list(remote_value_decoder()))
+  decode.success(ListRemoteValue(value:))
+}
+
+pub type ArrayRemoteValue {
+  ArrayRemoteValue(
+    remote_type: String,
+    handle: Option(Uuid),
+    internal_id: Option(String),
+    value: Option(ListRemoteValue),
+  )
+}
+
+pub fn array_remote_value_decoder() -> Decoder(RemoteValue) {
+  use remote_type <- decode.field("type", decode.string)
+  use handle <- decode.optional_field(
+    "handle",
+    None,
+    decode.optional(decoders.uuid()),
+  )
+  use internal_id <- decode.optional_field(
+    "internalId",
+    None,
+    decode.optional(decode.string),
+  )
+  use value <- decode.optional_field(
+    "value",
+    None,
+    decode.optional(list_remote_value_decoder()),
+  )
+  decode.success(
+    ArrayRemote(ArrayRemoteValue(remote_type:, handle:, internal_id:, value:)),
+  )
 }
 
 pub type ErrorRemoteValue {

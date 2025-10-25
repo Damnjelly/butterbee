@@ -31,12 +31,11 @@ pub fn navigation_test_() {
 pub fn enter_keys_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
+  let driver = driver.new(Firefox)
   let assert Ok(comment) =
-    driver.new(Firefox)
+    driver
     |> test_page.goto()
-    |> test_page.comments_field(action.enter_keys(
-      "line1" <> key.enter <> "line2" <> key.enter,
-    ))
+    |> test_page.comments_field(node.set_value("line1\nline2\n"))
     |> test_page.comments_field(node.text())
     |> driver.close()
   assert comment == "line1\nline2\n"
@@ -49,7 +48,7 @@ pub fn select_navigation_test_() {
     driver.new(Firefox)
     |> test_page.goto()
     |> test_page.country_dropdown(node_select.option("Canada"))
-    |> test_page.country_dropdown(node.value())
+    |> test_page.country_dropdown(node_select.selected_text())
     |> driver.close()
   assert country == "Canada"
 }
@@ -63,24 +62,19 @@ pub fn select_key_navigation_test_() {
     |> test_page.country_dropdown(action.click(key.LeftClick))
     |> test_page.country_dropdown(action.enter_keys(key.arrow_down))
     |> test_page.country_dropdown(action.enter_keys(key.enter))
-    |> test_page.country_dropdown(node.value())
+    |> test_page.country_dropdown(node_select.selected_text())
     |> driver.close()
   assert country == "United States"
 }
-//
-// pub fn button_test_() {
-//   use <- test_spec.make_with_timeout(butterbee_test.timeout)
-//
-//   let assert Ok(first_color) =
-//     driver.new(Firefox)
-//     |> test_page.submit_form_button(action.click(key.LeftClick))
-//     |> test_page.submit_form_button(node.inner_text())
-//     |> driver.close()
-//
-//   let assert Ok(button) =
-//     driver.new(Firefox)
-//     |> test_page.change_color_button(action.click(key.LeftClick))
-//     |> driver.close()
-//   assert button == "Submit"
-// }
-//
+
+pub fn button_test_() {
+  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+
+  let assert Ok(has_style) =
+    driver.new(Firefox)
+    |> test_page.goto()
+    |> test_page.change_color_button(action.click(key.LeftClick))
+    |> test_page.body(node.has_attribute("style"))
+    |> driver.close()
+  assert has_style == True
+}

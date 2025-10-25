@@ -1,0 +1,5 @@
+---
+version: 1.4.1
+title: When javascript returns a string,\n  call_function should return a String primitive value
+---
+[1mError[0m(DriverDoesNotHaveSocket[0m)

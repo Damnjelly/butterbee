@@ -1,0 +1,11 @@
+---
+version: 1.4.1
+title: When javascript returns a boolean parameter,\n  call_function should return a boolean primitive value
+---
+[1mOk[0m(SuccessResult[0m(EvaluateResultSuccess[0m(
+  Success[0m,
+  PrimitiveProtocol[0m(Boolean[0m(BooleanValue[0m(
+    [38;5;2m"boolean"[0m,
+    [38;5;4mTrue[0m,
+  ))),
+)))

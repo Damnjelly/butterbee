@@ -61,6 +61,7 @@ pub fn click(
             ),
           ])
 
+        node.do(driver, node.scroll_into_view())
         perform(driver, params)
       }
     }
@@ -90,7 +91,7 @@ pub fn enter_keys(
   fn(driver: WebDriver(remote_value.NodeRemoteValue)) {
     let key_list = string.split(keys, "")
 
-    let _ = node.do(driver, click(key.LeftClick))
+    let _ = webdriver.do(driver, click(key.LeftClick))
 
     case webdriver.get_context(driver) {
       Error(error) -> Error(error)

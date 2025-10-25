@@ -10,11 +10,21 @@ pub type PortError {
 
 pub type ButterbeeError {
   BidiError(definition.ErrorResponse)
-  BrowserDoesNotHaveRequest
   BrowserDoesNotHaveCmd
   BrowserDoesNotHaveProfileDir
-  CouldNotParseUrl(url: String)
+  BrowserDoesNotHaveRequest
+  CouldNotConvertToLocalValue
   CouldNotDeleteProfileDir(simplifile.FileError)
+  CouldNotGetIdFromSendCommand(json.DecodeError)
+  CouldNotGetIdFromSocketResponse(json.DecodeError)
+  CouldNotGetSubjectFromSocketResponse(json.DecodeError)
+  CouldNotParseResponse(json.DecodeError)
+  CouldNotParseSocketResponse(json.DecodeError)
+  CouldNotParseUrl(url: String)
+  CouldNotSendWebSocketRequest(stratus.SocketReason)
+  CouldNotStartSession
+  CouldNotStartWebSocket(stratus.InitializationError)
+  CouldNotStopWebSocket(stratus.SocketReason)
   CreatePortDirError(simplifile.FileError)
   CreateProfileDirError(simplifile.FileError)
   CreateUserPrefsError(simplifile.FileError)
@@ -25,27 +35,22 @@ pub type ButterbeeError {
   FileError(simplifile.FileError)
   MoreThanOneNodeFound
   NoBrowsingContexts
-  NoNodeFound
   NoInfoFound
+  NoNodeFound
   NodeDoesNotHaveSharedId
+  NodeTextIsNull
+  NodeIsNotALocalValue
   NodeNotFound
   PortError(PortError)
-  CouldNotStartSession
-  CouldNotStartWebSocket(stratus.InitializationError)
   ReadPortDirError(simplifile.FileError)
-  CouldNotParseResponse(json.DecodeError)
-  CouldNotParseSocketResponse(json.DecodeError)
-  CouldNotGetIdFromSocketResponse(json.DecodeError)
-  CouldNotGetIdFromSendCommand(json.DecodeError)
-  CouldNotSendWebSocketRequest(stratus.SocketReason)
-  CouldNotGetSubjectFromSocketResponse(json.DecodeError)
   ResponseDoesNotHaveCorrespondingRequestId(id: Int)
-  CouldNotStopWebSocket(stratus.SocketReason)
   RunnerError
+  SelectDoesNotHaveValue(String)
   UnexpectedBrowsingContextResultType
   UnexpectedGetTreeResultType
   UnexpectedNewResultType
   UnexpectedScriptResultType
   UnexpectedSessionResultType
   UnexpectedStatusResultType
+  ToBoolError(String)
 }

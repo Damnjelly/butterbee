@@ -55,9 +55,6 @@ pprint = ">= 1.0.6 and < 2.0.0"
 
 # [tools.butterbee]
 
-[tools.butterbee.driver]
-data_dir = "/tmp/butterbee"
-
 [tools.butterbee.browser.firefox]
 flags = ["-headless"]
 host = "127.0.0.1"

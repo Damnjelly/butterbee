@@ -1,0 +1,5 @@
+---
+version: 1.4.1
+title: When javascript returns a float parameter,\n  call_function should return a float primitive value
+---
+[1mError[0m(DriverDoesNotHaveSocket[0m)

@@ -4,6 +4,7 @@ import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/float
 import gleam/int
+import gleam/json.{type Json}
 
 pub type PrimitiveProtocolValue {
   Undefined(UndefinedValue)
@@ -12,6 +13,41 @@ pub type PrimitiveProtocolValue {
   Number(NumberValue)
   Boolean(BooleanValue)
   BigInt(BigIntValue)
+}
+
+pub fn primitive_protocol_value_to_json(value: PrimitiveProtocolValue) -> Json {
+  case value {
+    Undefined(UndefinedValue(remote_type)) ->
+      json.object([
+        #("type", json.string(remote_type)),
+        #("value", json.string("undefined")),
+      ])
+    Null(NullValue(remote_type)) ->
+      json.object([
+        #("type", json.string(remote_type)),
+        #("value", json.string("null")),
+      ])
+    String(StringValue(remote_type, value)) ->
+      json.object([
+        #("type", json.string(remote_type)),
+        #("value", json.string(value)),
+      ])
+    Number(NumberValue(remote_type, value)) ->
+      json.object([
+        #("type", json.string(remote_type)),
+        #("value", number_to_json(value)),
+      ])
+    Boolean(BooleanValue(remote_type, value)) ->
+      json.object([
+        #("type", json.string(remote_type)),
+        #("value", json.bool(value)),
+      ])
+    BigInt(BigIntValue(remote_type, value)) ->
+      json.object([
+        #("type", json.string(remote_type)),
+        #("value", json.string(value)),
+      ])
+  }
 }
 
 pub fn to_string(value: PrimitiveProtocolValue) -> String {
@@ -25,8 +61,19 @@ pub fn to_string(value: PrimitiveProtocolValue) -> String {
   }
 }
 
+pub fn to_bool(value: PrimitiveProtocolValue) -> Bool {
+  case value {
+    Boolean(value) -> value.value
+    _ -> False
+  }
+}
+
 pub type UndefinedValue {
   UndefinedValue(remote_type: String)
+}
+
+pub fn undefined() -> PrimitiveProtocolValue {
+  Undefined(UndefinedValue("undefined"))
 }
 
 pub type NullValue {
@@ -35,6 +82,10 @@ pub type NullValue {
 
 pub type StringValue {
   StringValue(remote_type: String, value: String)
+}
+
+pub fn string(value: String) -> PrimitiveProtocolValue {
+  String(StringValue("string", value))
 }
 
 pub type SpecialNumber {
@@ -77,6 +128,23 @@ pub fn number_to_string(number: Number) -> String {
   }
 }
 
+pub fn number_to_json(number: Number) -> Json {
+  case number {
+    Int(int) -> json.int(int)
+    Float(float) -> json.float(float)
+    Special(special_number) ->
+      json.string(special_number_to_string(special_number))
+  }
+}
+
+pub fn int(int: Int) -> PrimitiveProtocolValue {
+  Number(NumberValue("number", Int(int)))
+}
+
+pub fn float(float: Float) -> PrimitiveProtocolValue {
+  Number(NumberValue("number", Float(float)))
+}
+
 pub type NumberValue {
   NumberValue(remote_type: String, value: Number)
 }
@@ -111,6 +179,10 @@ pub fn number_value_classifier(value: Dynamic) -> Number {
 
 pub type BooleanValue {
   BooleanValue(remote_type: String, value: Bool)
+}
+
+pub fn boolean(boolean: Bool) -> PrimitiveProtocolValue {
+  Boolean(BooleanValue("boolean", boolean))
 }
 
 pub type BigIntValue {

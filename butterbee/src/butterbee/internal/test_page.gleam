@@ -14,6 +14,11 @@ pub fn goto(driver: WebDriver(state)) {
   driver.goto(driver, "file://" <> file_path)
 }
 
+pub fn body(driver: WebDriver(state), action: fn(_) -> WebDriver(new_state)) {
+  node_element.define(field: by.xpath("//body"))
+  |> node_element.perform_action(driver, action)
+}
+
 pub fn username_field(
   driver: WebDriver(state),
   action: fn(_) -> WebDriver(new_state),
