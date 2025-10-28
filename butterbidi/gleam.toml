@@ -1,7 +1,7 @@
 name = "butterbidi"
 version = "0.1.0"
 
-description = "A webdriver bidi cilent written in Gleam, for Gleam."
+description = "Spec compliant webdriver bidi types, decoders and encoders for gleam"
 
 licences = ["Apache-2.0"]
 
