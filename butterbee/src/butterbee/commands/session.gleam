@@ -1,12 +1,8 @@
-////
 //// ## [Session commands](https://w3c.github.io/webdriver-bidi/#module-session-commands)
 ////
 //// The session commands module contains commands found in the session section of the
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level
 //// API. But you can use these commands directly if you want something specific.
-////
-//// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
-////
 
 import butterbee/internal/error
 import butterbee/internal/id
@@ -21,12 +17,10 @@ import butterbidi/session/types/capabilities_request.{
 import gleam/http/request.{type Request}
 import gleam/result
 
-///
 /// Returns information about whether a remote end is in a state in which it can create
 /// new sessions.
 ///
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-session-status)
-///
 pub fn status(
   request: Request(String),
 ) -> Result(status.StatusResult, error.ButterbeeError) {
@@ -61,21 +55,15 @@ pub fn status(
   }
 }
 
-///
 /// Creates a new BiDi session with the given capabilities.
 ///
 /// ## Example
 ///
 /// ```gleam
-/// let session =
-///   session.new(CapabilitiesRequest(
-///     Some(CapabilityRequest(None, None, None, None, [])),
-///     None,
-///   ))
+/// let session = session.new(capabilities.default)
 /// ```
 ///
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-session-new)
-///
 pub fn new(
   request: Request(String),
   capabilities_request: CapabilitiesRequest,
@@ -108,11 +96,9 @@ pub fn new(
   }
 }
 
-///
 /// Closes the current session.
 ///
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-session-end)
-///
 pub fn end(socket: socket.WebDriverSocket) -> Nil {
   let command = definition.SessionCommand(session_definition.End)
   let request =

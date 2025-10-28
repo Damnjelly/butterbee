@@ -1,12 +1,10 @@
-////
 //// The driver config module contains functions for parsing and creating driver
 //// configurations. The driver configuration specifies general options the webdriver
-//// needs to run, such as the browser to use, the maximum wait time, and the request
-//// timeout.
+//// needs to run, such as the maximum wait time, and the request timeout.
 ////
 //// ### TOML Configuration Format
 ////
-//// The driver configuration is defined in a TOML configuration file under the
+//// The driver configuration is defined under the
 //// `[tools.butterbee.driver]` section of your `gleam.toml` file:
 ////
 //// ```toml
@@ -17,7 +15,6 @@
 //// request_timeout = 5000
 //// data_dir = "/tmp/butterbee"
 //// ```
-////
 
 import gleam/dynamic/decode
 

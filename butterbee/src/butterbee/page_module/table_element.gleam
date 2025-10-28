@@ -1,3 +1,27 @@
+//// Define elements for page module using this module.
+////
+//// Example:
+////
+//// ```gleam
+//// import butterbee/page_module/table_element.{type NodeTable}
+////
+//// pub fn pokedex_table(
+////   driver: WebDriver(state),
+////   on_element: NodeTable,
+////   action: fn(_) -> WebDriver(new_state),
+//// ) {
+////   table_element.define(
+////     table: by.css("table#pokedex"),
+////     table_row: by.css("tr"),
+////     table_cell: by.css("td"),
+////     table_width: 3,
+////   )
+////   |> table_element.perform_action(driver, on_element, action)
+//// }
+//// ```
+////
+//// For a more complete example, see the [`page module`](https://hexdocs.pm/butterbee/page-modules) guide.
+
 import butterbee/get
 import butterbee/webdriver.{type WebDriver}
 import butterbidi/browsing_context/types/locator.{type Locator}

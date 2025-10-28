@@ -6,11 +6,9 @@
 
 ### Control the browser with gleam code using butterbee!
 
-Butterbee is a webdriver bidi cilent written in Gleam, for Gleam.
+Butterbee is a webdriver bidi client written in Gleam, for Gleam.
 It provides both a simple API for interacting with a webdriver server, 
 and a more complex API for interacting with the webdriver bidi protocol directly.
-
-WARNING: Butterbee is still in early development and incomplete. Butterbee only supports Firefox at the moment, and the API is subject to change.
 
 NOTE: Because of test runner limitations, butterbee does not close the browser automatically when the test panics. If tests start randomly failing, check for any open browser processes in your system manager.
 
@@ -38,16 +36,16 @@ pub fn main() {
 }
 
 pub fn minimal_example_test_() {
-  let output =
-    webdriver.new(browser.Firefox)
-    |> webdriver.goto("https://gleam.run/")
-    |> query.node(by.xpath(
+  let assert Ok(output) =
+    driver.new(browser.Firefox)
+    |> driver.goto("https://gleam.run/")
+    |> get.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
-    |> input.click(input.LeftClick)
-    |> query.node(by.css("pre.log"))
-    |> nodes.inner_text()
-    |> webdriver.close()
+    |> node.do(action.click(key.LeftClick))
+    |> get.node(by.css("pre.log"))
+    |> node.get(node.text())
+    |> driver.close()
   assert output == "Hello, Joe!\n"
 }
 ```
@@ -55,13 +53,7 @@ pub fn minimal_example_test_() {
 ### Guides
 
 - [Butterbee configuration](https://hexdocs.pm/butterbee/config)
+- [Page modules](https://hexdocs.pm/butterbee/page-modules)
 - [Other testrunners](https://hexdocs.pm/butterbee/test-runners)
 - [Github actions](https://hexdocs.pm/butterbee/github-actions)
 
-
-## Development
-
-### Roadmap
-
-- [ ] Support for chromium 
-- [ ] Add more webdriver bidi commands

@@ -1,6 +1,4 @@
-////
 //// The driver module contains functions for interacting with the webdriver client 
-////
 
 import butterbee/commands/browser
 import butterbee/commands/browsing_context
@@ -20,16 +18,15 @@ import butterbidi/browsing_context/types/info
 import butterbidi/browsing_context/types/readiness_state
 import butterlib/log
 import gleam/erlang/process
+import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleam/uri
 
-///
 /// Start a new webdriver session connect to the browser session, 
 /// using the configuration in the gleam.toml file.
 ///  WebDriver holds the browsing context info in its state
-/// 
 pub fn new(browser: browser_config.BrowserType) {
   let config = case config.parse_config("gleam.toml") {
     Ok(config) -> config
@@ -43,9 +40,7 @@ pub fn new(browser: browser_config.BrowserType) {
   new_with_config(browser, config)
 }
 
-///
 /// Start a new webdriver session connect to the browser session, using the ButterbeeConfig type
-///
 pub fn new_with_config(
   browser_type: browser_config.BrowserType,
   config: config.ButterbeeConfig,
@@ -53,11 +48,12 @@ pub fn new_with_config(
   log.debug(
     "Starting webdriver session with config: " <> string.inspect(config),
   )
+  // Create webdriver type
   let driver =
     webdriver.new()
     |> webdriver.with_config(config)
 
-  let new = case driver.config {
+  let session = case driver.config {
     None -> Error(error.DriverDoesNotHaveConfig)
     Some(config) -> {
       // Start browser
@@ -80,7 +76,7 @@ pub fn new_with_config(
     }
   }
 
-  case new {
+  case session {
     Error(error) -> webdriver.with_state(driver, Error(error))
     Ok(new) -> {
       let #(socket, session) = new
@@ -120,19 +116,7 @@ pub fn new_with_config(
   }
 }
 
-///
 /// Navigates to the given url
-/// 
-/// # Example
-///
-/// This example navigates to the gleam website:
-///
-/// ```gleam
-/// let example =
-///   driver.new()
-///   |> driver.goto("https://gleam.run/")
-/// ```
-///
 pub fn goto(
   driver: WebDriver(state),
   url: String,
@@ -163,41 +147,26 @@ pub fn goto(
   |> webdriver.with_state(result)
 }
 
-///
-/// Waits for a given amount of time (in milliseconds) before continuing
-/// 
-/// # Example
-///
-/// This example waits for 2 seconds before continuing:
-///
-/// ```gleam
-/// let example =
-///   driver.new()
-///   |> driver.wait(2000)
-///   |> driver.goto("https://gleam.run/")
-/// ```
-///
+/// Returns the url of the current page
+pub fn url(driver: WebDriver(state)) -> WebDriver(String) {
+  case browsing_context.get_tree(driver, get_tree.default) {
+    Error(error) -> Error(error)
+    Ok(get_tree_result) -> {
+      list.first(get_tree_result.contexts.list)
+      |> result.map_error(fn(_) { error.NoInfoFound })
+      |> result.map(fn(context) { context.url })
+    }
+  }
+  |> webdriver.map_state(driver)
+}
+
+/// Pause for a given amount of time (in milliseconds) before continuing
 pub fn wait(state: state, duration: Int) -> state {
   process.sleep(duration)
   state
 }
 
-///
 /// Closes the webdriver session, closes the browser, and returns the state of the webdriver
-/// 
-/// # Example
-///
-/// This example closes the webdriver session, and returns "Gleam",
-/// the inner text of the element with the css selector `a.logo`:
-///
-/// ```gleam
-/// let example = driver.new()
-///   |> driver.goto("https://gleam.run/")
-///   |> query.node(by.css("a.logo"))
-///   |> nodes.inner_text()
-///   |> driver.close()
-/// ```
-///
 pub fn close(driver: WebDriver(state)) {
   let _ = browser.close(driver)
   use socket <- result.try({ webdriver.get_socket(driver) })
@@ -205,21 +174,7 @@ pub fn close(driver: WebDriver(state)) {
   driver.state
 }
 
-///
 /// Returns the state of the test without closing the webdriver session 
-/// 
-/// # Example
-///
-/// This example returns "Gleam" without closing the session:
-///
-/// ```gleam
-/// let example = driver.new()
-///   |> driver.goto("https://gleam.run/")
-///   |> query.node(by.css("a.logo"))
-///   |> nodes.inner_text()
-///   |> driver.value()
-/// ```
-///
 pub fn value(driver: WebDriver(state)) {
   driver.state
 }

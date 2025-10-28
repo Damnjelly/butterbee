@@ -1,9 +1,9 @@
-//// 
 //// The browser module contains the Browser type and functions to create and configure browsers.
 ////
 //// Usually you will not need to use this module directly, as it is usually derived
-//// from the configuration in the gleam.toml file.
-////
+//// from the configuration in the gleam.toml file. But you can pass it as a type using
+//// the [`driver.new_with_config`](https://hexdocs.pm/butterbee/driver.html#new_with_config)
+//// function.
 
 import butterbee/config/browser as browser_config
 import butterbee/internal/error
@@ -15,9 +15,7 @@ import gleam/result
 import simplifile
 import youid/uuid
 
-///
 /// The Browser type contains all the information needed to run a browser.
-///
 pub type Browser {
   Browser(
     /// The type of browser to run.
@@ -75,14 +73,13 @@ pub fn get_request(port: Int, host: String) -> Request(String) {
   |> request.set_scheme(Http)
 }
 
+/// Returns a free port to use for a webdriver session
 @external(erlang, "port_finder", "new_port")
 @external(javascript, "port_finder", "new_port")
 pub fn new_port() -> Result(Int, error.PortError)
 
-///
 /// Create a new profile directory
 /// Returns the name of the profile
-///
 pub fn new_profile(
   data_dir: String,
 ) -> Result(#(String, String), simplifile.FileError) {

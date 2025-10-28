@@ -1,4 +1,3 @@
-////
 //// Butterbee can be configured using the `gleam.toml` file.
 //// When you call the `new` function in the webdriver module, butterbee tries 
 //// to parse the `gleam.toml` file in the root of the project. If it can't find it,
@@ -26,9 +25,7 @@
 //// [tools.butterbee.browser.firefox]
 //// flags = []
 //// host = "127.0.0.1"
-//// port_range = [9222, 9232]
 //// ```
-////
 
 import butterbee/config/browser.{Firefox}
 import butterbee/config/driver.{driver_config_decoder}
@@ -45,9 +42,7 @@ import gleam/string
 import simplifile
 import tom
 
-/// 
 /// Represents the [tools.butterbee] section of your gleam.toml file
-///
 pub type ButterbeeConfig {
   ButterbeeConfig(
     driver: driver.DriverConfig,
@@ -113,10 +108,8 @@ fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
   decode.success(ButterbeeConfig(driver:, capabilities:, browser_config:))
 }
 
-/// 
 /// The default config.
 /// See the toml representation of the default configuration above
-///
 pub const default: ButterbeeConfig = ButterbeeConfig(driver.default, None, None)
 
 @internal

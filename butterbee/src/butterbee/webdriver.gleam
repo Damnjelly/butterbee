@@ -1,12 +1,12 @@
+//// The webdriver module contains the WebDriver type and functions to create and configure webdriver sessions.
+
 import butterbee/config
 import butterbee/internal/error
 import butterbee/internal/socket.{type WebDriverSocket}
 import butterbidi/browsing_context/types/browsing_context.{type BrowsingContext} as _
 import gleam/option.{type Option, None, Some}
 
-///
 /// Represents a webdriver session
-///
 pub type WebDriver(state) {
   WebDriver(
     /// The socket to the webdriver server
@@ -15,7 +15,8 @@ pub type WebDriver(state) {
     context: Option(BrowsingContext),
     /// The config used during the webdriver session
     config: Option(config.ButterbeeConfig),
-    /// Some state that is returned from a command (e.g. inner_text() fills state with Some(String))
+    /// Some state that is returned from a command (e.g. `node.value()` fills state with 
+    ///Result(String, error.ButterbeeError))
     state: Result(state, error.ButterbeeError),
   )
 }
@@ -97,6 +98,7 @@ pub fn get_state(
   webdriver.state
 }
 
+/// Perform an action using the webdriver and update the webdriver state
 pub fn do(webdriver: WebDriver(state), action: fn(_) -> WebDriver(new_state)) {
   action(webdriver)
 }

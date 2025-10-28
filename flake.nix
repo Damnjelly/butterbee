@@ -44,7 +44,7 @@
 
                 devDependencies = with pkgs; [
                   gleam
-                  beamMinimal27Packages.erlang-ls
+                  erlang-language-platform
                   typescript-language-server
                   nixd
                   nixfmt

@@ -1,10 +1,9 @@
-////
 //// This module provides functionality for parsing and creating browser configurations
 //// from TOML configuration files for WebDriver BiDi sessions.
 ////
 //// ### TOML Configuration Format
 ////
-//// The browser configuration is defined in a TOML configuration file under the
+//// The browser configuration is defined under the
 //// `[tools.butterbee.browser]` section of your `gleam.toml` file:
 ////
 //// ```toml
@@ -14,16 +13,13 @@
 //// cmd = "firefox"
 //// flags = ["-headless"]
 //// host = "127.0.0.1"
-//// port_range = [9222, 9282]
 ////
 //// # NOTE: chromium is not supported yet
 //// [tools.butterbee.browser.chromium]
 //// cmd = "chromium"
 //// flags = []
 //// host = "127.0.0.1"
-//// port_range = [9143, 9163]
 //// ```
-////
 
 import butterbee/internal/runner/firefox
 import gleam/dict.{type Dict}
@@ -31,9 +27,6 @@ import gleam/dynamic/decode
 
 /// Butterbee will use this host url unless overridden 
 pub const default_host: String = "127.0.0.1"
-
-/// Butterbee will use this port range unless overridden
-pub const default_port_range: #(Int, Int) = #(9222, 9232)
 
 /// Butterbee will use this port unless overridden
 pub const default_port: Int = 9222
@@ -86,10 +79,6 @@ pub type BrowserConfig {
     extra_flags: List(String),
     /// The host to use for the browser.
     host: String,
-    /// The port range to use for the browser. 
-    /// The first port in the range is the minimum port to use for the browser.
-    /// The second port in the range is the maximum port to use for the browser.
-    port_range: #(Int, Int),
   )
 }
 
@@ -107,7 +96,6 @@ pub fn default_configuration(browser_type: BrowserType) -> BrowserConfig {
     cmd: cmd,
     extra_flags: [],
     host: default_host,
-    port_range: default_port_range,
   )
 }
 
@@ -128,13 +116,6 @@ pub fn with_extra_flags(
 
 pub fn with_host(config: BrowserConfig, host: String) -> BrowserConfig {
   BrowserConfig(..config, host:)
-}
-
-pub fn with_port_range(
-  config: BrowserConfig,
-  port_range: #(Int, Int),
-) -> BrowserConfig {
-  BrowserConfig(..config, port_range:)
 }
 
 @internal
@@ -162,17 +143,5 @@ pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {
     decode.list(decode.string),
   )
   use host <- decode.optional_field("host", default_host, decode.string)
-  use port_range <- decode.optional_field("port_range", default_port_range, {
-    use a <- decode.field(0, decode.int)
-    use b <- decode.field(1, decode.int)
-
-    decode.success(#(a, b))
-  })
-  decode.success(BrowserConfig(
-    start_url:,
-    cmd:,
-    extra_flags:,
-    host:,
-    port_range:,
-  ))
+  decode.success(BrowserConfig(start_url:, cmd:, extra_flags:, host:))
 }

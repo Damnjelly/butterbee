@@ -1,5 +1,5 @@
 name = "butterbee"
-version = "0.1.0"
+version = "1.0.0"
 description = "A webdriver bidi client written in Gleam, for Gleam."
 licences = ["Apache-2.0"]
 
@@ -15,6 +15,11 @@ repo = "butterbee"
 [[links]]
 title = "github mirror"
 href = "https://github.com/Damnjelly/butterbee"
+
+[[documentation.pages]]
+title = "page modules"
+path = "page-modules.html"
+source = "docs/page-modules.md"
 
 [[documentation.pages]]
 title = "test runners"
@@ -53,9 +58,5 @@ gleeunit = ">= 1.6.1 and < 2.0.0"
 pprint = ">= 1.0.6 and < 2.0.0"
 
 
-# [tools.butterbee]
-
 [tools.butterbee.browser.firefox]
 flags = ["-headless"]
-host = "127.0.0.1"
-port_range = [9222, 9282]

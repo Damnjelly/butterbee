@@ -1,7 +1,8 @@
-////
 //// The by module contains functions to specify the type of locator to use
-//// to query for web elements
-//// 
+//// to query for web elements.
+////
+//// For resources on how to use xpath and css locators, see 
+//// [Xpath cheatsheet](https://devhints.io/xpath).
 
 import butterbidi/browsing_context/types/locator.{type Locator, type MatchType}
 

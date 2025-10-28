@@ -1,6 +1,33 @@
+//// The action module contains functions to get elements from the DOM
 ////
-//// The page module contains functions to locate DOM nodes
+//// ## Usage
 ////
+//// After navigating to a page, call one of the functions in this module to get a node,
+//// or a list of nodes. After getting a node, you can perform actions on it using functions from
+//// the [`node`](https://hexdocs.pm/butterbee/node.html) and 
+//// [`action`](https://hexdocs.pm/butterbee/action.html) modules.
+//// Butterbee supports different locating strategies, see the 
+//// [by](https://hexdocs.pm/butterbee/by.html) module for more information.
+////
+//// ### Example
+////
+//// This example gets a node from the page, and then performs an action on it:
+////
+//// ```gleam
+//// let example =
+////   driver
+////   // navigate to a page
+////   |> driver.goto("https://gleam.run/")
+////   // get the node matching the css selector `a.logo` 
+////   // and adds it to the state of the webdriver
+////   |> get.node(by.css("a.logo"))
+////   // perform actions on the node that was queried above
+////   |> node.get(node.text()) 
+//// ```
+//// 
+//// getting nodes directly is useful for one-off situations, 
+//// but if you want to make your tests more reusable, its recommended to use 
+//// [page modules](https://hexdocs.pm/butterbee/page-modules.html).
 
 import butterbee/commands/browsing_context
 import butterbee/internal/error
@@ -14,22 +41,8 @@ import gleam/list
 import gleam/option
 import gleam/result
 
-///
-/// Finds a node matching the given locator, if multiple nodes are found, the first node is returned.
-/// Will retry for a configurable amount of time to find a node.
-/// Panics if no node is found after retrying for the configured amount of time.
-/// 
-/// # Example
-///
-/// This example finds the first node matching the css selector `a.logo`:
-///
-/// ```gleam
-/// let example =
-///   webdriver.new()
-///   |> webdriver.goto("https://gleam.run/")
-///   |> query.node(by.css("a.logo"))
-/// ```
-///
+/// Finds a node matching the given locator. 
+/// If multiple nodes are found, the first node is returned.
 pub fn node(
   driver: WebDriver(state),
   locator: Locator,
@@ -49,21 +62,7 @@ pub fn node(
   |> webdriver.map_state(driver)
 }
 
-///
 /// Finds all nodes matching the given locator.
-/// Will retry for a configurable amount of time to find all nodes.
-/// 
-/// # Example
-///
-/// This example finds all nodes matching the css selector `a.logo`:
-///
-/// ```gleam
-/// let example =
-///   webdriver.new()
-///   |> webdriver.goto("https://gleam.run/")
-///   |> query.nodes(by.css("a.logo"))
-/// ```
-///
 pub fn nodes(
   driver: WebDriver(state),
   locator: Locator,
@@ -83,6 +82,7 @@ pub fn nodes(
   |> webdriver.map_state(driver)
 }
 
+/// Finds a node matching the given locator starting from the node in state.
 pub fn from_node(
   driver: WebDriver(remote_value.NodeRemoteValue),
   locator: Locator,
@@ -116,24 +116,7 @@ pub fn from_node(
   |> webdriver.map_state(driver)
 }
 
-/// 
-/// Query for a list of nodes from the position of another nodes.
-/// 
-/// Will retry for a configurable amount of time to find a node.
-/// 
-/// # Example
-///
-/// This example first finds all the package items, 
-/// then refines the list of nodes to only contain the package names:
-///
-/// ```gleam
-/// let example =
-///   webdriver.new()
-///   |> webdriver.goto("https://packages.gleam.run/")
-///   |> query.nodes(by.css("div.package-item"))
-///   |> query.refine(by.css("h2.package-name"))
-/// ```
-///
+/// Finds a list of nodes matching the given locator starting from the node in state.
 pub fn nodes_from_node(
   driver: WebDriver(remote_value.NodeRemoteValue),
   locator: Locator,
@@ -158,6 +141,7 @@ pub fn nodes_from_node(
   |> webdriver.map_state(driver)
 }
 
+/// Finds a node matching the given index starting from the list of nodes in state.
 pub fn node_from_nodes(
   driver: WebDriver(List(remote_value.NodeRemoteValue)),
   index: Int,
@@ -172,6 +156,9 @@ pub fn node_from_nodes(
   |> webdriver.map_state(driver)
 }
 
+/// Performs the locate nodes command, retries until a node is found, or until 
+/// the timeout is reached.
+@internal
 pub fn locate_nodes(
   driver: WebDriver(state),
   params: locate_nodes.LocateNodesParameters,

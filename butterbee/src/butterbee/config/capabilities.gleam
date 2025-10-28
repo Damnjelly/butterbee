@@ -1,4 +1,3 @@
-////
 //// This module provides functionality for parsing and creating capabilities requests 
 //// from TOML configuration files for WebDriver(state) BiDi sessions.
 ////
@@ -14,9 +13,8 @@
 ////
 //// ### TOML Configuration Format
 ////
-//// The capabilities are defined in a TOML configuration file under the
-//// `[tools.butterbee.capabilities]` section:
-//// section:
+//// The capabilities are defined under the
+//// `[tools.butterbee.capabilities]` section of your `gleam.toml` file:
 ////
 //// ```toml
 //// # gleam.toml
@@ -50,7 +48,6 @@
 ////   }
 //// ]
 //// ```
-////
 
 import butterbee/internal/lib
 import butterbidi/session/commands/new
@@ -70,18 +67,7 @@ import gleam/result
 import gleam/string
 import tom
 
-///
 /// Creates a default `CapabilitiesRequest` with no always_match or first_match capabilities.
-///
-/// ## Returns
-/// A `CapabilitiesRequest` with `None` values for both capability sets.
-///
-/// ## Example
-/// ```gleam
-/// let empty_capabilities = default()
-/// // CapabilitiesRequest(always_match: None, first_match: None)
-/// ```
-///
 pub const default: CapabilitiesRequest = CapabilitiesRequest(None, None)
 
 @internal

@@ -1,3 +1,29 @@
+//// Define elements for page module using this module.
+////
+//// Example:
+////
+//// ```gleam
+//// import butterbee/page_module/select_element
+////
+//// pub fn pokemon_dropdown(
+////   driver: WebDriver(state),
+////   action: fn(_) -> WebDriver(new_state),
+//// ) {
+////   select_element.define(field: by.css("select#pokemon"))
+////   |> select_element.perform_action(driver, action)
+//// }
+////
+//// // Select an option by its visible text
+//// driver
+//// |> form_page.pokemon_dropdown(select_element.option("Charmander"))
+////
+//// // Get the currently selected option's text
+//// driver
+//// |> form_page.pokemon_dropdown(select_element.selected_text())
+//// ```
+////
+//// For a more complete example, see the [`page module`](https://hexdocs.pm/butterbee/page-modules) guide.
+
 import butterbee/get
 import butterbee/internal/function
 import butterbee/webdriver.{type WebDriver}

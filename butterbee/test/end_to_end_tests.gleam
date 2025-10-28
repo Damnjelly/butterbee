@@ -4,7 +4,6 @@ import butterbee/driver
 import butterbee/internal/test_page
 import butterbee/key
 import butterbee/node
-import butterbee/page
 import butterbee/page_module/list_element
 import butterbee/page_module/select_element
 import butterbee/page_module/table_element
@@ -18,14 +17,14 @@ pub fn navigation_test_() {
 
   let assert Ok(first_url) =
     driver
-    |> page.url()
+    |> driver.url()
     |> driver.value()
   assert True == string.contains(first_url, "about:blank")
 
   let assert Ok(second_url) =
     driver
     |> test_page.goto()
-    |> page.url()
+    |> driver.url()
     |> driver.close()
   assert True == string.ends_with(second_url, "test_page.html")
 }
@@ -109,7 +108,7 @@ pub fn table_row_test_() {
   let assert Ok(table_row) =
     driver
     |> test_page.data_table(table_element.Row(1), node.inner_text())
-    |> driver.value()
+    |> driver.close()
   assert table_row == "1\tTest Item 1\tPASS"
 }
 
@@ -154,7 +153,7 @@ pub fn table_cell_test_() {
   let assert Ok(cell_3_3) =
     driver
     |> test_page.data_table(table_element.Cell(2, 2), node.inner_text())
-    |> driver.value()
+    |> driver.close()
   assert cell_1_1 <> " " <> cell_1_2 <> " " <> cell_1_3 == "1 Test Item 1 PASS"
   assert cell_2_1 <> " " <> cell_2_2 <> " " <> cell_2_3 == "2 Test Item 2 FAIL"
   assert cell_3_1 <> " " <> cell_3_2 <> " " <> cell_3_3 == "3 Test Item 3 PASS"

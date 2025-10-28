@@ -1,12 +1,8 @@
-////
 //// ## [Browsing context commands](https://w3c.github.io/webdriver-bidi/#module-browsing-context-commands) 
 ////
 //// The browsing context commands module contains commands found in the browsing context section of the
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level
 //// API. But you can use these commands directly if you want something specific.
-////
-//// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
-////
 
 import butterbee/internal/error
 import butterbee/internal/id
@@ -28,7 +24,6 @@ import gleam/json
 import gleam/option.{None, Some}
 import gleam/result
 
-///
 /// Returns a tree of all descendent navigables including the given 
 /// parent itself, or all top-level contexts when no parent is provided.
 /// 
@@ -41,7 +36,6 @@ import gleam/result
 /// ```
 ///
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-getTree)
-///
 pub fn get_tree(
   driver: WebDriver(state),
   params: get_tree.GetTreeParameters,
@@ -68,7 +62,6 @@ pub fn get_tree(
   }
 }
 
-///
 /// Returns a list of all nodes matching the specified locator.
 /// 
 /// ## Example
@@ -81,7 +74,6 @@ pub fn get_tree(
 /// ```
 ///
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-locateNodes)
-///
 pub fn locate_nodes(
   driver: WebDriver(state),
   params: locate_nodes.LocateNodesParameters,
@@ -110,7 +102,6 @@ pub fn locate_nodes(
   }
 }
 
-///
 /// Navigates a navigable to the given URL.
 /// 
 /// ## Example
@@ -122,7 +113,6 @@ pub fn locate_nodes(
 /// ```
 ///
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-browsingContext-navigate)
-///
 pub fn navigate(
   driver: WebDriver(state),
   params: navigate.NavigateParameters,

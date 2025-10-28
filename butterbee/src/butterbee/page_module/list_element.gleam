@@ -1,3 +1,25 @@
+//// Define elements for page module using this module.
+////
+//// Example:
+////
+//// ```gleam
+//// import butterbee/page_module/list_element.{type NodeList}
+////
+//// pub fn team_list(
+////   driver: WebDriver(state),
+////   on_element: NodeList,
+////   action: fn(_) -> WebDriver(new_state),
+//// ) {
+////   list_element.define(
+////     list: by.css("ul#team"),
+////     list_item: by.css("li"),
+////   )
+////   |> list_element.perform_action(driver, on_element, action)
+//// }
+//// ```
+////
+//// For a more complete example, see the [`page module`](https://hexdocs.pm/butterbee/page-modules) guide.
+
 import butterbee/get
 import butterbee/webdriver.{type WebDriver}
 import butterbidi/browsing_context/types/locator.{type Locator}
@@ -7,6 +29,7 @@ pub type NodeList {
   Row(Int)
 }
 
+/// Define an element for a page module.
 pub fn define(
   list list_locator: Locator,
   list_item list_item_locator: Locator,
@@ -14,6 +37,7 @@ pub fn define(
   #(list_locator, list_item_locator)
 }
 
+/// Perform an action on the defined element.
 pub fn perform_action(
   locator: #(Locator, Locator),
   driver: WebDriver(state),

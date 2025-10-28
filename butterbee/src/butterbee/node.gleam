@@ -1,6 +1,32 @@
+//// The node module contains functions to work with DOM nodes
+//// 
+//// ## Usage
 ////
-//// The nodes module contains functions to work with DOM nodes
+//// In your tests, call 
+//// [`get`](https://hexdocs.pm/butterbee/get.html#get),
+//// [`do`](https://hexdocs.pm/butterbee/node.html#do), 
+//// [`get_all`](https://hexdocs.pm/butterbee/get.html#get_all), or 
+//// [`do_all`](https://hexdocs.pm/butterbee/node.html#do_all) 
+//// to perform an action on a node. These function expect a parameter `action` 
+//// that is the action to perform. possible actions are listed in this module and in the 
+//// [action](https://hexdocs.pm/butterbee/action.html) module.
 ////
+//// ### Example
+////
+//// ```gleam
+//// let text =
+////   driver
+////   |> driver.goto("https://gleam.run/")
+////   |> get.node(by.css("a.logo"))
+////   // perform an action on the node, without updating the state
+////   |> node.do(action.click(key.LeftClick))
+////   // get the text of the node, the state is updated with the result of the action
+////   |> node.get(node.text()) 
+//// ```
+////
+//// Performing actions on nodes directly is useful for one-off situations, 
+//// but if you want to make your tests more reusable, its recommended to use 
+//// [page modules](https://hexdocs.pm/butterbee/page-modules.html).
 
 import butterbee/internal/error
 import butterbee/internal/function
@@ -9,6 +35,7 @@ import butterbee/webdriver.{type WebDriver}
 import butterbidi/script/types/local_value
 import butterbidi/script/types/remote_value
 
+/// Perform an action on a node, updating the state with the result of the action
 pub fn get(
   driver: WebDriver(remote_value.NodeRemoteValue),
   action: fn(_) -> WebDriver(new_state),
@@ -16,6 +43,7 @@ pub fn get(
   webdriver.do(driver, action)
 }
 
+/// Perform an action on a list of nodes, updating the state with the result of the action
 pub fn get_all(
   driver: WebDriver(List(remote_value.NodeRemoteValue)),
   action: fn(_) -> WebDriver(new_state),
@@ -23,6 +51,7 @@ pub fn get_all(
   webdriver.do(driver, action)
 }
 
+/// Perform an action on a node, without updating the state of the driver
 pub fn do(
   driver: WebDriver(remote_value.NodeRemoteValue),
   action: fn(_) -> WebDriver(new_state),
@@ -31,22 +60,18 @@ pub fn do(
   driver
 }
 
-///
-/// Get the inner text of the node.
-/// 
-/// # Example
-///
-/// This example finds the first node matching the css selector `a.logo`
-/// and returns its inner text:
-///
-/// ```gleam
-/// let example =
-///   webdriver.new()
-///   |> webdriver.goto("https://gleam.run/")
-///   |> nodes.query(by.css("a.logo"))
-///   |> nodes.inner_text()
-/// ```
-///
+/// Perform an action on a list of nodes, without updating the state of the driver
+pub fn do_all(
+  driver: WebDriver(List(remote_value.NodeRemoteValue)),
+  action: fn(_) -> WebDriver(new_state),
+) -> WebDriver(List(remote_value.NodeRemoteValue)) {
+  webdriver.do(driver, action)
+  driver
+}
+
+/// Get text from a node, tries different methods to get the text from a node. 
+/// First tries `textContent`, then `innerText`, then `value`.
+/// Returns null if no text is found.
 pub fn text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   WebDriver(String) {
   let function =
@@ -70,21 +95,9 @@ pub fn text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   }
 }
 
-/// 
-/// Returns the inner texts of the nodes.
-/// 
-/// # Example
-///
-/// This example finds all nodes matching the css selector `a.logo` and returns their inner texts:
-///
-/// ```gleam
-/// let example =
-///   webdriver.new()
-///   |> webdriver.goto("https://gleam.run/")
-///   |> nodes.query(by.css("a.logo"))
-///   |> nodes.inner_texts()
-/// ```
-///
+/// Get text from a list of nodes, tries different methods to get the text from a node. 
+/// First tries `textContent`, then `innerText`, then `value`.
+/// Returns null if no text is found.
 pub fn texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   WebDriver(List(String)) {
   let function =
@@ -99,6 +112,7 @@ pub fn texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   }
 }
 
+/// Get the inner text of a node, returns an empty string if no text is found.
 pub fn inner_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   WebDriver(String) {
   let function = "function() { return this.innerText; }"
@@ -110,6 +124,7 @@ pub fn inner_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   }
 }
 
+/// Get the inner text of a list of nodes, returns an empty string if no text is found.
 pub fn inner_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   WebDriver(List(String)) {
   let function = "function() { return Array.from(this, n => n.innerText); }"
@@ -121,6 +136,7 @@ pub fn inner_texts() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   }
 }
 
+/// Set the value of a node. Useful for setting text fields.
 pub fn set_value(
   value: String,
 ) -> fn(WebDriver(remote_value.NodeRemoteValue)) -> WebDriver(String) {
@@ -133,6 +149,7 @@ pub fn set_value(
   }
 }
 
+/// Get the value of a node.
 pub fn value() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   WebDriver(String) {
   let function = "function() { return this.value; }"
@@ -144,6 +161,7 @@ pub fn value() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   }
 }
 
+/// Get the value of a list of nodes.
 pub fn values() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   WebDriver(List(String)) {
   let function = "function() { return Array.from(this, n => n.value); }"
@@ -155,6 +173,7 @@ pub fn values() -> fn(WebDriver(List(remote_value.NodeRemoteValue))) ->
   }
 }
 
+/// Set an attribute of a node.
 pub fn set_attribute(
   attribute: String,
   value: String,
@@ -172,6 +191,7 @@ pub fn set_attribute(
   }
 }
 
+/// Check if a node has an attribute.
 pub fn has_attribute(
   attribute: String,
 ) -> fn(WebDriver(remote_value.NodeRemoteValue)) -> WebDriver(Bool) {
@@ -184,6 +204,7 @@ pub fn has_attribute(
   }
 }
 
+/// Scroll a node into view.
 pub fn scroll_into_view() {
   let function = "function() { this.scrollIntoView(true); }"
   fn(driver: WebDriver(remote_value.NodeRemoteValue)) {

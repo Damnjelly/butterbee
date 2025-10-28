@@ -1,16 +1,16 @@
-////
-//// A collection of special keys
+//// A collection of special keys for use with the 
+//// [`action.enter_keys`](https://hexdocs.pm/butterbee/action.html#enter_keys/2) function.
 ////
 //// NOTE: This module has been slopped together from a claude prompt.
 //// If a key doesn't work, it's probably a hallucination.
 //// Please [open an issue](https://codeberg.org/gelei/butterbee/issues/new) if you find one.
-////
 
 pub type MouseButton {
   LeftClick
   RightClick
 }
 
+@internal
 pub fn mouse_button_to_int(click: MouseButton) -> Int {
   case click {
     LeftClick -> 0
@@ -18,6 +18,8 @@ pub fn mouse_button_to_int(click: MouseButton) -> Int {
   }
 }
 
+/// NOTE: Don't use this key for entering a new line into text fields using the `node.set_value` 
+/// function. Use `\n` instead.
 pub const enter: String = "\u{E007}"
 
 pub const tab: String = "\u{E004}"

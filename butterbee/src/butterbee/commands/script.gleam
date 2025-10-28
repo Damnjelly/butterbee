@@ -1,12 +1,8 @@
-////
 //// ## [Script commands](https://w3c.github.io/webdriver-bidi/#module-script-commands)
 ////
 //// The script commands module contains commands found in the script section of the
 //// webdriver bidi protocol. Butterbee uses these internally to create the high level
 //// API. But you can use these commands directly if you want something specific.
-////
-//// These commands usually expect parameter defined in the [butterbidi project](https://hexdocs.pm/butterbidi/index.html).
-////  
 
 import butterbee/internal/error
 import butterbee/internal/id
@@ -20,31 +16,18 @@ import butterbidi/script/definition as script_definition
 import butterbidi/script/types/evaluate_result.{type EvaluateResult}
 import gleam/result
 
-///
 /// Calls a function on the page with the given arguments.
 ///
 /// ## Example
 ///
 /// ```gleam
-/// let result =
-///   webdriver.socket
-///   |> script.call_function(call_function.CallFunctionParameters(
-///     function_declaration: "function(node) { return node.innerText; }",
-///     await_promise: False,
-///     target: target.Context(target.ContextTarget(webdriver.context, None)),
-///     arguments: Some([
-///       local_value.RemoteReference(
-///         remote_reference.Shared(remote_reference.SharedReference(
-///           shared_id,
-///           None,
-///         )),
-///       ),
-///     ]),
-///   ))
+/// let function_params =
+///   call_function.new(target)
+///   |> call_function.with_function(function)
+///   |> call_function.with_arguments(arguments)
 /// ```
 ///
 /// [w3c](https://w3c.github.io/webdriver-bidi/#command-script-callFunction)
-///
 pub fn call_function(
   driver: webdriver.WebDriver(state),
   params: CallFunctionParameters,
