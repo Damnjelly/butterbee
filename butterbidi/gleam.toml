@@ -1,5 +1,5 @@
 name = "butterbidi"
-version = "0.1.0"
+version = "1.0.0"
 
 description = "Spec compliant webdriver bidi types, decoders and encoders for gleam"
 
