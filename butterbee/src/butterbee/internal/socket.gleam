@@ -103,7 +103,7 @@ pub fn new(
           stratus.continue(state)
         }
         stratus.User(Close) -> {
-          let _ = stratus.close(conn)
+          let _ = stratus.close(conn, stratus.NotProvided)
           stratus.stop()
         }
       }
