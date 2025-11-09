@@ -72,6 +72,14 @@
             "options": {
                 "cwd": "${workspaceFolder}/butterbee"
             }
+        },
+        {
+            "label": "gleam clean",
+            "type": "shell",
+            "command": "sh -c 'cd ./butterbee && gleam clean; cd ../butterbidi && gleam clean; cd ../butterlib && gleam clean'",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
         }
     ]
 }

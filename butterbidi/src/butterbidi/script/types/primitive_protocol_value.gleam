@@ -1,10 +1,11 @@
-import butterlib/log
 import gleam/bool
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/float
 import gleam/int
 import gleam/json.{type Json}
+import gleam/string
+import palabres as log
 
 pub type PrimitiveProtocolValue {
   Undefined(UndefinedValue)
@@ -101,7 +102,11 @@ fn string_to_special_number(variant: String) -> SpecialNumber {
     "-0" -> NegativeZero
     "Infinity" -> Infinity
     "-Infinity" -> NegativeInfinity
-    _ -> log.warning_and_continue("Unknown special number: " <> variant, NaN)
+    _ -> {
+      log.warning("Unknown special number")
+      |> log.string("variant", variant)
+      NaN
+    }
   }
 }
 
@@ -154,26 +159,39 @@ pub fn number_value_classifier(value: Dynamic) -> Number {
     "Int" ->
       case decode.run(value, decode.int) {
         Ok(int) -> Int(int)
-        Error(_) ->
-          log.warning_and_continue("Failed to decode Int", Special(NaN))
+        Error(_) -> {
+          log.warning("Failed to decode Int")
+          |> log.string("value", string.inspect(value))
+          |> log.log
+          Special(NaN)
+        }
       }
     "Float" ->
       case decode.run(value, decode.float) {
         Ok(float) -> Float(float)
-        Error(_) ->
-          log.warning_and_continue("Failed to decode Float", Special(NaN))
+        Error(_) -> {
+          log.warning("Failed to decode Float")
+          |> log.string("value", string.inspect(value))
+          |> log.log
+          Special(NaN)
+        }
       }
     "String" ->
       case decode.run(value, decode.string) {
         Ok(string) -> Special(string_to_special_number(string))
-        Error(_) ->
-          log.warning_and_continue("Failed to decode String", Special(NaN))
+        Error(_) -> {
+          log.warning("Failed to decode String")
+          |> log.string("value", string.inspect(value))
+          |> log.log
+          Special(NaN)
+        }
       }
-    _ ->
-      log.warning_and_continue(
-        "Unknown number type: " <> dynamic.classify(value),
-        Special(NaN),
-      )
+    _ -> {
+      log.warning("Unknown number type")
+      |> log.string("type", dynamic.classify(value))
+      |> log.log
+      Special(NaN)
+    }
   }
 }
 

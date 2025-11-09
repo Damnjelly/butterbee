@@ -7,11 +7,12 @@
 
 import butterbee/config/browser as browser_config
 import butterbee/internal/error
-import butterlib/log
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
+import gleam/javascript/promise.{type Promise}
 import gleam/option.{type Option, None, Some}
 import gleam/result
+import palabres as log
 import simplifile
 import youid/uuid
 
@@ -74,8 +75,8 @@ pub fn get_request(port: Int, host: String) -> Request(String) {
 }
 
 /// Returns a free port to use for a webdriver session
-@external(erlang, "port_finder", "new_port")
-@external(javascript, "port_finder", "new_port")
+@external(erlang, "browser_ffi", "new_port")
+@external(javascript, "./browser_ffi.mjs", "new_port")
 pub fn new_port() -> Result(Int, error.PortError)
 
 /// Create a new profile directory
@@ -83,14 +84,17 @@ pub fn new_port() -> Result(Int, error.PortError)
 pub fn new_profile(
   data_dir: String,
 ) -> Result(#(String, String), simplifile.FileError) {
-  let profile = uuid.v7() |> uuid.to_string()
-  let profile_dir = data_dir <> "/" <> profile
+  let profile_name = uuid.v7() |> uuid.to_string()
+  let profile_dir = data_dir <> "/" <> profile_name
 
   let profile =
     simplifile.create_directory_all(profile_dir)
-    |> result.map(with: fn(_) { #(profile, profile_dir) })
+    |> result.map(with: fn(_) { #(profile_name, profile_dir) })
 
-  log.debug("Created profile at " <> profile_dir)
+  log.debug("Creating profile")
+  |> log.string("profile dir", profile_dir)
+  |> log.string("profile name", profile_name)
+  |> log.log
 
   profile
 }

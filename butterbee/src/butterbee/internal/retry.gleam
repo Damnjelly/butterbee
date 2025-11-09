@@ -1,15 +1,17 @@
-import butterlib/log
-import gleam/erlang/process
-import gleam/int
 import gleam/order
 import gleam/time/duration
 import gleam/time/timestamp.{type Timestamp}
+import palabres as log
+
+@target(erlang)
+import gleam/erlang/process
+
+@target(javascript)
+import gleam/javascript/promise
 
 const max_wait_time = 4000
 
-///
 /// Retry a function until it returns a result that satisfies a condition
-///
 pub fn until_ok(
   retry_function: fn() -> Result(return_type, b),
 ) -> Result(return_type, b) {
@@ -45,8 +47,11 @@ fn result_loop(
           duration.milliseconds(max_wait_time),
         )
       {
-        order.Gt | order.Eq ->
-          log.warning_and_continue("Retry timed out", result)
+        order.Gt | order.Eq -> {
+          log.warning("Retry timed out")
+          |> log.log
+          result
+        }
         order.Lt -> {
           wait_on_attempts(attempts)
           log_attempts(attempts)
@@ -57,10 +62,8 @@ fn result_loop(
   }
 }
 
-///
 /// Retry a function until it returns a result that satisfies a condition that returns a Bool
 /// Panics if the function never returns true
-///
 pub fn until_true(retry_function: fn() -> Bool) -> Bool {
   let timeout =
     timestamp.add(timestamp.system_time(), duration.milliseconds(max_wait_time))
@@ -75,10 +78,16 @@ fn bool_loop(
   case retry_function() {
     True -> True
     False -> {
-      case timestamp.compare(timeout, timestamp.system_time()) {
+      case
+        duration.compare(
+          timestamp.difference(timeout, timestamp.system_time()),
+          duration.milliseconds(max_wait_time),
+        )
+      {
         order.Gt | order.Eq -> {
           log.warning("Retry timed out")
-          False
+          |> log.log
+          True
         }
         order.Lt -> {
           wait_on_attempts(attempts)
@@ -90,22 +99,34 @@ fn bool_loop(
   }
 }
 
+@target(erlang)
 fn wait_on_attempts(attempts: Int) -> Nil {
-  let wait_time = case attempts {
+  process.sleep(get_wait_time(attempts))
+}
+
+@target(javascript)
+fn wait_on_attempts(attempts: Int) -> Nil {
+  delay(get_wait_time(attempts))
+}
+
+@target(javascript)
+@external(javascript, "./retry_ffi.mjs", "delay")
+pub fn delay(ms: Int) -> Nil
+
+fn get_wait_time(attempts: Int) -> Int {
+  case attempts {
     0 | 1 -> 50
     2 | 3 -> 100
     4 | 5 -> 200
     6 | 7 -> 500
     _ -> 1000
   }
-  process.sleep(wait_time)
 }
 
 fn log_attempts(attempts: Int) -> Nil {
-  log.debug(
-    "Connection attempt failed, retrying, current attempt: "
-    <> int.to_string(attempts),
-  )
+  log.debug("retry attempts")
+  |> log.int("attempts", attempts)
+  |> log.log
 }
 
 /// Increment a value until a condition is met

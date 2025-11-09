@@ -32,7 +32,7 @@
             packages =
               let
                 dependencies = with pkgs; [
-                  erlang_27
+                  erlang
                   rebar3
                 ];
 
@@ -50,6 +50,7 @@
                   nixfmt
                   typos-lsp
                   marksman
+                  nodejs
                 ];
               in
               dependencies ++ runtimeDependencies ++ devDependencies;

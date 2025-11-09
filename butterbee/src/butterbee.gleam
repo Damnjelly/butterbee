@@ -1,4 +1,6 @@
 import butterlib/log
+import palabres as logger
+import palabres/level
 import simplifile
 
 /// Initialize butterbee,
@@ -6,12 +8,35 @@ import simplifile
 /// Then call [`driver.new`](https://hexdocs.pm/butterbee/driver.html#new) in your test
 /// to start using butterbee.
 pub fn init() {
-  log.debug("Initializing butterbee")
-  let _ = log.suppress_sasl_error_reports()
-
-  log.debug("Deleting data_dir")
+  logger.debug("Initializing butterbee")
+  |> logger.log
+  logger.debug("Deleting data_dir")
+  |> logger.log
   //TODO: actually delete data_dir instead of hardcoding it
-  let _ = simplifile.delete("/tmp/butterbee")
+  // let _ = simplifile.delete("/tmp/butterbee")
 
   Nil
+}
+
+import butterbee/action
+import butterbee/by
+import butterbee/config/browser
+import butterbee/driver
+import butterbee/get
+import butterbee/key
+import butterbee/node
+
+pub fn main() {
+  log.configure(level.Debug)
+  let assert Ok(output) =
+    driver.new(browser.Firefox)
+    |> driver.goto("https://gleam.run/")
+    |> get.node(by.xpath(
+      "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
+    ))
+    |> node.do(action.click(key.LeftClick))
+    |> get.node(by.css("pre.log"))
+    |> node.get(node.text())
+    |> driver.close()
+  assert output == "Hello, Joe!\n"
 }

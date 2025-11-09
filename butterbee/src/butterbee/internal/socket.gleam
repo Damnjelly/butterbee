@@ -4,44 +4,80 @@ import butterbee/internal/error
 import butterbee/internal/glam
 import butterbee/internal/retry
 import butterbidi/definition
-import butterlib/log
-import gleam/dict.{type Dict}
+import gleam/bool
+import gleam/dict
 import gleam/dynamic/decode.{type Decoder}
-import gleam/erlang/process
+import gleam/fetch
 import gleam/http/request.{type Request}
+import gleam/http/response
+import gleam/javascript/promise
 import gleam/json.{type Json}
-import gleam/otp/actor
+import gleam/option.{None, Some}
 import gleam/result
-import gleam/uri
-import stratus
+import gleam/uri.{Uri}
+import palabres as log
+
+@target(erlang)
+import gleam/erlang/process
+@target(erlang)
+import gleam/otp/actor
+@target(erlang)
+import stratus as websocket
+
+@target(javascript)
+import stratocumulus.{type WebSocket} as websocket
 
 const request_timeout = 5000
 
+fn log_response(response: String) {
+  log.debug("")
+  |> log.string("response", "\n" <> glam.pretty_json(response))
+  |> log.log
+}
+
+fn log_request(request: String) {
+  log.debug("")
+  |> log.string("request", "\n" <> glam.pretty_json(request))
+  |> log.log
+}
+
+fn id_decoder() -> Decoder(Int) {
+  use id <- decode.field("id", decode.int)
+  decode.success(id)
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// ERLANG WEBSOCKET
+// ─────────────────────────────────────────────────────────────────────────
+
+@target(erlang)
+pub type WebDriverSocket {
+  WebDriverSocket(
+    actor: actor.Started(process.Subject(websocket.InternalMessage(Msg))),
+  )
+}
+
+@target(erlang)
 pub type Msg {
   SendCommand(subject: process.Subject(Result(String, String)), request: String)
   Close
 }
 
-pub type WebDriverSocket {
-  WebDriverSocket(
-    actor: actor.Started(process.Subject(stratus.InternalMessage(Msg))),
-  )
-}
-
+@target(erlang)
 pub fn new(
   request: Request(String),
 ) -> Result(WebDriverSocket, error.ButterbeeError) {
-  log.debug(
-    "Connecting to WebDriver server at "
-    <> request.to_uri(request) |> uri.to_string(),
-  )
+  log.debug("Connecting to WebDriver server")
+  |> log.string("url", request.to_uri(request) |> uri.to_string())
+  |> log.log
+
   let state = Ok(dict.new())
 
   let subject =
-    stratus.new(request, state)
-    |> stratus.on_message(fn(state, msg, conn) {
+    websocket.new(request, state)
+    |> websocket.on_message(fn(state, msg, conn) {
       case msg {
-        stratus.Text(msg) -> {
+        websocket.Text(msg) -> {
           log_response(msg)
 
           let state = case state {
@@ -53,7 +89,7 @@ pub fn new(
               })
 
               use subject <- result.try({
-                get_subject(state, id)
+                dict.get(state, id)
                 |> result.map_error(fn(_) {
                   error.ResponseDoesNotHaveCorrespondingRequestId(id)
                 })
@@ -73,10 +109,10 @@ pub fn new(
               Ok(state |> dict.drop([id]))
             }
           }
-          stratus.continue(state)
+          websocket.continue(state)
         }
-        stratus.Binary(_) -> stratus.continue(state)
-        stratus.User(SendCommand(subject, request)) -> {
+        websocket.Binary(_) -> websocket.continue(state)
+        websocket.User(SendCommand(subject, request)) -> {
           let id_decoder = {
             use id <- decode.field("id", decode.int)
             decode.success(id)
@@ -93,54 +129,43 @@ pub fn new(
               log_request(request)
 
               use _ <- result.try({
-                stratus.send_text_message(conn, request)
-                |> result.map_error(error.CouldNotSendWebSocketRequest)
+                case websocket.send_text_message(conn, request) {
+                  Ok(_) -> Ok(Nil)
+                  Error(err) ->
+                    Error(error.WebSocketError(error.CouldNotSendRequest(err)))
+                }
               })
 
               Ok(dict.insert(state, id, subject))
             }
           }
-          stratus.continue(state)
+          websocket.continue(state)
         }
-        stratus.User(Close) -> {
-          let _ = stratus.close(conn, stratus.NotProvided)
-          stratus.stop()
+        websocket.User(Close) -> {
+          let _ = websocket.close(conn, websocket.NotProvided)
+          websocket.stop()
         }
       }
     })
 
   use subject <- result.try({
-    retry.until_ok(fn() { stratus.start(subject) })
-    |> result.map_error(error.CouldNotStartWebSocket)
+    case retry.until_ok(fn() { websocket.start(subject) }) {
+      Ok(subject) -> Ok(subject)
+      Error(err) -> Error(error.WebSocketError(error.CouldNotInit(err)))
+    }
   })
 
   Ok(WebDriverSocket(subject))
 }
 
-fn get_subject(
-  state: Dict(Int, process.Subject(Result(String, String))),
-  id: Int,
-) -> Result(process.Subject(Result(String, String)), error.ButterbeeError) {
-  use subject <- result.try({
-    dict.get(state, id)
-    |> result.map_error(fn(_) {
-      error.ResponseDoesNotHaveCorrespondingRequestId(id)
-    })
-  })
-  Ok(subject)
-}
-
-fn id_decoder() -> Decoder(Int) {
-  use id <- decode.field("id", decode.int)
-  decode.success(id)
-}
-
+@target(erlang)
 /// Close the websocket connection
 pub fn close(socket: WebDriverSocket) {
-  stratus.to_user_message(Close)
+  websocket.to_user_message(Close)
   |> process.send(socket.actor.data, _)
 }
 
+@target(erlang)
 /// Send a request to the webdriver server
 /// Returns the result from the server as a dynamic
 pub fn send_request(
@@ -150,7 +175,7 @@ pub fn send_request(
 ) -> Result(definition.CommandResponse, error.ButterbeeError) {
   let result =
     process.call(socket.actor.data, request_timeout, fn(subject) {
-      stratus.to_user_message(SendCommand(subject, json.to_string(request)))
+      websocket.to_user_message(SendCommand(subject, json.to_string(request)))
     })
 
   case result {
@@ -173,12 +198,6 @@ pub fn send_request(
   }
 }
 
-fn log_response(response: String) {
-  log.debug("── Received WebDriver Response ───────────────────────
-    " <> glam.pretty_json(response))
 }
 
-fn log_request(request: String) {
-  log.debug("── Sending WebDriver Request ─────────────────────────
-    " <> glam.pretty_json(request))
 }

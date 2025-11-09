@@ -1,12 +1,12 @@
 import butterbee/internal/error
 import butterbee/internal/lib
-import butterlib/log
 import gleam/dynamic.{type Dynamic}
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
+import palabres as log
 import simplifile
 
 /// Butterbee will use this command unless overridden
@@ -43,6 +43,7 @@ pub fn get_flags(
 ///
 pub fn setup(profile_dir: String) -> Result(Nil, error.ButterbeeError) {
   log.debug("Creating user prefs")
+  |> log.log
   use _ <- result.try({
     write_user_prefs(profile_dir, [])
     |> result.map_error(fn(err) { error.CreateUserPrefsError(err) })

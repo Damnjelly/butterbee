@@ -3,19 +3,19 @@ import butterbee/config
 import butterbee/config/browser as browser_config
 import butterbee/internal/error
 import butterbee/internal/runner/firefox
-import butterlib/log
 import gleam/dict
 import gleam/erlang/process
 import gleam/list
-import gleam/option.{Some}
+import gleam/option
 import gleam/result
 import gleam/string
+import palabres as log
 import shellout
 import simplifile
 
-///
+@target(erlang)
+import gleam/erlang/process
 /// Start a browser instance
-///
 pub fn new(
   browser_to_run: browser_config.BrowserType,
   config: config.ButterbeeConfig,
@@ -73,10 +73,8 @@ pub fn new(
   Ok(browser)
 }
 
-///
 /// Run the browser
 /// TODO: Should maybe be a shell script for better lifetime management
-///
 fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
   use #(cmd, flags) <- result.try({
     browser.cmd
@@ -88,25 +86,43 @@ fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
     |> option.to_result(error.BrowserDoesNotHaveProfileDir)
   })
 
-  log.info("Starting " <> cmd <> " with flags: " <> string.inspect(flags))
+  log.info("Starting browser")
+  |> log.string("cmd", cmd)
+  |> log.string("flags", string.inspect(flags))
+  |> log.string("profile_dir", profile_dir)
+  |> log.log
 
+  do_run(cmd, flags, profile_dir)
+
+  Ok(browser)
+}
+
+@target(erlang)
+fn do_run(cmd: String, flags: List(String), profile_dir: String) {
   process.spawn(fn() {
     let _ = case
-      shellout.command(run: cmd, with: flags, in: profile_dir, opt: [])
+      shellout.command(run: cmd, with: flags, in: profile_dir, opt: [
+        shellout.LetBeStdout,
+      ])
     {
       Ok(_) -> Nil
-      Error(error) -> log.error("Error running browser command: " <> error.1)
+      Error(error) -> {
+        log.error("Error running browser command")
+        |> log.string("error", error.1)
+        |> log.log
+      }
     }
 
     // INFO: This run after the browser  closes
     log.debug("Cleaning up profile directory")
+    |> log.log
     let _ = case simplifile.delete(profile_dir) {
       Ok(_) -> Ok(Nil)
       Error(error) -> Error(error.CouldNotDeleteProfileDir(error))
     }
 
-    Some("Done")
+    option.Some("Done")
   })
+}
 
-  Ok(browser)
 }
