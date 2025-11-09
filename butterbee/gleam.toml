@@ -61,3 +61,5 @@ pprint = ">= 1.0.6 and < 2.0.0"
 
 [tools.butterbee.browser.firefox]
 flags = ["-headless"]
+
+[tools.butterbee.browser.chromium]

@@ -2,6 +2,7 @@ import butterbee/browser.{type Browser}
 import butterbee/config
 import butterbee/config/browser as browser_config
 import butterbee/internal/error
+import butterbee/internal/runner/chromium
 import butterbee/internal/runner/firefox
 import gleam/dict
 import gleam/list
@@ -49,13 +50,13 @@ pub fn new(
         request.port,
         profile_dir,
       )
-    // browser_config.Chrome -> todo as "Chrome not supported yet"
+    browser_config.Chromium -> [browser_config.start_url]
   }
 
   use _ <- result.try({
     case browser_to_run {
       browser_config.Firefox -> firefox.setup(profile_dir)
-      // browser_config.Chrome -> todo as "Chrome not supported yet"
+      browser_config.Chromium -> chromium.setup()
     }
   })
 

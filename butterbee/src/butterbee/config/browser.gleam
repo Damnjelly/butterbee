@@ -21,6 +21,7 @@
 //// host = "127.0.0.1"
 //// ```
 
+import butterbee/internal/runner/chromium
 import butterbee/internal/runner/firefox
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
@@ -46,8 +47,7 @@ pub fn default_firefox() -> Dict(BrowserType, BrowserConfig) {
 
 pub type BrowserType {
   Firefox
-  // TODO: support chrome
-  // Chrome
+  Chromium
 }
 
 ///
@@ -85,10 +85,12 @@ pub type BrowserConfig {
 pub fn default_configuration(browser_type: BrowserType) -> BrowserConfig {
   let cmd = case browser_type {
     Firefox -> firefox.default_cmd
+    Chromium -> chromium.default_cmd
   }
 
   let default_start_url = case browser_type {
     Firefox -> firefox.default_start_url
+    Chromium -> chromium.default_start_url
   }
 
   BrowserConfig(

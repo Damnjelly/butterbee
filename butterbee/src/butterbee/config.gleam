@@ -27,7 +27,7 @@
 //// host = "127.0.0.1"
 //// ```
 
-import butterbee/config/browser.{Firefox}
+import butterbee/config/browser.{Chromium, Firefox}
 import butterbee/config/driver.{driver_config_decoder}
 import butterbee/internal/lib
 import butterbidi/session/types/capabilities_request.{
@@ -77,6 +77,7 @@ pub fn with_browser_config(
   ) {
     case browser_type {
       Firefox -> dict.insert(dict, browser_type, browser_config)
+      Chromium -> dict.insert(dict, browser_type, browser_config)
     }
   }
 
