@@ -276,7 +276,7 @@ fn call_with_function(
   function: String,
   arguments: List(LocalValue),
 ) -> Result(EvaluateResult, ButterbeeError) {
-  let driver = driver.new(browser.Chromium)
+  let driver = driver.new(browser.Firefox)
 
   driver
   |> get.node(by.xpath("/html"))
