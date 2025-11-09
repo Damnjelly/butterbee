@@ -1,4 +1,4 @@
--module(port_finder).
+-module(browser_ffi).
 
 -export([new_port/0]).
 

@@ -1,4 +1,3 @@
-import butterlib/log
 import gleam/bool
 import gleam/dict
 import gleam/dynamic.{type Dynamic}
@@ -7,13 +6,12 @@ import gleam/float
 import gleam/int
 import gleam/list
 import gleam/string
+import palabres as log
 import tom
 
 pub const definition_error = "Butterbee error"
 
-/// 
 /// Returns the first element of the list, or an error if the list is empty
-/// 
 pub fn single_element(list: List(a)) -> Result(a, String) {
   case list {
     [element] -> Ok(element)
@@ -22,9 +20,7 @@ pub fn single_element(list: List(a)) -> Result(a, String) {
   }
 }
 
-///
 /// unwraps a toml document into a dynamic document
-///
 pub fn toml_to_dynamic(value: tom.Toml) -> Dynamic {
   case value {
     tom.String(value) -> dynamic.string(value)
@@ -46,13 +42,12 @@ pub fn toml_to_dynamic(value: tom.Toml) -> Dynamic {
         list.map(value, fn(table) { toml_to_dynamic(tom.Table(table)) })
       })
     }
-    _ ->
-      log.error_and_continue(
-        "Could not unwrap value: "
-          <> string.inspect(value)
-          <> " Replacing with empty string",
-        dynamic.string(""),
-      )
+    _ -> {
+      log.error("Could not unwrap value")
+      |> log.string("value", string.inspect(value))
+      |> log.log
+      dynamic.string("")
+    }
   }
 }
 
@@ -85,12 +80,11 @@ pub fn dynamic_to_string(dyn: Dynamic) -> String {
         Error(_) -> ""
       }
     }
-    _ ->
-      log.error_and_continue(
-        "Could not convert dynamic to string, value: "
-          <> string.inspect(dyn)
-          <> " replacing with empty string",
-        "",
-      )
+    _ -> {
+      log.error("Could not convert dynamic to string")
+      |> log.string("value", string.inspect(dyn))
+      |> log.log
+      ""
+    }
   }
 }

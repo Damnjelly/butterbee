@@ -5,9 +5,9 @@ import butterbidi/script/types/remote_reference.{
   type RemoteReference, remote_reference_to_json,
 }
 import butterbidi/script/types/remote_value
-import butterlib/log
 import gleam/json.{type Json}
 import gleam/option.{None, Some}
+import palabres as log
 
 pub type LocalValue {
   RemoteReference(RemoteReference)
@@ -78,11 +78,11 @@ pub fn array(array: List(LocalValue)) -> LocalValue {
 
 pub fn node(node: remote_value.NodeRemoteValue) -> LocalValue {
   case node.shared_id {
-    None ->
-      log.error_and_continue(
-        "Node does not have shared id",
-        PrimitiveProtocol(primitive_protocol_value.undefined()),
-      )
+    None -> {
+      log.error("Node does not have shared id")
+      |> log.log
+      PrimitiveProtocol(primitive_protocol_value.undefined())
+    }
     Some(shared_id) ->
       shared_id
       |> remote_reference.remote_reference_from_id()

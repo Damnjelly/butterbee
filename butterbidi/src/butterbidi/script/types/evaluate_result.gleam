@@ -10,8 +10,8 @@ import butterbidi/script/types/remote_value.{
   type RemoteValue, remote_value_decoder,
 }
 import butterbidi/script/types/stack_trace
-import butterlib/log
 import gleam/dynamic/decode.{type Decoder}
+import palabres as log
 
 pub type EvaluateResult {
   SuccessResult(result: EvaluateResultSuccess)
@@ -23,11 +23,12 @@ pub fn evaluate_result_decoder() -> Decoder(EvaluateResult) {
   case result_type {
     "success" -> success_result_decoder()
     "exception" -> exception_result_decoder()
-    _ ->
-      log.error_and_continue(
-        "Unknown evaluate result type: " <> result_type,
-        decode.failure(evaluate_result_failure, "Unknown evaluate result type"),
-      )
+    _ -> {
+      log.error("Unknown evaluate result type")
+      |> log.string("type", result_type)
+      |> log.log
+      decode.failure(evaluate_result_failure, "Unknown evaluate result type")
+    }
   }
 }
 

@@ -9,7 +9,7 @@ import butterbee/key
 import butterbee/node
 import butterlib/log
 import gleeunit
-import logging
+import palabres/level
 import pprint.{BitArraysAsString, Config, NoLabels, Styled}
 import qcheck_gleeunit_utils/test_spec
 
@@ -18,9 +18,9 @@ pub const timeout = 30
 pub fn main() {
   let _ = case argv.load().arguments {
     ["--debug"] -> {
-      log.configure(logging.Debug)
+      log.configure(level.Debug)
     }
-    _ -> log.configure(logging.Error)
+    _ -> log.configure(level.Warning)
   }
   butterbee.init()
   gleeunit.main()

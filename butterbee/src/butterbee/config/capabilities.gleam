@@ -57,7 +57,6 @@ import butterbidi/session/types/capabilities_request.{
 import butterbidi/session/types/capability_request.{
   type CapabilityRequest, CapabilityRequest,
 }
-import butterlib/log
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode
@@ -65,6 +64,7 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
+import palabres as log
 import tom
 
 /// Creates a default `CapabilitiesRequest` with no always_match or first_match capabilities.
@@ -89,18 +89,22 @@ pub fn capabilities_request_from_toml(
       case cap {
         // Each first_match entry should be an inline table
         tom.InlineTable(cap) -> Ok(capability_request_from_toml(cap))
-        _ ->
-          log.error_and_continue(
-            "Could not parse Capabilities.first_match, expected InlineTable, got "
-              <> string.inspect(cap),
-            Error(Nil),
-          )
+        _ -> {
+          log.error("Could not parse Capabilities.first_match")
+          |> log.string("value", string.inspect(cap))
+          |> log.log
+          Error(Nil)
+        }
       }
     })
 
   // Return capabilities request if either always_match or first_match is present
   case always_match, first_match {
-    None, None -> log.debug_and_continue("No capabilities found", None)
+    None, None -> {
+      log.debug("No capabilities found")
+      |> log.log
+      None
+    }
     _, _ -> {
       Some(CapabilitiesRequest(always_match:, first_match:))
     }
@@ -135,12 +139,11 @@ fn capability_request_from_toml(
   // Handle parsing results with fallback for errors
   case capabilities {
     Ok(capabilities) -> capabilities
-    Error(error) ->
-      log.error_and_continue(
-        "Could not parse Capabilities, error: "
-          <> string.inspect(error)
-          <> " Replacing with empty CapabilityRequest",
-        CapabilityRequest(None, None, None, None, dict.new()),
-      )
+    Error(error) -> {
+      log.error("Could not parse Capabilities")
+      |> log.string("error", string.inspect(error))
+      |> log.log
+      CapabilityRequest(None, None, None, None, dict.new())
+    }
   }
 }

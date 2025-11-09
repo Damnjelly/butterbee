@@ -8,13 +8,13 @@ import butterbidi/script/types/primitive_protocol_value.{
   type PrimitiveProtocolValue, BigInt, BigIntValue, Boolean, BooleanValue, Null,
   NullValue, Number, NumberValue, String, StringValue, Undefined, UndefinedValue,
 }
-import butterlib/log
 import gleam/dict
 import gleam/dynamic/decode.{type Decoder}
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/string
 import internal/decoders
+import palabres as log
 import youid/uuid.{type Uuid}
 
 pub type RemoteValue {
@@ -58,14 +58,15 @@ pub fn remote_value_decoder() -> Decoder(RemoteValue) {
     "error" -> error_remote_value_decoder()
     "array" -> array_remote_value_decoder()
     "node" -> node_remote_decoder()
-    _ ->
-      log.error_and_continue(
-        "Unknown remote value type: " <> remote_type,
-        decode.failure(
-          ErrorRemote(ErrorRemoteValue(remote_type, None, None)),
-          "Unknown remote value type",
-        ),
+    _ -> {
+      log.error("Unknown remote value type")
+      |> log.string("type", remote_type)
+      |> log.log
+      decode.failure(
+        ErrorRemote(ErrorRemoteValue(remote_type, None, None)),
+        "Unknown remote value type",
       )
+    }
   }
 }
 
@@ -73,13 +74,12 @@ pub fn to_string(remote_value: RemoteValue) -> String {
   case remote_value {
     PrimitiveProtocol(primitive) ->
       primitive_protocol_value.to_string(primitive)
-    _ ->
-      log.error_and_continue(
-        "Expected Primitive, got: "
-          <> string.inspect(remote_value)
-          <> ". Returning undefined",
-        primitive_protocol_value.to_string(Undefined(UndefinedValue(""))),
-      )
+    _ -> {
+      log.error("expected primitive")
+      |> log.string("value", string.inspect(remote_value))
+      |> log.log
+      primitive_protocol_value.to_string(Undefined(UndefinedValue("")))
+    }
   }
 }
 
@@ -87,30 +87,32 @@ pub fn to_string_list(remote_value: RemoteValue) -> List(String) {
   case remote_value {
     ArrayRemote(array) ->
       case array.value {
-        None ->
-          log.error_and_continue(
-            "Expected Primitive, got: "
-              <> string.inspect(remote_value)
-              <> ". Returning undefined",
-            [],
-          )
+        None -> {
+          log.error("expected primitive")
+          |> log.string("value", string.inspect(remote_value))
+          []
+        }
         Some(list) ->
           list.map(list.value, fn(remote_value) { to_string(remote_value) })
       }
-    _ -> log.error_and_continue("Expected Array, Returning empty list", [])
+    _ -> {
+      log.error("expected array")
+      |> log.string("value", string.inspect(remote_value))
+      |> log.log
+      []
+    }
   }
 }
 
 pub fn to_bool(remote_value: RemoteValue) -> Bool {
   case remote_value {
     PrimitiveProtocol(primitive) -> primitive_protocol_value.to_bool(primitive)
-    _ ->
-      log.error_and_continue(
-        "Expected Primitive, got: "
-          <> string.inspect(remote_value)
-          <> ". Returning undefined",
-        False,
-      )
+    _ -> {
+      log.error("expected primitive")
+      |> log.string("value", string.inspect(remote_value))
+      |> log.log
+      False
+    }
   }
 }
 

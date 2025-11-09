@@ -16,25 +16,27 @@ import butterbidi/browsing_context/commands/navigate
 import butterbidi/browsing_context/types/browsing_context as _
 import butterbidi/browsing_context/types/info
 import butterbidi/browsing_context/types/readiness_state
-import butterlib/log
-import gleam/erlang/process
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleam/uri
+import palabres as log
 
+@target(erlang)
+import gleam/erlang/process
 /// Start a new webdriver session connect to the browser session, 
 /// using the configuration in the gleam.toml file.
 ///  WebDriver holds the browsing context info in its state
 pub fn new(browser: browser_config.BrowserType) {
   let config = case config.parse_config("gleam.toml") {
     Ok(config) -> config
-    Error(error) ->
-      log.error_and_continue(
-        "Failed to parse gleam.toml: " <> string.inspect(error),
-        config.default,
-      )
+    Error(error) -> {
+      log.error("Failed to parse gleam.toml")
+      |> log.string("error", string.inspect(error))
+      |> log.log
+      config.default
+    }
   }
 
   new_with_config(browser, config)
@@ -45,9 +47,10 @@ pub fn new_with_config(
   browser_type: browser_config.BrowserType,
   config: config.ButterbeeConfig,
 ) -> WebDriver(info.Info) {
-  log.debug(
-    "Starting webdriver session with config: " <> string.inspect(config),
-  )
+  log.debug("Starting webdriver session with config")
+  |> log.string("config", string.inspect(config))
+  |> log.log
+
   // Create webdriver type
   let driver =
     webdriver.new()
@@ -160,6 +163,7 @@ pub fn url(driver: WebDriver(state)) -> WebDriver(String) {
   |> webdriver.map_state(driver)
 }
 
+@target(erlang)
 /// Pause for a given amount of time (in milliseconds) before continuing
 pub fn wait(state: state, duration: Int) -> state {
   process.sleep(duration)
@@ -170,7 +174,7 @@ pub fn wait(state: state, duration: Int) -> state {
 pub fn close(driver: WebDriver(state)) {
   let _ = browser.close(driver)
   use socket <- result.try({ webdriver.get_socket(driver) })
-  socket.close(socket)
+  let _ = socket.close(socket)
   driver.state
 }
 

@@ -33,12 +33,12 @@ import butterbee/internal/lib
 import butterbidi/session/types/capabilities_request.{
   type CapabilitiesRequest, capabilities_request_decoder,
 }
-import butterlib/log
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
+import palabres as log
 import simplifile
 import tom
 
@@ -128,7 +128,6 @@ pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
   use config <- result.try({ tom.parse(path) |> result.map_error(ParseError) })
 
   let config = lib.toml_to_dynamic(tom.Table(config))
-  log.debug("Butterbee config: \n" <> string.inspect(config))
 
   let decoder = decode.at(["tools", "butterbee"], butterbee_config_decoder())
 
@@ -136,7 +135,9 @@ pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
     decode.run(config, decoder)
     |> result.map_error(DecodeError)
   })
-  log.debug("Butterbee config: \n" <> string.inspect(config))
+  log.debug("Butterbee config")
+  |> log.string("config", string.inspect(config))
+  |> log.log
 
   Ok(config)
 }

@@ -1,7 +1,22 @@
 import butterbidi/definition
 import gleam/json
 import simplifile
+@target(javascript)
+import stratocumulus
+@target(erlang)
 import stratus
+
+@target(erlang)
+pub type WebSocketError {
+  CouldNotSendRequest(stratus.SocketReason)
+  CouldNotStart(stratus.SocketReason)
+  CouldNotInit(stratus.InitializationError)
+}
+
+@target(javascript)
+pub type WebSocketError {
+  CouldNotStart(stratocumulus.OpenError)
+}
 
 pub type PortError {
   SocketError(String)
@@ -21,10 +36,8 @@ pub type ButterbeeError {
   CouldNotParseResponse(json.DecodeError)
   CouldNotParseSocketResponse(json.DecodeError)
   CouldNotParseUrl(url: String)
-  CouldNotSendWebSocketRequest(stratus.SocketReason)
   CouldNotStartSession
-  CouldNotStartWebSocket(stratus.InitializationError)
-  CouldNotStopWebSocket(stratus.SocketReason)
+  WebSocketError(WebSocketError)
   CreatePortDirError(simplifile.FileError)
   CreateProfileDirError(simplifile.FileError)
   CreateUserPrefsError(simplifile.FileError)
