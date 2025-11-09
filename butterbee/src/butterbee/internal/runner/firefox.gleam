@@ -20,9 +20,7 @@ const default_flags = [
   "-no-remote", "-new-instance", "-juggler-pipe",
 ]
 
-///
 /// Returns the flags firefox needs to run
-///
 pub fn get_flags(
   flags: List(String),
   port: Option(Int),
@@ -38,9 +36,7 @@ pub fn get_flags(
   |> list.append(["-profile", profile_dir])
 }
 
-///
 /// Fill the profile directory with user prefs that provide a test environment
-///
 pub fn setup(profile_dir: String) -> Result(Nil, error.ButterbeeError) {
   log.debug("Creating user prefs")
   |> log.log

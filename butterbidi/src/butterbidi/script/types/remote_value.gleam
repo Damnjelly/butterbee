@@ -13,9 +13,7 @@ import gleam/dynamic/decode.{type Decoder}
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/string
-import internal/decoders
 import palabres as log
-import youid/uuid.{type Uuid}
 
 pub type RemoteValue {
   PrimitiveProtocol(PrimitiveProtocolValue)
@@ -128,7 +126,7 @@ pub fn list_remote_value_decoder() -> Decoder(ListRemoteValue) {
 pub type ArrayRemoteValue {
   ArrayRemoteValue(
     remote_type: String,
-    handle: Option(Uuid),
+    handle: Option(String),
     internal_id: Option(String),
     value: Option(ListRemoteValue),
   )
@@ -139,7 +137,7 @@ pub fn array_remote_value_decoder() -> Decoder(RemoteValue) {
   use handle <- decode.optional_field(
     "handle",
     None,
-    decode.optional(decoders.uuid()),
+    decode.optional(decode.string),
   )
   use internal_id <- decode.optional_field(
     "internalId",
@@ -159,7 +157,7 @@ pub fn array_remote_value_decoder() -> Decoder(RemoteValue) {
 pub type ErrorRemoteValue {
   ErrorRemoteValue(
     remote_type: String,
-    handle: Option(Uuid),
+    handle: Option(String),
     internal_id: Option(String),
   )
 }
@@ -169,7 +167,7 @@ pub fn error_remote_value_decoder() -> Decoder(RemoteValue) {
   use handle <- decode.optional_field(
     "handle",
     None,
-    decode.optional(decoders.uuid()),
+    decode.optional(decode.string),
   )
   use internal_id <- decode.optional_field(
     "internalId",
@@ -184,8 +182,8 @@ pub fn error_remote_value_decoder() -> Decoder(RemoteValue) {
 pub type NodeRemoteValue {
   NodeRemoteValue(
     remote_type: String,
-    shared_id: Option(Uuid),
-    handle: Option(Uuid),
+    shared_id: Option(String),
+    handle: Option(String),
     internal_id: Option(String),
     value: Option(NodeProperties),
   )
@@ -211,12 +209,12 @@ pub fn node_remote_value_decoder() -> Decoder(NodeRemoteValue) {
   use shared_id <- decode.optional_field(
     "sharedId",
     None,
-    decode.optional(decoders.uuid()),
+    decode.optional(decode.string),
   )
   use handle <- decode.optional_field(
     "handle",
     None,
-    decode.optional(decoders.uuid()),
+    decode.optional(decode.string),
   )
   use internal_id <- decode.optional_field(
     "internalId",

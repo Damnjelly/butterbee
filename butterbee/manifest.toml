@@ -69,4 +69,3 @@ simplifile = { version = ">= 2.3.0 and < 3.0.0" }
 stratocumulus = { version = ">= 0.1.0 and < 1.0.0" }
 stratus = { git = "https://github.com/Damnjelly/stratus.git", ref = "8cc2d98d2892644c26e9a6edc27c70bef04e7479" }
 tom = { version = ">= 2.0.0 and < 3.0.0" }
-youid = { version = ">= 1.5.1 and < 2.0.0" }

@@ -1,6 +1,16 @@
 //// This module provides functionality for parsing and creating browser configurations
 //// from TOML configuration files for WebDriver BiDi sessions.
 ////
+//// ### Chromium support
+////
+//// Because chromium does not natively support WebDriver BiDi, 
+//// butterbee uses the [chromedriver](https://chromedriver.chromium.org/downloads)
+//// to control chromium. Which has a BiDi to CDP mapper built in.
+////
+//// Chromedriver does not come with chromium built in, so make sure you have chromium installed.
+//// Chromedriver will search for the chromium binary on your system. so no additional 
+//// configuration is needed.
+////
 //// ### TOML Configuration Format
 ////
 //// The browser configuration is defined under the
@@ -14,16 +24,29 @@
 //// flags = ["-headless"]
 //// host = "127.0.0.1"
 ////
-//// # NOTE: chromium is not supported yet
 //// [tools.butterbee.browser.chromium]
-//// cmd = "chromium"
+//// cmd = "chromedriver"
 //// flags = []
 //// host = "127.0.0.1"
 //// ```
+////
+//// #### Headless
+//// to run the browsers headless, add the following to your `gleam.toml` file:
+////
+//// ```toml
+//// [tools.butterbee.browser.firefox]
+//// flags = ["-headless"]
+////
+//// [tools.butterbee.capabilities.always_match]
+//// webSocketUrl = true
+//// "goog:chromeOptions" = { args = ["--headless=new"] }
+//// ```
 
+import butterbee/internal/runner/chromium
 import butterbee/internal/runner/firefox
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode
+import palabres as logger
 
 /// Butterbee will use this host url unless overridden 
 pub const default_host: String = "127.0.0.1"
@@ -31,28 +54,19 @@ pub const default_host: String = "127.0.0.1"
 /// Butterbee will use this port unless overridden
 pub const default_port: Int = 9222
 
-///
 /// Returns the default browser configuration
-///
 pub fn default() -> Dict(BrowserType, BrowserConfig) {
   dict.new()
   |> dict.insert(Firefox, default_configuration(Firefox))
-}
-
-pub fn default_firefox() -> Dict(BrowserType, BrowserConfig) {
-  dict.new()
-  |> dict.insert(Firefox, default_configuration(Firefox))
+  |> dict.insert(Chromium, default_configuration(Chromium))
 }
 
 pub type BrowserType {
   Firefox
-  // TODO: support chrome
-  // Chrome
+  Chromium
 }
 
-///
 /// Returns the default browser type, firefox
-///
 pub const default_browser_type = Firefox
 
 @internal
@@ -60,12 +74,13 @@ pub fn browser_type_decoder() -> decode.Decoder(BrowserType) {
   use browser_type <- decode.then(decode.string)
   case browser_type {
     "firefox" -> decode.success(Firefox)
-    // "chrome" -> decode.success(Chrome)
-    _ ->
-      decode.failure(
-        default_browser_type,
-        "Browser type not supported: " <> browser_type,
-      )
+    "chromium" -> decode.success(Chromium)
+    _ -> {
+      logger.error("Browser type not supported")
+      |> logger.string("browser_type", browser_type)
+      |> logger.log
+      decode.failure(default_browser_type, "Browser type not supported")
+    }
   }
 }
 
@@ -85,10 +100,12 @@ pub type BrowserConfig {
 pub fn default_configuration(browser_type: BrowserType) -> BrowserConfig {
   let cmd = case browser_type {
     Firefox -> firefox.default_cmd
+    Chromium -> chromium.default_cmd
   }
 
   let default_start_url = case browser_type {
     Firefox -> firefox.default_start_url
+    Chromium -> chromium.default_start_url
   }
 
   BrowserConfig(
@@ -122,26 +139,36 @@ pub fn with_host(config: BrowserConfig, host: String) -> BrowserConfig {
 pub fn browser_config_decoder() -> decode.Decoder(
   Dict(BrowserType, BrowserConfig),
 ) {
-  use browser_config <- decode.then(decode.dict(
-    browser_type_decoder(),
-    configuration_options_decoder(),
-  ))
-  decode.success(browser_config)
+  use firefox_config <- decode.optional_field(
+    "firefox",
+    default_configuration(Firefox),
+    configuration_options_decoder(Firefox),
+  )
+  use chromium_config <- decode.optional_field(
+    "chromium",
+    default_configuration(Chromium),
+    configuration_options_decoder(Chromium),
+  )
+  decode.success(
+    dict.new()
+    |> dict.insert(Firefox, firefox_config)
+    |> dict.insert(Chromium, chromium_config),
+  )
 }
 
 @internal
-pub fn configuration_options_decoder() -> decode.Decoder(BrowserConfig) {
-  use start_url <- decode.optional_field(
-    "start_url",
-    firefox.default_start_url,
-    decode.string,
-  )
-  use cmd <- decode.optional_field("cmd", firefox.default_cmd, decode.string)
+pub fn configuration_options_decoder(
+  browser_type: BrowserType,
+) -> decode.Decoder(BrowserConfig) {
+  let BrowserConfig(start_url, cmd, extra_flags, host) =
+    default_configuration(browser_type)
+  use start_url <- decode.optional_field("start_url", start_url, decode.string)
+  use cmd <- decode.optional_field("cmd", cmd, decode.string)
   use extra_flags <- decode.optional_field(
     "flags",
-    [],
+    extra_flags,
     decode.list(decode.string),
   )
-  use host <- decode.optional_field("host", default_host, decode.string)
+  use host <- decode.optional_field("host", host, decode.string)
   decode.success(BrowserConfig(start_url:, cmd:, extra_flags:, host:))
 }

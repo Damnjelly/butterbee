@@ -1,7 +1,6 @@
 import gleam/json.{type Json}
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import youid/uuid.{type Uuid}
 
 pub type RemoteReference {
   Shared(SharedReference)
@@ -18,12 +17,12 @@ pub fn remote_reference_to_json(remote_reference: RemoteReference) -> Json {
   }
 }
 
-pub fn remote_reference_from_id(shared_id: Uuid) -> RemoteReference {
+pub fn remote_reference_from_id(shared_id: String) -> RemoteReference {
   Shared(shared_reference_from_id(shared_id))
 }
 
 pub type SharedReference {
-  SharedReference(shared_id: Uuid, handle: Option(Uuid))
+  SharedReference(shared_id: String, handle: Option(String))
 }
 
 pub fn shared_reference_to_json(shared_reference: SharedReference) -> Json {
@@ -31,23 +30,23 @@ pub fn shared_reference_to_json(shared_reference: SharedReference) -> Json {
 
   let handle = case handle {
     None -> []
-    Some(value) -> [#("handle", json.string(uuid.to_string(value)))]
+    Some(value) -> [#("handle", json.string(value))]
   }
 
   json.object(
-    [#("sharedId", json.string(uuid.to_string(shared_id)))]
+    [#("sharedId", json.string(shared_id))]
     |> list.append(handle),
   )
 }
 
 /// Creates a new shared reference from a shared id
-pub fn shared_reference_from_id(shared_id: Uuid) -> SharedReference {
+pub fn shared_reference_from_id(shared_id: String) -> SharedReference {
   SharedReference(shared_id, None)
 }
 
 pub fn shared_reference_with_handle(
   shared_reference: SharedReference,
-  handle: Uuid,
+  handle: String,
 ) -> SharedReference {
   SharedReference(..shared_reference, handle: Some(handle))
 }

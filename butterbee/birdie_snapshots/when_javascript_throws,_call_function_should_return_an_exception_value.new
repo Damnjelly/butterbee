@@ -1,5 +1,0 @@
----
-version: 1.4.1
-title: When javascript throws,\n  call_function should return an exception value
----
-[1mError[0m(DriverDoesNotHaveSocket[0m)

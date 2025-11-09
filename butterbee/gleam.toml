@@ -41,7 +41,6 @@ stratus = { git = "https://github.com/Damnjelly/stratus.git", ref = "8cc2d98d289
 gleam_http = ">= 4.1.1 and < 5.0.0"
 gleam_json = ">= 3.0.2 and < 4.0.0"
 gleam_httpc = ">= 5.0.0 and < 6.0.0"
-youid = ">= 1.5.1 and < 2.0.0"
 glam = ">= 2.0.3 and < 3.0.0"
 tom = ">= 2.0.0 and < 3.0.0"
 simplifile = ">= 2.3.0 and < 3.0.0"
@@ -58,6 +57,20 @@ birdie = ">= 1.4.1 and < 2.0.0"
 gleeunit = ">= 1.6.1 and < 2.0.0"
 pprint = ">= 1.0.6 and < 2.0.0"
 
-
 [tools.butterbee.browser.firefox]
 flags = ["-headless"]
+
+[tools.butterbee.capabilities.always_match]
+webSocketUrl = true
+"goog:chromeOptions" = { args = ["--headless=new"] }
+
+[[tools.butterbee.capabilities.first_match]]
+browserVersion = "latest"
+"chrome:options" = { debuggerAddress = "localhost:9222" }
+
+[[tools.butterbee.capabilities.first_match]]
+"moz:firefoxOptions" = { binary = "/usr/bin/firefox", args = [
+	"-headless",
+	"-safe-mode",
+], prefs = { "dom.webnotifications.enabled" = false }, log = { level = "trace" } }
+browserVersion = "stable"

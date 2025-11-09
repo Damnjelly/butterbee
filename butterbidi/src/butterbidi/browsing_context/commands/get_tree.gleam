@@ -8,6 +8,7 @@ import butterbidi/browsing_context/types/browsing_context.{
 import butterbidi/browsing_context/types/info
 import gleam/dynamic/decode
 import gleam/json.{type Json}
+import gleam/list
 import gleam/option.{type Option, None, Some}
 
 pub type GetTreeParameters {
@@ -18,16 +19,17 @@ pub fn get_tree_parameters_to_json(
   get_tree_parameters: GetTreeParameters,
 ) -> Json {
   let GetTreeParameters(max_depth:, root:) = get_tree_parameters
-  json.object([
-    #("max_depth", case max_depth {
-      None -> json.null()
-      Some(value) -> json.int(value)
-    }),
-    #("root", case root {
-      None -> json.null()
-      Some(value) -> browsing_context_to_json(value)
-    }),
-  ])
+  let params =
+    list.new()
+    |> list.append(case max_depth {
+      None -> []
+      Some(value) -> [#("max_depth", json.int(value))]
+    })
+    |> list.append(case root {
+      None -> []
+      Some(value) -> [#("root", browsing_context_to_json(value))]
+    })
+  json.object(params)
 }
 
 pub const default: GetTreeParameters = GetTreeParameters(None, None)

@@ -39,6 +39,7 @@
                 runtimeDependencies = with pkgs; [
                   firefox
                   servo
+                  chromedriver
                   chromium
                 ];
 

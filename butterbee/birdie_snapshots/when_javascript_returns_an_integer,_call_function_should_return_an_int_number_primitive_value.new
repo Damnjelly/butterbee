@@ -1,5 +1,0 @@
----
-version: 1.4.1
-title: When javascript returns an integer,\n  call_function should return an Int Number primitive value
----
-[1mError[0m(DriverDoesNotHaveSocket[0m)

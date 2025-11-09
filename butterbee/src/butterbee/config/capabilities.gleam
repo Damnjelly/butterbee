@@ -18,35 +18,23 @@
 ////
 //// ```toml
 //// # gleam.toml
+//// # TODO: add realistic example here, the current example works but is not realistic
 ////
-//// [tools.butterbee.capabilities]
-//// # Required capabilities that must always be matched
-//// always_match = {
-////   browserName = "chrome"
-////   platformName = "linux"
-////   "goog:chromeOptions" = { args = ["--headless", "--no-sandbox"] }
+//// [tools.butterbee.capabilities.always_match]
+//// webSocketUrl = true
+//// "goog:chromeOptions" = { args = ["--headless=new"] }
+////
+//// [[tools.butterbee.capabilities.first_match]]
+//// browserVersion = "latest"
+//// "chrome:options" = { debuggerAddress = "localhost:9222" }
+////
+//// [[tools.butterbee.capabilities.first_match]]
+//// "moz:firefoxOptions" = { binary = "/usr/bin/firefox", args = [
+////   "-headless",
+////   "-safe-mode",
+//// ], prefs = { "dom.webnotifications.enabled" = false }, log = { level = "trace" } }
+//// browserVersion = "stable"
 //// }
-////
-//// # List of alternative capability sets (first successful match wins)
-//// first_match = [
-////   {
-////     browserVersion = "latest"
-////     "chrome:options" = { debuggerAddress = "localhost:9222" }
-////   },
-////   {
-////     browserVersion = "stable"
-////     "moz:firefoxOptions" = {
-////       binary = "/usr/bin/firefox",
-////       args = ["-headless", "-safe-mode"],
-////       prefs = {
-////         "dom.webnotifications.enabled" = false,
-////         "media.navigator.permission.disabled" = true
-////       },
-////       log = { level = "trace" },
-////       env = { MOZ_HEADLESS = "1" }
-////     }
-////   }
-//// ]
 //// ```
 
 import butterbee/internal/lib
@@ -67,8 +55,19 @@ import gleam/string
 import palabres as log
 import tom
 
-/// Creates a default `CapabilitiesRequest` with no always_match or first_match capabilities.
-pub const default: CapabilitiesRequest = CapabilitiesRequest(None, None)
+/// Creates a default `CapabilitiesRequest` with only the `webSocketUrl` capability for `always_match`.
+pub fn default() -> CapabilitiesRequest {
+  CapabilitiesRequest(
+    always_match: Some(
+      CapabilityRequest(
+        ..capability_request.default(),
+        extensible: dict.new()
+          |> dict.insert("webSocketUrl", dynamic.bool(True)),
+      ),
+    ),
+    first_match: None,
+  )
+}
 
 @internal
 pub fn capabilities_request_from_toml(
