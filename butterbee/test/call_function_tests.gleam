@@ -1,7 +1,6 @@
 import birdie
 import butterbee/by
-import butterbee/config
-import butterbee/config/browser.{Firefox}
+import butterbee/config/browser
 import butterbee/driver
 import butterbee/get
 import butterbee/internal/error.{type ButterbeeError}
@@ -16,7 +15,6 @@ import butterbidi/script/types/remote_value.{NodeRemote, NodeRemoteValue}
 import gleam/option.{None, Some}
 import gleam/result
 import qcheck_gleeunit_utils/test_spec
-import youid/uuid
 
 pub fn evaluate_result_error_test_() {
   use <- test_spec.make_with_timeout(timeout)
@@ -260,7 +258,7 @@ fn filter_uuid_from_remote_value(
         let NodeRemoteValue(a, id, c, d, e) = node_remote_value
         let id = case id {
           None -> None
-          Some(_) -> Some(uuid.nil)
+          Some(_) -> Some("")
         }
         SuccessResult(EvaluateResultSuccess(
           t,
@@ -276,15 +274,7 @@ fn call_with_function(
   function: String,
   arguments: List(LocalValue),
 ) -> Result(EvaluateResult, ButterbeeError) {
-  let browser_config =
-    browser.default_configuration(browser.Firefox)
-    |> browser.with_extra_flags(["-headless"])
-
-  let config =
-    config.default
-    |> config.with_browser_config(browser.Firefox, browser_config)
-
-  let driver = driver.new_with_config(Firefox, config)
+  let driver = driver.new(browser.Chromium)
 
   driver
   |> get.node(by.xpath("/html"))

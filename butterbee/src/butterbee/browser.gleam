@@ -7,13 +7,14 @@
 
 import butterbee/config/browser as browser_config
 import butterbee/internal/error
+import butterbee/internal/id
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
+import gleam/int
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import palabres as log
 import simplifile
-import youid/uuid
 
 @target(javascript)
 import gleam/javascript/promise.{type Promise}
@@ -86,7 +87,7 @@ pub fn new_port() -> Result(Int, error.PortError)
 pub fn new_profile(
   data_dir: String,
 ) -> Result(#(String, String), simplifile.FileError) {
-  let profile_name = uuid.v7() |> uuid.to_string()
+  let profile_name = int.to_string(id.from_unix())
   let profile_dir = data_dir <> "/" <> profile_name
 
   let profile =

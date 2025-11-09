@@ -29,7 +29,6 @@ import gleam/list
 import gleam/option.{None}
 import gleam/result
 import gleam/string
-import youid/uuid.{type Uuid}
 
 /// Performs a click on the given node
 pub fn click(
@@ -102,7 +101,7 @@ pub fn enter_keys(
 
 /// A helper function that moves the mouse to the given node.
 pub fn move_to_element(
-  shared_id: Uuid,
+  shared_id: String,
 ) -> List(perform_actions.PointerSourceAction) {
   [
     perform_actions.pointer_move_action(

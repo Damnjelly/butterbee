@@ -13,6 +13,8 @@ pub type CapabilitiesRequest {
   )
 }
 
+/// Converts a Dynamic value to a CapabilitiesRequest
+/// Used when decoding capabilities requests from TOML configuration
 pub fn capabilities_request_decoder() -> decode.Decoder(CapabilitiesRequest) {
   use always_match <- decode.optional_field(
     "always_match",
@@ -33,12 +35,12 @@ pub fn capabilities_request_to_json(
   let CapabilitiesRequest(always_match:, first_match:) = capabilities_request
   let always_match = case always_match {
     None -> []
-    Some(value) -> [#("always_match", capability_request_to_json(value))]
+    Some(value) -> [#("alwaysMatch", capability_request_to_json(value))]
   }
   let first_match = case first_match {
     None -> []
     Some(value) -> [
-      #("first_match", json.array(value, capability_request_to_json)),
+      #("firstMatch", json.array(value, capability_request_to_json)),
     ]
   }
 

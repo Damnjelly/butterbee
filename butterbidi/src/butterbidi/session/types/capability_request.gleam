@@ -17,29 +17,38 @@ pub type CapabilityRequest {
   )
 }
 
+pub fn default() -> CapabilityRequest {
+  CapabilityRequest(None, None, None, None, dict.new())
+}
+
 pub fn capability_request_decoder() -> decode.Decoder(CapabilityRequest) {
-  use accept_insecure_certs <- decode.field(
+  use accept_insecure_certs <- decode.optional_field(
     "acceptInsecureCerts",
+    None,
     decode.optional(decode.bool),
   )
-  use browser_name <- decode.field(
+  use browser_name <- decode.optional_field(
     "browserName",
+    None,
     decode.optional(decode.string),
   )
-  use browser_version <- decode.field(
+  use browser_version <- decode.optional_field(
     "browserVersion",
+    None,
     decode.optional(decode.string),
   )
-  use platform_name <- decode.field(
+  use platform_name <- decode.optional_field(
     "platformName",
+    None,
     decode.optional(decode.string),
   )
+  use extensible <- decode.then(decode.dict(decode.string, decode.dynamic))
   decode.success(CapabilityRequest(
     accept_insecure_certs:,
     browser_name:,
     browser_version:,
     platform_name:,
-    extensible: dict.new(),
+    extensible:,
   ))
 }
 
@@ -51,25 +60,25 @@ pub fn capability_request_to_json(capability_request: CapabilityRequest) -> Json
     platform_name:,
     extensible:,
   ) = capability_request
-  json.object(
-    [
-      #("accept_insecure_certs", case accept_insecure_certs {
-        None -> json.null()
-        option.Some(value) -> json.bool(value)
-      }),
-      #("browser_name", case browser_name {
-        None -> json.null()
-        option.Some(value) -> json.string(value)
-      }),
-      #("browser_version", case browser_version {
-        None -> json.null()
-        option.Some(value) -> json.string(value)
-      }),
-      #("platform_name", case platform_name {
-        None -> json.null()
-        option.Some(value) -> json.string(value)
-      }),
-    ]
-    |> list.append(extensible.extensible_to_list(extensible)),
-  )
+  let options =
+    list.new()
+    |> list.append(case accept_insecure_certs {
+      None -> []
+      option.Some(value) -> [#("acceptInsecureCerts", json.bool(value))]
+    })
+    |> list.append(case browser_name {
+      None -> []
+      option.Some(value) -> [#("browserName", json.string(value))]
+    })
+    |> list.append(case browser_version {
+      None -> []
+      option.Some(value) -> [#("browserVersion", json.string(value))]
+    })
+    |> list.append(case platform_name {
+      None -> []
+      option.Some(value) -> [#("platformName", json.string(value))]
+    })
+    |> list.append(extensible.extensible_to_list(extensible))
+
+  json.object(options)
 }

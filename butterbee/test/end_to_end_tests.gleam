@@ -1,5 +1,5 @@
 import butterbee/action
-import butterbee/config/browser.{Firefox}
+import butterbee/config/browser.{Chromium}
 import butterbee/driver
 import butterbee/internal/test_page
 import butterbee/key
@@ -13,7 +13,7 @@ import qcheck_gleeunit_utils/test_spec
 
 pub fn navigation_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
-  let driver = driver.new(Firefox)
+  let driver = driver.new(Chromium)
 
   let assert Ok(first_url) =
     driver
@@ -32,7 +32,7 @@ pub fn navigation_test_() {
 pub fn enter_keys_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
-  let driver = driver.new(Firefox)
+  let driver = driver.new(Chromium)
   let assert Ok(comment) =
     driver
     |> test_page.goto()
@@ -46,7 +46,7 @@ pub fn select_navigation_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
   let assert Ok(country) =
-    driver.new(Firefox)
+    driver.new(Chromium)
     |> test_page.goto()
     |> test_page.country_dropdown(select_element.option("Canada"))
     |> test_page.country_dropdown(select_element.selected_text())
@@ -58,7 +58,7 @@ pub fn select_key_navigation_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
   let assert Ok(country) =
-    driver.new(Firefox)
+    driver.new(Chromium)
     |> test_page.goto()
     |> test_page.country_dropdown(action.click(key.LeftClick))
     |> test_page.country_dropdown(action.enter_keys(key.arrow_down))
@@ -72,7 +72,7 @@ pub fn button_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
   let assert Ok(has_style) =
-    driver.new(Firefox)
+    driver.new(Chromium)
     |> test_page.goto()
     |> test_page.change_color_button(action.click(key.LeftClick))
     |> test_page.body(node.has_attribute("style"))
@@ -84,7 +84,7 @@ pub fn table_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
   let assert Ok(table) =
-    driver.new(Firefox)
+    driver.new(Chromium)
     |> test_page.goto()
     |> test_page.data_table(table_element.Table, node.inner_text())
     |> driver.close()
@@ -96,7 +96,7 @@ pub fn table_row_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
   let driver =
-    driver.new(Firefox)
+    driver.new(Chromium)
     |> test_page.goto()
 
   let assert Ok(table_row) =
@@ -116,7 +116,7 @@ pub fn table_cell_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
   let driver =
-    driver.new(Firefox)
+    driver.new(Chromium)
     |> test_page.goto()
   let assert Ok(cell_1_1) =
     driver
@@ -163,7 +163,7 @@ pub fn list_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
   let assert Ok(list) =
-    driver.new(Firefox)
+    driver.new(Chromium)
     |> test_page.goto()
     |> test_page.test_list(list_element.List, node.inner_text())
     |> driver.close()
@@ -175,7 +175,7 @@ pub fn list_item_test_() {
   use <- test_spec.make_with_timeout(butterbee_test.timeout)
 
   let driver =
-    driver.new(Firefox)
+    driver.new(Chromium)
     |> test_page.goto()
 
   let assert Ok(list_item) =

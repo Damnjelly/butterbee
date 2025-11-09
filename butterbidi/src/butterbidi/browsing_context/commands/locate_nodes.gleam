@@ -8,7 +8,6 @@ import butterbidi/script/types/serialization_options.{type SerializationOptions}
 import gleam/dynamic/decode
 import gleam/json.{type Json}
 import gleam/option.{type Option, None, Some}
-import youid/uuid
 
 pub type LocateNodesParameters {
   LocateNodesParameters(
@@ -31,7 +30,7 @@ pub fn locate_nodes_parameters_to_json(
     start_nodes:,
   ) = locate_nodes_parameters
   json.object([
-    #("context", json.string(uuid.to_string(context.id))),
+    #("context", json.string(context.id)),
     #("locator", locator.locator_to_json(locator)),
     #("max_node_count", case max_node_count {
       None -> json.null()
@@ -65,7 +64,7 @@ pub fn new(context: BrowsingContext, locator: Locator) -> LocateNodesParameters 
 pub fn new_without_context(locator: Locator) -> LocateNodesParameters {
   LocateNodesParameters(
     locator:,
-    context: BrowsingContext(id: uuid.nil),
+    context: BrowsingContext(id: ""),
     max_node_count: None,
     serialization_options: None,
     start_nodes: None,

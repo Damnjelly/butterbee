@@ -13,7 +13,6 @@ import butterbee/internal/socket
 import butterbee/webdriver.{type WebDriver}
 import butterbidi/browsing_context/commands/get_tree
 import butterbidi/browsing_context/commands/navigate
-import butterbidi/browsing_context/types/browsing_context as _
 import butterbidi/browsing_context/types/info
 import butterbidi/browsing_context/types/readiness_state
 import gleam/list
@@ -21,10 +20,11 @@ import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import gleam/uri
-import palabres as log
+import palabres as logger
 
 @target(erlang)
 import gleam/erlang/process
+
 /// Start a new webdriver session connect to the browser session, 
 /// using the configuration in the gleam.toml file.
 ///  WebDriver holds the browsing context info in its state
@@ -32,9 +32,9 @@ pub fn new(browser: browser_config.BrowserType) {
   let config = case config.parse_config("gleam.toml") {
     Ok(config) -> config
     Error(error) -> {
-      log.error("Failed to parse gleam.toml")
-      |> log.string("error", string.inspect(error))
-      |> log.log
+      logger.error("Failed to parse gleam.toml")
+      |> logger.string("error", string.inspect(error))
+      |> logger.log
       config.default
     }
   }
@@ -47,9 +47,9 @@ pub fn new_with_config(
   browser_type: browser_config.BrowserType,
   config: config.ButterbeeConfig,
 ) -> WebDriver(info.Info) {
-  log.debug("Starting webdriver session with config")
-  |> log.string("config", string.inspect(config))
-  |> log.log
+  logger.debug("Starting webdriver session with config")
+  |> logger.string("config", string.inspect(config))
+  |> logger.log
 
   // Create webdriver type
   let driver =
@@ -59,31 +59,46 @@ pub fn new_with_config(
   let session = case driver.config {
     None -> Error(error.DriverDoesNotHaveConfig)
     Some(config) -> {
-      // Start browser
+      logger.debug("Starting browser")
+      |> logger.log
       use browser <- result.try({ runner.new(browser_type, config) })
+
+      logger.debug("Getting capabilities")
+      |> logger.log
 
       let capabilities =
         config.capabilities
-        |> option.unwrap(capabilities_config.default)
+        |> option.unwrap(capabilities_config.default())
+
+      logger.debug("Getting request")
+      |> logger.log
 
       use request <- result.try({
         browser.request
         |> option.to_result(error.BrowserDoesNotHaveRequest)
       })
 
-      // Check if browser is ready
+      logger.debug("Checking if browser is ready")
+      |> logger.log
+
       use _ <- result.try({ retry.until_ok(fn() { session.status(request) }) })
 
-      // Start webdriver session
+      logger.debug("Starting webdriver session")
+      |> logger.log
+
       session.new(request, capabilities)
     }
   }
 
   case session {
-    Error(error) -> webdriver.with_state(driver, Error(error))
+    Error(error) -> {
+      logger.error("Failed to create webdriver session")
+      |> logger.string("error", string.inspect(error))
+      |> logger.log
+      webdriver.with_state(driver, Error(error))
+    }
     Ok(new) -> {
       let #(socket, session) = new
-
       let driver =
         driver
         |> webdriver.with_socket(socket)

@@ -4,7 +4,6 @@ import butterbidi/script/types/remote_reference
 import gleam/json.{type Json}
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import youid/uuid
 
 pub type PerformActionsParameters {
   PerformActionsParameters(
@@ -18,7 +17,7 @@ pub fn perform_actions_parameters_to_json(
 ) -> Json {
   let PerformActionsParameters(context:, actions:) = perform_actions_parameters
   json.object([
-    #("context", json.string(uuid.to_string(context.id))),
+    #("context", json.string(context.id)),
     #("actions", json.array(actions, source_actions_to_json)),
   ])
 }

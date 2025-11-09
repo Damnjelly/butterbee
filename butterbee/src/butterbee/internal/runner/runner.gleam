@@ -50,7 +50,13 @@ pub fn new(
         request.port,
         profile_dir,
       )
-    browser_config.Chromium -> [browser_config.start_url]
+    browser_config.Chromium ->
+      chromium.get_flags(
+        {
+          [browser_config.start_url] |> list.append(browser_config.extra_flags)
+        },
+        request.port,
+      )
   }
 
   use _ <- result.try({

@@ -18,11 +18,16 @@
 //// request_timeout = 5000
 //// data_dir = "/tmp/butterbee"
 ////
-//// [tools.butterbee.capabilities]
-////
-//// # Capabilities is empty by default
+//// [tools.butterbee.capabilities.always_match]
+//// webSocketUrl = true
 ////
 //// [tools.butterbee.browser.firefox]
+//// cmd = "firefox"
+//// flags = []
+//// host = "127.0.0.1"
+////
+//// [tools.butterbee.browser.chromium]
+//// cmd = "chromedriver"
 //// flags = []
 //// host = "127.0.0.1"
 //// ```
@@ -136,6 +141,7 @@ pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
     decode.run(config, decoder)
     |> result.map_error(DecodeError)
   })
+
   log.debug("Butterbee config")
   |> log.string("config", string.inspect(config))
   |> log.log

@@ -40,6 +40,7 @@
                   firefox
                   servo
                   chromedriver
+                  chromium
                 ];
 
                 devDependencies = with pkgs; [

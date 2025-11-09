@@ -4,7 +4,6 @@ import gleam/dynamic/decode
 import gleam/json.{type Json}
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import youid/uuid
 
 pub type NavigateParameters {
   NavigateParameters(
@@ -34,7 +33,7 @@ pub fn navigate_parameters_to_json(
 
   json.object(
     [
-      #("context", json.string(uuid.to_string(context.id))),
+      #("context", json.string(context.id)),
       #("url", json.string(url)),
     ]
     |> list.append(wait),

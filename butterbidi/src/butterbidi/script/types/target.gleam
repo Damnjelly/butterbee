@@ -2,7 +2,6 @@ import butterbidi/browsing_context/types/browsing_context
 import gleam/json.{type Json}
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import youid/uuid
 
 pub type Target {
   Context(ContextTarget)
@@ -42,7 +41,7 @@ pub fn context_target_to_json(context_target: ContextTarget) -> Json {
     Some(value) -> [#("sandbox", json.string(value))]
   }
   json.object(
-    [#("context", json.string(uuid.to_string(context.id)))]
+    [#("context", json.string(context.id))]
     |> list.append(sandbox),
   )
 }
