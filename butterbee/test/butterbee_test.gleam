@@ -29,7 +29,7 @@ pub fn main() {
 pub fn minimal_example_test_() {
   use <- test_spec.make_with_timeout(timeout)
   let assert Ok(output) =
-    driver.new(browser.Chromium)
+    driver.new(browser.Firefox)
     |> driver.goto("https://gleam.run/")
     |> get.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",

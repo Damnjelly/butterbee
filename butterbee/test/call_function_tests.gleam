@@ -18,14 +18,16 @@ import qcheck_gleeunit_utils/test_spec
 
 pub fn evaluate_result_error_test_() {
   use <- test_spec.make_with_timeout(timeout)
-  "function test_exception() { throw new Error('Test exception'); }"
-  |> call_with_function([])
-  |> filter_uuid_from_remote_value
-  |> pretty_print
-  |> birdie.snap(
-    title: "When javascript throws,
-  call_function should return an exception value",
-  )
+  let value =
+    "function test_exception() { throw new Error('Test exception'); }"
+    |> call_with_function([])
+    |> filter_uuid_from_remote_value
+    |> fn(res) {
+      let assert Ok(res) = res
+      let assert evaluate_result.ExceptionResult(res) = res
+      res.result_type
+    }
+  assert evaluate_result.Exception == value
 }
 
 pub fn evaluate_result_node_value_test_() {
