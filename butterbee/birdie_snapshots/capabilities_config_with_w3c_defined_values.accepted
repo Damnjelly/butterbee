@@ -1,0 +1,24 @@
+---
+version: 1.4.1
+title: capabilities config with w3c defined values
+file: ./test/config_tests.gleam
+test_name: capabilities_w3c_values_test_
+---
+[1mOk[0m(ButterbeeConfig[0m(
+  DriverConfig[0m(
+    [38;5;3m20000[0m,
+    [38;5;3m5000[0m,
+    [38;5;2m"/tmp/butterbee"[0m,
+  ),
+  [1mSome[0m(CapabilitiesRequest[0m(
+    [1mSome[0m(CapabilityRequest[0m(
+      [1mSome[0m([38;5;4mTrue[0m),
+      [1mSome[0m([38;5;2m"chromium"[0m),
+      [1mSome[0m([38;5;2m"latest"[0m),
+      [1mSome[0m([38;5;2m"linux"[0m),
+      dict.from_list([]),
+    )),
+    [1mNone[0m,
+  )),
+  [1mNone[0m,
+))

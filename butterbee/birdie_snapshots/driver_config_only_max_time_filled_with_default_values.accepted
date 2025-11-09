@@ -1,0 +1,13 @@
+---
+version: 1.4.1
+title: driver config only max time filled with default values
+---
+[1mOk[0m(ButterbeeConfig[0m(
+  DriverConfig[0m(
+    [38;5;3m33333[0m,
+    [38;5;3m5000[0m,
+    [38;5;2m"/tmp/butterbee"[0m,
+  ),
+  [1mNone[0m,
+  [1mNone[0m,
+))

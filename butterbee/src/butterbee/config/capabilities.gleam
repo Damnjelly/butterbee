@@ -37,23 +37,13 @@
 //// }
 //// ```
 
-import butterbee/internal/lib
-import butterbidi/session/commands/new
 import butterbidi/session/types/capabilities_request.{
   type CapabilitiesRequest, CapabilitiesRequest,
 }
-import butterbidi/session/types/capability_request.{
-  type CapabilityRequest, CapabilityRequest,
-}
-import gleam/dict.{type Dict}
+import butterbidi/session/types/capability_request.{CapabilityRequest}
+import gleam/dict
 import gleam/dynamic
-import gleam/dynamic/decode
-import gleam/list
-import gleam/option.{type Option, None, Some}
-import gleam/result
-import gleam/string
-import palabres as log
-import tom
+import gleam/option.{None, Some}
 
 /// Creates a default `CapabilitiesRequest` with only the `webSocketUrl` capability for `always_match`.
 pub fn default() -> CapabilitiesRequest {
@@ -67,82 +57,4 @@ pub fn default() -> CapabilitiesRequest {
     ),
     first_match: None,
   )
-}
-
-@internal
-pub fn capabilities_request_from_toml(
-  config: Dict(String, tom.Toml),
-) -> Option(CapabilitiesRequest) {
-  // Extract always_match capabilities from [Capabilities.always_match] table
-  let always_match =
-    tom.get_table(config, ["Capabilities", "always_match"])
-    |> option.from_result()
-    |> option.map(fn(toml_cap) { capability_request_from_toml(toml_cap) })
-
-  // Extract first_match capabilities from [[Capabilities.first_match]] array
-  let first_match =
-    tom.get_array(config, ["Capabilities", "first_match"])
-    |> option.from_result()
-    |> option.map(fn(toml_caps) {
-      use cap <- list.filter_map(toml_caps)
-      case cap {
-        // Each first_match entry should be an inline table
-        tom.InlineTable(cap) -> Ok(capability_request_from_toml(cap))
-        _ -> {
-          log.error("Could not parse Capabilities.first_match")
-          |> log.string("value", string.inspect(cap))
-          |> log.log
-          Error(Nil)
-        }
-      }
-    })
-
-  // Return capabilities request if either always_match or first_match is present
-  case always_match, first_match {
-    None, None -> {
-      log.debug("No capabilities found")
-      |> log.log
-      None
-    }
-    _, _ -> {
-      Some(CapabilitiesRequest(always_match:, first_match:))
-    }
-  }
-}
-
-fn capability_request_from_toml(
-  toml_cap: Dict(String, tom.Toml),
-) -> CapabilityRequest {
-  // Convert TOML dictionary to dynamic properties for decoding
-  let dynamic_cap =
-    dict.to_list(toml_cap)
-    |> list.map(fn(entry) {
-      let #(key, value) = entry
-      #(dynamic.string(key), lib.toml_to_dynamic(value))
-    })
-    |> dynamic.properties()
-
-  // Extract extensible capabilities (vendor-specific capabilities like "goog:chromeOptions")
-  let extensible =
-    decode.run(dynamic_cap, new.extensible_capabilities_decoder())
-    |> result.unwrap(dict.new())
-
-  // Parse standard WebDriver(state) capabilities
-  let capabilities =
-    decode.run(dynamic_cap, capability_request.capability_request_decoder())
-    |> result.map(fn(capabilities) {
-      // Merge standard capabilities with extensible ones
-      CapabilityRequest(..capabilities, extensible:)
-    })
-
-  // Handle parsing results with fallback for errors
-  case capabilities {
-    Ok(capabilities) -> capabilities
-    Error(error) -> {
-      log.error("Could not parse Capabilities")
-      |> log.string("error", string.inspect(error))
-      |> log.log
-      CapabilityRequest(None, None, None, None, dict.new())
-    }
-  }
 }

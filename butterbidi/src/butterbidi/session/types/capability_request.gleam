@@ -17,6 +17,13 @@ pub type CapabilityRequest {
   )
 }
 
+const capabilities_request_fields = [
+  "acceptInsecureCerts",
+  "browserName",
+  "browserVersion",
+  "platformName",
+]
+
 pub fn default() -> CapabilityRequest {
   CapabilityRequest(None, None, None, None, dict.new())
 }
@@ -43,6 +50,10 @@ pub fn capability_request_decoder() -> decode.Decoder(CapabilityRequest) {
     decode.optional(decode.string),
   )
   use extensible <- decode.then(decode.dict(decode.string, decode.dynamic))
+
+  // Remove fields from extensible that are defined in CapabilityRequest
+  let extensible = dict.drop(extensible, capabilities_request_fields)
+
   decode.success(CapabilityRequest(
     accept_insecure_certs:,
     browser_name:,
@@ -60,6 +71,10 @@ pub fn capability_request_to_json(capability_request: CapabilityRequest) -> Json
     platform_name:,
     extensible:,
   ) = capability_request
+
+  // Remove fields from extensible that are defined in CapabilityRequest
+  let extensible = dict.drop(extensible, capabilities_request_fields)
+
   let options =
     list.new()
     |> list.append(case accept_insecure_certs {

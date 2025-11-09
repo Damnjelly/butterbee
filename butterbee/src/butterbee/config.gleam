@@ -131,7 +131,11 @@ pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
     simplifile.read(path) |> result.map_error(ReadError)
   })
 
-  use config <- result.try({ tom.parse(path) |> result.map_error(ParseError) })
+  parse_config_string(path)
+}
+
+pub fn parse_config_string(toml: String) -> Result(ButterbeeConfig, Error) {
+  use config <- result.try({ tom.parse(toml) |> result.map_error(ParseError) })
 
   let config = lib.toml_to_dynamic(tom.Table(config))
 

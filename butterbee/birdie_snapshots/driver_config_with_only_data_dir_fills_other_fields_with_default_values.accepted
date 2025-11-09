@@ -1,0 +1,15 @@
+---
+version: 1.4.1
+title: driver config with only data dir fills other fields with default values
+file: ./test/config_tests.gleam
+test_name: driver_only_data_dir_filled_test_
+---
+[1mOk[0m(ButterbeeConfig[0m(
+  DriverConfig[0m(
+    [38;5;3m20000[0m,
+    [38;5;3m5000[0m,
+    [38;5;2m"/another/another/dir"[0m,
+  ),
+  [1mNone[0m,
+  [1mNone[0m,
+))

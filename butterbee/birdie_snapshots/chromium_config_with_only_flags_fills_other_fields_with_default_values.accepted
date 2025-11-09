@@ -1,0 +1,34 @@
+---
+version: 1.4.1
+title: chromium config with only flags fills other fields with default values
+file: ./test/config_tests.gleam
+test_name: chromium_only_flags_filled_test_
+---
+[1mOk[0m(ButterbeeConfig[0m(
+  DriverConfig[0m(
+    [38;5;3m20000[0m,
+    [38;5;3m5000[0m,
+    [38;5;2m"/tmp/butterbee"[0m,
+  ),
+  [1mNone[0m,
+  [1mSome[0m(dict.from_list([
+    #(
+      Chromium[0m,
+      BrowserConfig[0m(
+        [38;5;2m"about:blank"[0m,
+        [38;5;2m"chromedriver"[0m,
+        [[38;5;2m"-headless"[0m],
+        [38;5;2m"127.0.0.1"[0m,
+      ),
+    ),
+    #(
+      Firefox[0m,
+      BrowserConfig[0m(
+        [38;5;2m"about:blank"[0m,
+        [38;5;2m"firefox"[0m,
+        [],
+        [38;5;2m"127.0.0.1"[0m,
+      ),
+    ),
+  ])),
+))

@@ -1,0 +1,15 @@
+---
+version: 1.4.1
+title: driver config max filled with alternative values
+file: ./test/config_tests.gleam
+test_name: driver_max_filled_test_
+---
+[1mOk[0m(ButterbeeConfig[0m(
+  DriverConfig[0m(
+    [38;5;3m10000[0m,
+    [38;5;3m10000[0m,
+    [38;5;2m"/another/dir"[0m,
+  ),
+  [1mNone[0m,
+  [1mNone[0m,
+))

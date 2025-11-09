@@ -63,14 +63,3 @@ flags = ["-headless"]
 [tools.butterbee.capabilities.always_match]
 webSocketUrl = true
 "goog:chromeOptions" = { args = ["--headless=new"] }
-
-[[tools.butterbee.capabilities.first_match]]
-browserVersion = "latest"
-"chrome:options" = { debuggerAddress = "localhost:9222" }
-
-[[tools.butterbee.capabilities.first_match]]
-"moz:firefoxOptions" = { binary = "/usr/bin/firefox", args = [
-	"-headless",
-	"-safe-mode",
-], prefs = { "dom.webnotifications.enabled" = false }, log = { level = "trace" } }
-browserVersion = "stable"
