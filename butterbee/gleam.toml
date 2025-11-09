@@ -3,8 +3,6 @@ version = "1.0.0"
 description = "A webdriver bidi client written in Gleam, for Gleam."
 licences = ["Apache-2.0"]
 
-target = "javascript"
-
 internal-modules = ["butterbee/internal/*"]
 
 [repository]
@@ -62,4 +60,4 @@ pprint = ">= 1.0.6 and < 2.0.0"
 
 
 [tools.butterbee.browser.firefox]
-# flags = ["-headless"]
+flags = ["-headless"]

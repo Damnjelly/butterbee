@@ -4,17 +4,12 @@ import butterbee/internal/error
 import butterbee/internal/glam
 import butterbee/internal/retry
 import butterbidi/definition
-import gleam/bool
 import gleam/dict
 import gleam/dynamic/decode.{type Decoder}
-import gleam/fetch
 import gleam/http/request.{type Request}
-import gleam/http/response
-import gleam/javascript/promise
 import gleam/json.{type Json}
-import gleam/option.{None, Some}
 import gleam/result
-import gleam/uri.{Uri}
+import gleam/uri
 import palabres as log
 
 @target(erlang)
@@ -24,6 +19,8 @@ import gleam/otp/actor
 @target(erlang)
 import stratus as websocket
 
+@target(javascript)
+import gleam/javascript/promise
 @target(javascript)
 import stratocumulus.{type WebSocket} as websocket
 
@@ -196,8 +193,4 @@ pub fn send_request(
       Error(error.BidiError(error))
     }
   }
-}
-
-}
-
 }

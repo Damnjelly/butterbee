@@ -4,7 +4,6 @@ import butterbee/config/browser as browser_config
 import butterbee/internal/error
 import butterbee/internal/runner/firefox
 import gleam/dict
-import gleam/erlang/process
 import gleam/list
 import gleam/option
 import gleam/result
@@ -15,6 +14,7 @@ import simplifile
 
 @target(erlang)
 import gleam/erlang/process
+
 /// Start a browser instance
 pub fn new(
   browser_to_run: browser_config.BrowserType,
@@ -102,7 +102,8 @@ fn do_run(cmd: String, flags: List(String), profile_dir: String) {
   process.spawn(fn() {
     let _ = case
       shellout.command(run: cmd, with: flags, in: profile_dir, opt: [
-        shellout.LetBeStdout,
+        // You can uncomment this to see the output of the browser, but for some reason it makes the tests fail
+      // shellout.LetBeStdout,
       ])
     {
       Ok(_) -> Nil
@@ -123,6 +124,4 @@ fn do_run(cmd: String, flags: List(String), profile_dir: String) {
 
     option.Some("Done")
   })
-}
-
 }

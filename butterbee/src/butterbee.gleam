@@ -1,7 +1,4 @@
-import butterlib/log
 import palabres as logger
-import palabres/level
-import simplifile
 
 /// Initialize butterbee,
 /// Call this in the main function of your test, before calling gleeunit.main.
@@ -16,27 +13,4 @@ pub fn init() {
   // let _ = simplifile.delete("/tmp/butterbee")
 
   Nil
-}
-
-import butterbee/action
-import butterbee/by
-import butterbee/config/browser
-import butterbee/driver
-import butterbee/get
-import butterbee/key
-import butterbee/node
-
-pub fn main() {
-  log.configure(level.Debug)
-  let assert Ok(output) =
-    driver.new(browser.Firefox)
-    |> driver.goto("https://gleam.run/")
-    |> get.node(by.xpath(
-      "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
-    ))
-    |> node.do(action.click(key.LeftClick))
-    |> get.node(by.css("pre.log"))
-    |> node.get(node.text())
-    |> driver.close()
-  assert output == "Hello, Joe!\n"
 }
