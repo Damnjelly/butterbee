@@ -9,7 +9,7 @@ import gleam/erlang/process
 @target(javascript)
 import gleam/javascript/promise
 
-const max_wait_time = 4000
+const max_wait_time = 8000
 
 /// Retry a function until it returns a result that satisfies a condition
 pub fn until_ok(
