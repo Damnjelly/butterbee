@@ -9,12 +9,14 @@ import butterbee/config/browser as browser_config
 import butterbee/internal/error
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
-import gleam/javascript/promise.{type Promise}
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import palabres as log
 import simplifile
 import youid/uuid
+
+@target(javascript)
+import gleam/javascript/promise.{type Promise}
 
 /// The Browser type contains all the information needed to run a browser.
 pub type Browser {

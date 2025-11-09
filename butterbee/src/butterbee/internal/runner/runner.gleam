@@ -4,8 +4,6 @@ import butterbee/config/browser as browser_config
 import butterbee/internal/error
 import butterbee/internal/runner/firefox
 import gleam/dict
-import gleam/erlang/process
-import gleam/javascript/array.{type Array}
 import gleam/list
 import gleam/option
 import gleam/result
@@ -17,6 +15,8 @@ import simplifile
 @target(erlang)
 import gleam/erlang/process
 
+@target(javascript)
+import gleam/javascript/array.{type Array}
 @target(javascript)
 import gleam/javascript/promise
 
@@ -107,7 +107,8 @@ fn do_run(cmd: String, flags: List(String), profile_dir: String) {
   process.spawn(fn() {
     let _ = case
       shellout.command(run: cmd, with: flags, in: profile_dir, opt: [
-        shellout.LetBeStdout,
+        // You can uncomment this to see the output of the browser, but for some reason it makes the tests fail
+      // shellout.LetBeStdout,
       ])
     {
       Ok(_) -> Nil
@@ -135,5 +136,6 @@ fn do_run(cmd: String, flags: List(String), profile_dir: String) {
   run_browser(cmd, array.from_list(flags), profile_dir)
 }
 
+@target(javascript)
 @external(javascript, "./runner_ffi.mjs", "runBrowser")
 fn run_browser(cmd: String, flags: Array(String), profile_dir: String) -> Nil
