@@ -5,6 +5,7 @@ import butterbee/internal/error
 import butterbee/internal/runner/firefox
 import gleam/dict
 import gleam/erlang/process
+import gleam/javascript/array.{type Array}
 import gleam/list
 import gleam/option
 import gleam/result
@@ -15,6 +16,10 @@ import simplifile
 
 @target(erlang)
 import gleam/erlang/process
+
+@target(javascript)
+import gleam/javascript/promise
+
 /// Start a browser instance
 pub fn new(
   browser_to_run: browser_config.BrowserType,
@@ -125,4 +130,10 @@ fn do_run(cmd: String, flags: List(String), profile_dir: String) {
   })
 }
 
+@target(javascript)
+fn do_run(cmd: String, flags: List(String), profile_dir: String) {
+  run_browser(cmd, array.from_list(flags), profile_dir)
 }
+
+@external(javascript, "./runner_ffi.mjs", "runBrowser")
+fn run_browser(cmd: String, flags: Array(String), profile_dir: String) -> Nil

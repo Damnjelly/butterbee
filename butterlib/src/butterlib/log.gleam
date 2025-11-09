@@ -12,11 +12,9 @@ fn palabres_configure(loglevel: Level) {
   |> palabres.configure
 }
 
-/// Logs an Debug log and return a value
-/// Useful for when you want to log a debug log before returning a value
-pub fn debug_and_continue(msg: String, continue: a) -> a {
-  debug(msg)
-  continue
+@target(javascript)
+pub fn configure(loglevel: Level) {
+  palabres_configure(loglevel)
 }
 
 @target(erlang)

@@ -198,6 +198,74 @@ pub fn send_request(
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// JS WEBSOCKET
+// ─────────────────────────────────────────────────────────────────────────
+
+@target(javascript)
+pub type WebDriverSocket {
+  WebDriverSocket(ws: WebSocket)
 }
 
+@target(javascript)
+pub fn new(
+  request: Request(String),
+) -> Result(WebDriverSocket, error.ButterbeeError) {
+  log.debug("Connecting to WebDriver server")
+  |> log.string("url", request.to_uri(request) |> uri.to_string())
+  |> log.log
+
+  retry.delay(4000)
+
+  let request = Uri(..request.to_uri(request), scheme: Some("ws"))
+
+  let subject =
+    websocket.new(request)
+    |> websocket.on_open(fn(_) {
+      echo "open"
+      Nil
+    })
+    |> websocket.on_close(fn(_) {
+      echo "close"
+      Nil
+    })
+    |> websocket.on_error(fn(data) {
+      echo data
+      Nil
+    })
+    |> websocket.on_text(fn(content: String, _event) {
+      echo content
+      Nil
+    })
+
+  log.debug("Opening websocket")
+  |> log.log
+
+  use subject <- result.try({
+    case retry.until_ok(fn() { websocket.open(subject) }) {
+      Ok(subject) -> Ok(subject)
+      Error(err) -> Error(error.WebSocketError(error.CouldNotStart(err)))
+    }
+  })
+
+  let _ =
+    retry.until_true(fn() { websocket.ready_state(subject) == websocket.Open })
+
+  Ok(WebDriverSocket(subject))
+}
+
+@target(javascript)
+pub fn close(socket: WebDriverSocket) {
+  websocket.close(socket.ws, 1000, "normal")
+}
+
+@target(javascript)
+pub fn send_request(
+  socket: WebDriverSocket,
+  request: Json,
+  command: definition.CommandData,
+) -> Result(definition.CommandResponse, error.ButterbeeError) {
+  let result = websocket.send(socket.ws, json.to_string(request))
+  echo result
+  todo
 }

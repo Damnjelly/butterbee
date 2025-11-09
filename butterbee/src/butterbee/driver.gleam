@@ -25,6 +25,10 @@ import palabres as log
 
 @target(erlang)
 import gleam/erlang/process
+
+@target(javascript)
+import gleam/javascript/promise
+
 /// Start a new webdriver session connect to the browser session, 
 /// using the configuration in the gleam.toml file.
 ///  WebDriver holds the browsing context info in its state
@@ -167,6 +171,13 @@ pub fn url(driver: WebDriver(state)) -> WebDriver(String) {
 /// Pause for a given amount of time (in milliseconds) before continuing
 pub fn wait(state: state, duration: Int) -> state {
   process.sleep(duration)
+  state
+}
+
+@target(javascript)
+/// Pause for a given amount of time (in milliseconds) before continuing
+pub fn wait(state: state, duration: Int) -> state {
+  promise.wait(duration)
   state
 }
 
