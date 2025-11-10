@@ -6,11 +6,11 @@
 
 ### Control the browser with gleam code using butterbee!
 
-Butterbee is a webdriver bidi client written in Gleam, for Gleam.
-It provides both a simple API for interacting with a webdriver server, 
-and a more complex API for interacting with the webdriver bidi protocol directly.
+Butterbee is a webdriver bidi client written in Gleam. 
+Webdriver bidi is a protocol that allows for controlling the browser via code. 
+It's primary usage is to write tests that automate user behavior on a web page
 
-NOTE: Because of test runner limitations, butterbee does not close the browser automatically when the test panics. If tests start randomly failing, check for any open browser processes in your system manager.
+## Getting started
 
 ```sh
 gleam add --dev butterbee
@@ -49,6 +49,8 @@ pub fn minimal_example_test_() {
   assert output == "Hello, Joe!\n"
 }
 ```
+
+NOTE: Because of test runner limitations, butterbee does not close the browser automatically when the test panics. If tests start randomly failing, check for any open browser processes in your system manager.
 
 ### Guides
 
