@@ -31,13 +31,11 @@ source = "docs/github-actions.md"
 
 [dependencies]
 butterbidi = { path = "../butterbidi" }
-butterlib = { path = "../butterlib" }
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
 gleam_erlang = ">= 1.2.0 and < 2.0.0"
 shellout = ">= 1.7.0 and < 2.0.0"
 gleam_otp = ">= 1.0.0 and < 2.0.0"
-stratus = { git = "https://github.com/Damnjelly/stratus.git", ref = "8cc2d98d2892644c26e9a6edc27c70bef04e7479" }
-# stratus = ">= 1.0.2 and < 2.0.0"
+grom_stratus = ">= 1.0.2 and < 2.0.0"
 gleam_http = ">= 4.1.1 and < 5.0.0"
 gleam_json = ">= 3.0.2 and < 4.0.0"
 gleam_httpc = ">= 5.0.0 and < 6.0.0"

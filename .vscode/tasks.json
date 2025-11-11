@@ -76,7 +76,7 @@
         {
             "label": "gleam clean",
             "type": "shell",
-            "command": "sh -c 'cd ./butterbee && gleam clean; cd ../butterbidi && gleam clean; cd ../butterlib && gleam clean'",
+            "command": "sh -c 'cd ./butterbee && gleam clean; cd ../butterbidi && gleam clean'",
             "options": {
                 "cwd": "${workspaceFolder}"
             }

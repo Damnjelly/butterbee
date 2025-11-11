@@ -5,9 +5,9 @@ import butterbee/by
 import butterbee/config/browser
 import butterbee/driver
 import butterbee/get
+import butterbee/internal/log
 import butterbee/key
 import butterbee/node
-import butterlib/log
 import gleeunit
 import palabres/level
 import pprint.{BitArraysAsString, Config, NoLabels, Styled}
@@ -15,13 +15,17 @@ import qcheck_gleeunit_utils/test_spec
 
 pub const timeout = 30
 
-pub fn main() {
-  let _ = case argv.load().arguments {
+fn load_arguments() {
+  case argv.load().arguments {
     ["--debug"] -> {
       log.configure(level.Debug)
     }
     _ -> log.configure(level.Warning)
   }
+}
+
+pub fn main() {
+  load_arguments()
   butterbee.init()
   gleeunit.main()
 }

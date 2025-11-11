@@ -47,7 +47,7 @@ pub fn new_with_config(
   browser_type: browser_config.BrowserType,
   config: config.ButterbeeConfig,
 ) -> WebDriver(info.Info) {
-  logger.debug("Starting webdriver session with config")
+  logger.info("Starting webdriver session with config")
   |> logger.string("config", string.inspect(config))
   |> logger.log
 
@@ -187,6 +187,8 @@ pub fn wait(state: state, duration: Int) -> state {
 
 /// Closes the webdriver session, closes the browser, and returns the state of the webdriver
 pub fn close(driver: WebDriver(state)) {
+  logger.info("Closing webdriver session")
+  |> logger.log
   let _ = browser.close(driver)
   use socket <- result.try({ webdriver.get_socket(driver) })
   let _ = socket.close(socket)

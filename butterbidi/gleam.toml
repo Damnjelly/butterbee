@@ -1,5 +1,5 @@
 name = "butterbidi"
-version = "1.0.0"
+version = "1.0.1"
 
 description = "Spec compliant webdriver bidi types, decoders and encoders for gleam"
 
@@ -16,8 +16,6 @@ target = "erlang"
 internal-modules = ["internal/*"]
 
 [dependencies]
-butterlib = { path = "../butterlib" }
-# butterlib = ">= 1.0.0 and < 2.0.0"
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
 gleam_json = ">= 3.0.2 and < 4.0.0"
 palabres = ">= 1.0.2 and < 2.0.0"
