@@ -29,6 +29,11 @@ title = "github actions"
 path = "github-actions.html"
 source = "docs/github-actions.md"
 
+[[documentation.pages]]
+title = "changelog"
+path = "changelog.html"
+source = "../CHANGELOG.md"
+
 [dependencies]
 butterbidi = { path = "../butterbidi" }
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"

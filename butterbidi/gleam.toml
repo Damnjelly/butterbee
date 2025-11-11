@@ -5,13 +5,19 @@ description = "Spec compliant webdriver bidi types, decoders and encoders for gl
 
 licences = ["Apache-2.0"]
 
-repository = { type = "codeberg", user = "gelei", repo = "butterbee" }
+[repository]
+type = "codeberg"
+user = "gelei"
+repo = "butterbee"
 
-links = [
-	{ title = "github mirror", href = "https://github.com/Damnjelly/butterbee" },
-]
+[[links]]
+title = "github mirror"
+href = "https://github.com/Damnjelly/butterbee"
 
-target = "erlang"
+[[documentation.pages]]
+title = "changelog"
+path = "changelog.html"
+source = "../CHANGELOG.md"
 
 internal-modules = ["internal/*"]
 

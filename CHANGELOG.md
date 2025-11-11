@@ -1,7 +1,5 @@
 # Butterbee Changelog
 
-## [Unreleased]
-
 ## [1.0.0] - 2025-11-11
 
 - Initial release
