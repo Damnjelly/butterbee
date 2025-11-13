@@ -1,10 +1,9 @@
 import birdie
 import butterbee/config
-import butterbee_test.{pretty_print}
-import qcheck_gleeunit_utils/test_spec
+import butterbee_test.{pretty_print, timeout}
 
 pub fn driver_max_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.driver]
     max_wait_time = 10000
@@ -17,7 +16,7 @@ pub fn driver_max_filled_test_() {
 }
 
 pub fn driver_only_max_time_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.driver]
     max_wait_time = 33333
@@ -30,7 +29,7 @@ pub fn driver_only_max_time_filled_test_() {
 }
 
 pub fn driver_only_request_timeout_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.driver]
     request_timeout = 31415
@@ -43,7 +42,7 @@ pub fn driver_only_request_timeout_filled_test_() {
 }
 
 pub fn driver_only_data_dir_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.driver]
     data_dir = '/another/another/dir'
@@ -56,7 +55,7 @@ pub fn driver_only_data_dir_filled_test_() {
 }
 
 pub fn driver_min_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.driver]
   "
@@ -66,7 +65,7 @@ pub fn driver_min_filled_test_() {
 }
 
 pub fn firefox_max_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.firefox]
     cmd = '/path/to/firefox'
@@ -79,7 +78,7 @@ pub fn firefox_max_filled_test_() {
 }
 
 pub fn firefox_only_cmd_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.firefox]
     cmd = '/path/to/firefox'
@@ -92,7 +91,7 @@ pub fn firefox_only_cmd_filled_test_() {
 }
 
 pub fn firefox_only_flags_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.firefox]
     flags = ['-headless']
@@ -105,7 +104,7 @@ pub fn firefox_only_flags_filled_test_() {
 }
 
 pub fn firefox_only_host_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.firefox]
     host = 'localhost'
@@ -118,7 +117,7 @@ pub fn firefox_only_host_filled_test_() {
 }
 
 pub fn firefox_min_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.firefox]
   "
@@ -128,7 +127,7 @@ pub fn firefox_min_filled_test_() {
 }
 
 pub fn chromium_max_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.chromium]
     cmd = '/path/to/chromium'
@@ -141,7 +140,7 @@ pub fn chromium_max_filled_test_() {
 }
 
 pub fn chromium_only_cmd_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.chromium]
     cmd = '/path/to/chromium'
@@ -154,7 +153,7 @@ pub fn chromium_only_cmd_filled_test_() {
 }
 
 pub fn chromium_only_flags_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.chromium]
     flags = ['-headless']
@@ -167,7 +166,7 @@ pub fn chromium_only_flags_filled_test_() {
 }
 
 pub fn chromium_only_host_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.chromium]
     host = 'localhost'
@@ -180,7 +179,7 @@ pub fn chromium_only_host_filled_test_() {
 }
 
 pub fn chromium_min_filled_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.browser.chromium]
   "
@@ -190,7 +189,7 @@ pub fn chromium_min_filled_test_() {
 }
 
 pub fn capabilities_w3c_values_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.capabilities.always_match]
     acceptInsecureCerts = true
@@ -204,7 +203,7 @@ pub fn capabilities_w3c_values_test_() {
 }
 
 pub fn always_match_primitives_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [tools.butterbee.capabilities.always_match]
     bool = true
@@ -220,7 +219,7 @@ pub fn always_match_primitives_test_() {
 }
 
 pub fn first_match_primitives_test_() {
-  use <- test_spec.make_with_timeout(butterbee_test.timeout)
+  use <- butterbee_test.Timeout(timeout)
   "
     [[tools.butterbee.capabilities.first_match]]
     bool = true

@@ -27,9 +27,9 @@ jobs:
           firefox-version: "latest"
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: "27.1.2"
-          gleam-version: "1.11.0"
-          rebar3-version: "3"
+          otp-version: "latest"
+          gleam-version: "latest"
+          rebar3-version: "latest"
       - run: gleam deps download
       - run: xvfb-run -a gleam test
       - run: gleam format --check src test

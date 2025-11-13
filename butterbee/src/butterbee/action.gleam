@@ -1,8 +1,8 @@
 //// The action module contains functions to perform actions on nodes.
 ////
 //// Perform actions by passing the functions in this module to either the 
-//// [`node.do`](https://hexdocs.pm/butterbee/node.html#do/2) or 
-//// [`node.get`](https://hexdocs.pm/butterbee/node.html#get/2) functions.
+//// [`node.do`](https://hexdocs.pm/butterbee/butterbee/node.html#do) or 
+//// [`node.get`](https://hexdocs.pm/butterbee/butterbee/node.html#get) functions.
 ////
 //// ### Example
 ////
@@ -15,7 +15,7 @@
 ////   |> node.do(action.click(key.LeftClick))
 //// ```
 
-import butterbee/commands/input
+import butterbee/internal/commands/input
 import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/key
@@ -72,7 +72,7 @@ pub fn click(
 /// Simulates a user entering the given keys into the browser.
 ///
 /// NOTE: It is not recommended to use this function for entering text into text fields. 
-/// Use the [`node.set_value(value)`](https://hexdocs.pm/butterbee/node.html#do) function instead.
+/// Use the [`node.set_value(value)`](https://hexdocs.pm/butterbee/butterbee/node.html#set_value) function instead.
 pub fn enter_keys(
   keys: String,
 ) -> fn(WebDriver(remote_value.NodeRemoteValue)) ->

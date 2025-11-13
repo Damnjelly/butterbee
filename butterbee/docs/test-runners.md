@@ -1,32 +1,72 @@
-Gleeunit, currently, it has an unconfigurable timeout time. Which is a problem for 
-running browser based tests, since they tend to take longer than the timeout permits.
+To set a timeout for your tests in gleeunit, you can create a `Timeout` type and use it in your test like this:
 
-For browser tests I currently recommend using [qcheck_gleeunit_utils](https://hexdocs.pm/qcheck_gleeunit_utils/index.html) to run your tests. Since it allows you to set a timeout for your tests.
+```gleam
+import butterbee
+import butterbee/action
+import butterbee/by
+import butterbee/config.{Firefox}
+import butterbee/get
+import butterbee/key
+import butterbee/node
+import gleeunit
+
+pub const timeout = 30.0
+
+pub fn main() {
+  load_arguments()
+  butterbee.init()
+  gleeunit.main()
+}
+
+pub type Timeout {
+  Timeout(Float, fn() -> Nil)
+}
+
+pub fn minimal_example_test_() {
+  use <- Timeout(timeout)
+  let output =
+    driver
+    |> butterbee.goto("https://gleam.run/")
+    |> get.node(by.xpath(
+      "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
+    ))
+    |> node.do(action.click(key.LeftClick))
+    |> get.node(by.css("pre.log"))
+    |> node.get(node.text())
+    |> butterbee.value()
+  assert output == Ok("Hello, Joe!\n")
+}
+```
+
+
+you can also use [qcheck_gleeunit_utils](https://hexdocs.pm/qcheck_gleeunit_utils/index.html) to run your tests. Since it allows you to set a timeout for your tests.
 
 The 'getting started' would look something like this with qcheck_gleeunit_utils integration:
 
 ```gleam
 import butterbee
+import butterbee/action
 import butterbee/by
-import butterbee/config/browser
-import butterbee/input
-import butterbee/nodes
-import butterbee/query
-import butterbee/webdriver
+import butterbee/config.{Firefox}
+import butterbee/get
+import butterbee/key
+import butterbee/node
 import gleeunit
 import qcheck_gleeunit_utils/test_spec
 
+pub const timeout = 30
+
 pub fn minimal_example_test_() {
-  use <- test_spec.make_with_timeout(30)
+  use <- test_spec.make_with_timeout(timeout)
   let output =
-    webdriver.new(browser.Firefox)
-    |> webdriver.goto("https://gleam.run/")
-    |> query.node(by.xpath(
+    driver
+    |> butterbee.goto("https://gleam.run/")
+    |> get.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
-    |> input.click(input.LeftClick)
-    |> query.node(by.css("pre.log"))
-    |> nodes.inner_text()
-    |> webdriver.close()
-  assert output == "Hello, Joe!\n"
+    |> node.do(action.click(key.LeftClick))
+    |> get.node(by.css("pre.log"))
+    |> node.get(node.text())
+    |> butterbee.value()
+  assert output == Ok("Hello, Joe!\n")
 }

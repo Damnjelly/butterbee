@@ -2,8 +2,7 @@ import argv
 import butterbee
 import butterbee/action
 import butterbee/by
-import butterbee/config/browser
-import butterbee/driver
+import butterbee/config.{Firefox}
 import butterbee/get
 import butterbee/internal/log
 import butterbee/key
@@ -11,9 +10,8 @@ import butterbee/node
 import gleeunit
 import palabres/level
 import pprint.{BitArraysAsString, Config, NoLabels, Styled}
-import qcheck_gleeunit_utils/test_spec
 
-pub const timeout = 30
+pub const timeout = 30.0
 
 fn load_arguments() {
   case argv.load().arguments {
@@ -30,19 +28,25 @@ pub fn main() {
   gleeunit.main()
 }
 
+pub type Timeout {
+  Timeout(Float, fn() -> Nil)
+}
+
 pub fn minimal_example_test_() {
-  use <- test_spec.make_with_timeout(timeout)
-  let assert Ok(output) =
-    driver.new(browser.Firefox)
-    |> driver.goto("https://gleam.run/")
+  use <- Timeout(timeout)
+
+  use driver <- butterbee.run(Firefox)
+  let output =
+    driver
+    |> butterbee.goto("https://gleam.run/")
     |> get.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
     |> node.do(action.click(key.LeftClick))
     |> get.node(by.css("pre.log"))
     |> node.get(node.text())
-    |> driver.close()
-  assert output == "Hello, Joe!\n"
+    |> butterbee.value()
+  assert output == Ok("Hello, Joe!\n")
 }
 
 pub fn pretty_print(value: a) -> String {

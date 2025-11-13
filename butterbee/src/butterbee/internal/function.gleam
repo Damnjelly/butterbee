@@ -1,4 +1,4 @@
-import butterbee/commands/script
+import butterbee/internal/commands/script
 import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/webdriver.{type WebDriver}

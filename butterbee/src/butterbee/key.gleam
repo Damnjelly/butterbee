@@ -1,5 +1,5 @@
 //// A collection of special keys for use with the 
-//// [`action.enter_keys`](https://hexdocs.pm/butterbee/action.html#enter_keys/2) function.
+//// [`action.enter_keys`](https://hexdocs.pm/butterbee/butterbee/action.html#enter_keys) function.
 ////
 //// NOTE: This module has been slopped together from a claude prompt.
 //// If a key doesn't work, it's probably a hallucination.

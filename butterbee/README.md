@@ -22,12 +22,12 @@ Getting started with butterbee is easy! make sure Firefox is on your $PATH, add 
 
 ```gleam
 import butterbee
+import butterbee/action
 import butterbee/by
-import butterbee/config/browser
-import butterbee/input
-import butterbee/nodes
-import butterbee/query
-import butterbee/webdriver
+import butterbee/config.{Firefox}
+import butterbee/get
+import butterbee/key
+import butterbee/node
 import gleeunit
 
 pub fn main() {
@@ -35,18 +35,24 @@ pub fn main() {
   gleeunit.main()
 }
 
+pub type Timeout {
+  Timeout(Float, fn() -> Nil)
+}
+
 pub fn minimal_example_test_() {
-  let assert Ok(output) =
-    driver.new(browser.Firefox)
-    |> driver.goto("https://gleam.run/")
+  use <- Timeout(timeout)
+  use driver <- butterbee.run(Firefox)
+  let output =
+    driver
+    |> butterbee.goto("https://gleam.run/")
     |> get.node(by.xpath(
       "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
     ))
     |> node.do(action.click(key.LeftClick))
     |> get.node(by.css("pre.log"))
     |> node.get(node.text())
-    |> driver.close()
-  assert output == "Hello, Joe!\n"
+    |> butterbee.value()
+  assert output == Ok("Hello, Joe!\n")
 }
 ```
 
@@ -54,8 +60,8 @@ NOTE: Because of test runner limitations, butterbee does not close the browser a
 
 ### Guides
 
-- [Butterbee configuration](https://hexdocs.pm/butterbee/config)
-- [Page modules](https://hexdocs.pm/butterbee/page-modules)
-- [Other testrunners](https://hexdocs.pm/butterbee/test-runners)
-- [Github actions](https://hexdocs.pm/butterbee/github-actions)
+- [Butterbee configuration](https://hexdocs.pm/butterbee/butterbee/config.html)
+- [Page modules](https://hexdocs.pm/butterbee/page-modules.html)
+- [Other testrunners](https://hexdocs.pm/butterbee/test-runners.html)
+- [Github actions](https://hexdocs.pm/butterbee/github-actions.html)
 

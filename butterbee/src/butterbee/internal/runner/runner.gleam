@@ -1,38 +1,34 @@
 import butterbee/browser.{type Browser}
 import butterbee/config
-import butterbee/config/browser as browser_config
 import butterbee/internal/error
 import butterbee/internal/runner/chromium
 import butterbee/internal/runner/firefox
 import gleam/dict
+import gleam/erlang/process
 import gleam/list
 import gleam/option
 import gleam/result
 import gleam/string
-import palabres as log
+import operating_system
+import palabres as logger
 import shellout
 import simplifile
 
-@target(erlang)
-import gleam/erlang/process
-
 /// Start a browser instance
 pub fn new(
-  browser_to_run: browser_config.BrowserType,
+  browser_to_run: config.BrowserType,
   config: config.ButterbeeConfig,
 ) -> Result(Browser, error.ButterbeeError) {
   let driver_config = config.driver
-  let browser_config =
+  let config =
     config.browser_config
-    |> option.unwrap(browser_config.default())
+    |> option.unwrap(config.default_browser_config())
     |> dict.get(browser_to_run)
-    |> result.unwrap(browser_config.default_configuration(
-      browser_config.Firefox,
-    ))
+    |> result.unwrap(config.default_individual_browser_config(config.Firefox))
 
   use request <- result.try({
     browser.new_port()
-    |> result.map(fn(port) { browser.get_request(port, browser_config.host) })
+    |> result.map(fn(port) { browser.get_request(port, config.host) })
     |> result.map_error(error.PortError)
   })
 
@@ -42,27 +38,23 @@ pub fn new(
   })
 
   let flags = case browser_to_run {
-    browser_config.Firefox ->
+    config.Firefox ->
       firefox.get_flags(
-        {
-          [browser_config.start_url] |> list.append(browser_config.extra_flags)
-        },
+        { [config.start_url] |> list.append(config.extra_flags) },
         request.port,
         profile_dir,
       )
-    browser_config.Chromium ->
+    config.Chromium ->
       chromium.get_flags(
-        {
-          [browser_config.start_url] |> list.append(browser_config.extra_flags)
-        },
+        { [config.start_url] |> list.append(config.extra_flags) },
         request.port,
       )
   }
 
   use _ <- result.try({
     case browser_to_run {
-      browser_config.Firefox -> firefox.setup(profile_dir)
-      browser_config.Chromium -> chromium.setup()
+      config.Firefox -> firefox.setup(profile_dir)
+      config.Chromium -> chromium.setup()
     }
   })
 
@@ -71,7 +63,7 @@ pub fn new(
     |> browser.with_request(request)
     |> browser.with_profile_dir(profile_dir)
     |> browser.with_profile_name(profile)
-    |> browser.with_cmd(#(browser_config.cmd, flags))
+    |> browser.with_cmd(#(config.cmd, flags))
 
   use browser <- result.try({
     run(browser) |> result.map_error(fn(_) { error.RunnerError })
@@ -93,37 +85,49 @@ fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
     |> option.to_result(error.BrowserDoesNotHaveProfileDir)
   })
 
-  log.info("Starting browser")
-  |> log.string("cmd", cmd)
-  |> log.string("flags", string.inspect(flags))
-  |> log.string("profile_dir", profile_dir)
-  |> log.log
+  logger.info("Starting browser")
+  |> logger.string("cmd", cmd)
+  |> logger.string("flags", string.inspect(flags))
+  |> logger.string("profile_dir", profile_dir)
+  |> logger.log
 
   do_run(cmd, flags, profile_dir)
 
   Ok(browser)
 }
 
-@target(erlang)
 fn do_run(cmd: String, flags: List(String), profile_dir: String) {
   process.spawn(fn() {
+    let browser = list.prepend(flags, cmd)
+    let wrapper_cmd = case operating_system.name() {
+      "linux" | "darwin" -> "runner.sh"
+      "windows_nt" -> "runner.ps1"
+      _ -> {
+        logger.error("Unsupported operating system")
+        |> logger.string("error", operating_system.name())
+        |> logger.log
+        "runner.sh"
+      }
+    }
     let _ = case
-      shellout.command(run: cmd, with: flags, in: profile_dir, opt: [
-        // You can uncomment this to see the output of the browser, but for some reason it makes the tests fail
-      // shellout.LetBeStdout,
-      ])
+      shellout.command(
+        run: "src/butterbee/internal/runner/" <> wrapper_cmd,
+        with: browser,
+        in: ".",
+        opt: [],
+      )
     {
       Ok(_) -> Nil
       Error(error) -> {
-        log.error("Error running browser command")
-        |> log.string("error", error.1)
-        |> log.log
+        logger.error("Error running browser command")
+        |> logger.string("error", error.1)
+        |> logger.log
       }
     }
 
     // INFO: This run after the browser  closes
-    log.debug("Cleaning up profile directory")
-    |> log.log
+    logger.debug("Cleaning up profile directory")
+    |> logger.log
     let _ = case simplifile.delete(profile_dir) {
       Ok(_) -> Ok(Nil)
       Error(error) -> Error(error.CouldNotDeleteProfileDir(error))

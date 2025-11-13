@@ -1,10 +1,8 @@
 import gleam/dynamic
+import gleam/erlang/atom.{type Atom}
 import palabres
 import palabres/level.{type Level}
 import palabres/options
-
-@target(erlang)
-import gleam/erlang/atom.{type Atom}
 
 fn palabres_configure(loglevel: Level) {
   options.defaults()
@@ -12,7 +10,6 @@ fn palabres_configure(loglevel: Level) {
   |> palabres.configure
 }
 
-@target(erlang)
 pub fn configure(loglevel: Level) {
   palabres_configure(loglevel)
   suppress_sasl_error_reports()
@@ -23,11 +20,9 @@ const filters = [
   "WebSocket handshake failed: Sock\\(Econnrefused\\)", "Making request",
 ]
 
-@target(erlang)
 @external(erlang, "logger", "set_application_level")
 fn set_application_level(app: Atom, level: Atom) -> Result(Nil, Nil)
 
-@target(erlang)
 /// Suppress SASL application logs specifically
 /// This removeds the Error Reports from erlang logging
 /// These showed up when connecting to browser using stratus before the browser was ready

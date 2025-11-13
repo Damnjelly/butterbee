@@ -1,11 +1,7 @@
-//// The browser module contains the Browser type and functions to create and configure browsers.
-////
-//// Usually you will not need to use this module directly, as it is usually derived
-//// from the configuration in the gleam.toml file. But you can pass it as a type using
-//// the [`driver.new_with_config`](https://hexdocs.pm/butterbee/driver.html#new_with_config)
-//// function.
+//// The browser module contains the Browser type, which holds the state and configuration
+//// of the browser session.
 
-import butterbee/config/browser as browser_config
+import butterbee/config
 import butterbee/internal/error
 import butterbee/internal/id
 import gleam/http.{Http}
@@ -16,14 +12,11 @@ import gleam/result
 import palabres as log
 import simplifile
 
-@target(javascript)
-import gleam/javascript/promise.{type Promise}
-
 /// The Browser type contains all the information needed to run a browser.
 pub type Browser {
   Browser(
     /// The type of browser to run.
-    browser_type: browser_config.BrowserType,
+    browser_type: config.BrowserType,
     /// The command to run the browser including the flags.
     cmd: Option(#(String, List(String))),
     /// The url to use to start the browser.
@@ -36,14 +29,14 @@ pub type Browser {
 }
 
 pub const default: Browser = Browser(
-  browser_type: browser_config.default_browser_type,
+  browser_type: config.default_browser_type,
   cmd: None,
   request: None,
   profile_name: None,
   profile_dir: None,
 )
 
-pub fn new(browser_to_run: browser_config.BrowserType) -> Browser {
+pub fn new(browser_to_run: config.BrowserType) -> Browser {
   Browser(
     browser_type: browser_to_run,
     cmd: None,
@@ -79,7 +72,6 @@ pub fn get_request(port: Int, host: String) -> Request(String) {
 
 /// Returns a free port to use for a webdriver session
 @external(erlang, "browser_ffi", "new_port")
-@external(javascript, "./browser_ffi.mjs", "new_port")
 pub fn new_port() -> Result(Int, error.PortError)
 
 /// Create a new profile directory

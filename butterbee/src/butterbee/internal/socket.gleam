@@ -6,23 +6,14 @@ import butterbee/internal/retry
 import butterbidi/definition
 import gleam/dict
 import gleam/dynamic/decode.{type Decoder}
+import gleam/erlang/process
 import gleam/http/request.{type Request}
 import gleam/json.{type Json}
+import gleam/otp/actor
 import gleam/result
 import gleam/uri
 import palabres as log
-
-@target(erlang)
-import gleam/erlang/process
-@target(erlang)
-import gleam/otp/actor
-@target(erlang)
 import stratus as websocket
-
-@target(javascript)
-import gleam/javascript/promise
-@target(javascript)
-import stratocumulus.{type WebSocket} as websocket
 
 const request_timeout = 5000
 
@@ -43,24 +34,17 @@ fn id_decoder() -> Decoder(Int) {
   decode.success(id)
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// ERLANG WEBSOCKET
-// ─────────────────────────────────────────────────────────────────────────
-
-@target(erlang)
 pub type WebDriverSocket {
   WebDriverSocket(
     actor: actor.Started(process.Subject(websocket.InternalMessage(Msg))),
   )
 }
 
-@target(erlang)
 pub type Msg {
   SendCommand(subject: process.Subject(Result(String, String)), request: String)
   Close
 }
 
-@target(erlang)
 pub fn new(
   request: Request(String),
 ) -> Result(WebDriverSocket, error.ButterbeeError) {
@@ -155,14 +139,12 @@ pub fn new(
   Ok(WebDriverSocket(subject))
 }
 
-@target(erlang)
 /// Close the websocket connection
 pub fn close(socket: WebDriverSocket) {
   websocket.to_user_message(Close)
   |> process.send(socket.actor.data, _)
 }
 
-@target(erlang)
 /// Send a request to the webdriver server
 /// Returns the result from the server as a dynamic
 pub fn send_request(

@@ -4,10 +4,10 @@
 ////
 //// After navigating to a page, call one of the functions in this module to get a node,
 //// or a list of nodes. After getting a node, you can perform actions on it using functions from
-//// the [`node`](https://hexdocs.pm/butterbee/node.html) and 
-//// [`action`](https://hexdocs.pm/butterbee/action.html) modules.
+//// the [`node`](https://hexdocs.pm/butterbee/butterbee/node.html) and 
+//// [`action`](https://hexdocs.pm/butterbee/butterbee/action.html) modules.
 //// Butterbee supports different locating strategies, see the 
-//// [by](https://hexdocs.pm/butterbee/by.html) module for more information.
+//// [by](https://hexdocs.pm/butterbee/butterbee/by.html) module for more information.
 ////
 //// ### Example
 ////
@@ -29,7 +29,7 @@
 //// but if you want to make your tests more reusable, its recommended to use 
 //// [page modules](https://hexdocs.pm/butterbee/page-modules.html).
 
-import butterbee/commands/browsing_context
+import butterbee/internal/commands/browsing_context
 import butterbee/internal/error
 import butterbee/internal/retry
 import butterbee/webdriver.{type WebDriver}

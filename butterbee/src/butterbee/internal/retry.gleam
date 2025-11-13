@@ -1,13 +1,8 @@
+import gleam/erlang/process
 import gleam/order
 import gleam/time/duration
 import gleam/time/timestamp.{type Timestamp}
 import palabres as log
-
-@target(erlang)
-import gleam/erlang/process
-
-@target(javascript)
-import gleam/javascript/promise
 
 const max_wait_time = 8000
 
@@ -99,19 +94,9 @@ fn bool_loop(
   }
 }
 
-@target(erlang)
 fn wait_on_attempts(attempts: Int) -> Nil {
   process.sleep(get_wait_time(attempts))
 }
-
-@target(javascript)
-fn wait_on_attempts(attempts: Int) -> Nil {
-  delay(get_wait_time(attempts))
-}
-
-@target(javascript)
-@external(javascript, "./retry_ffi.mjs", "delay")
-pub fn delay(ms: Int) -> Nil
 
 fn get_wait_time(attempts: Int) -> Int {
   case attempts {

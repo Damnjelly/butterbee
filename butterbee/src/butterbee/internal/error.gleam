@@ -1,21 +1,12 @@
 import butterbidi/definition
 import gleam/json
 import simplifile
-@target(javascript)
-import stratocumulus
-@target(erlang)
 import stratus
 
-@target(erlang)
 pub type WebSocketError {
   CouldNotSendRequest(stratus.SocketReason)
   CouldNotStart(stratus.SocketReason)
   CouldNotInit(stratus.InitializationError)
-}
-
-@target(javascript)
-pub type WebSocketError {
-  CouldNotStart(stratocumulus.OpenError)
 }
 
 pub type PortError {

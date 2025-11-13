@@ -3,13 +3,13 @@
 //// ## Usage
 ////
 //// In your tests, call 
-//// [`get`](https://hexdocs.pm/butterbee/get.html#get),
-//// [`do`](https://hexdocs.pm/butterbee/node.html#do), 
-//// [`get_all`](https://hexdocs.pm/butterbee/get.html#get_all), or 
-//// [`do_all`](https://hexdocs.pm/butterbee/node.html#do_all) 
+//// [`get`](https://hexdocs.pm/butterbee/butterbee/node.html#get),
+//// [`do`](https://hexdocs.pm/butterbee/butterbee/node.html#do), 
+//// [`get_all`](https://hexdocs.pm/butterbee/butterbee/node.html#get_all), or 
+//// [`do_all`](https://hexdocs.pm/butterbee/butterbee/node.html#do_all) 
 //// to perform an action on a node. These function expect a parameter `action` 
 //// that is the action to perform. possible actions are listed in this module and in the 
-//// [action](https://hexdocs.pm/butterbee/action.html) module.
+//// [action](https://hexdocs.pm/butterbee/butterbee/action.html) module.
 ////
 //// ### Example
 ////
@@ -211,5 +211,57 @@ pub fn scroll_into_view() {
     driver
     |> function.on_node([], function)
     |> webdriver.map_state(driver)
+  }
+}
+
+/// Gets the `inner text` of the selected option of a `select` element.
+pub fn selected_text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
+  WebDriver(String) {
+  fn(driver: WebDriver(remote_value.NodeRemoteValue)) -> WebDriver(String) {
+    driver
+    |> function.on_node(
+      [],
+      "function() { return this.options[this.selectedIndex].text; }",
+    )
+    |> function.result_to_string
+    |> webdriver.map_state(driver)
+  }
+}
+
+/// Selects the value of a `select` element based on the `inner text` of one of its options.
+pub fn select_option(
+  option: String,
+) -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
+  WebDriver(remote_value.NodeRemoteValue) {
+  // Sets the value of a <select> element based on the innerText of one of its options.
+  // @param {string} innerTextValue – The exact innerText of the option that should become selected.
+  // @this {HTMLSelectElement} – The select element whose value will be updated.
+  let function =
+    "function setSelectByInnerText(innerTextValue) {
+      if (!this || this.tagName !== 'SELECT') {
+        throw new TypeError('Function must be called on a <select> element');
+      }
+
+      for (let i = 0; i < this.options.length; i++) {
+        if (this.options[i].innerText === innerTextValue) {
+          this.selectedIndex = i;
+          return; // Stop once the match is found
+        }
+      }
+
+      throw new Error(`No option with innerText \"${innerTextValue}\" found`);
+    }"
+
+  fn(driver: WebDriver(remote_value.NodeRemoteValue)) {
+    let _ =
+      driver
+      |> webdriver.with_state({
+        case driver.state {
+          Error(error) -> Error(error)
+          Ok(node) -> Ok(local_value.node(node))
+        }
+      })
+      |> function.on_value([local_value.string(option)], function)
+    driver
   }
 }
