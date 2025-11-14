@@ -19,10 +19,7 @@ jobs:
       - uses: browser-actions/setup-firefox@v1
         with:
           firefox-version: "latest"
-      - uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: "latest"
-          install-chromedriver: true
+      - uses: nanasess/setup-chromedriver@v2
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "latest"
