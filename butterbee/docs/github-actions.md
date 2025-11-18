@@ -1,9 +1,9 @@
 # Set up butterbee in Github Actions
 
 butterbee can be used in Github Actions to run tests in a browser. For this to work, you need
-to have add firefox to the runner and run gleam test via xvfb.
+to have the browsers to the runner and run gleam test via xvfb.
 
-### Firefox example
+### github actions example
 ```yml
 name: test
 
@@ -13,6 +13,7 @@ on:
       - master
       - main
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -22,9 +23,16 @@ jobs:
         working-directory: ./butterbee
     steps:
       - uses: actions/checkout@v4
+      - name: Remove pre-installed Chrome
+        run: |
+          sudo apt-get remove -y google-chrome-stable
+          sudo apt-get autoremove -y
       - uses: browser-actions/setup-firefox@v1
         with:
           firefox-version: "latest"
+      - uses: browser-actions/setup-chrome@v1
+        with:
+          install-chromedriver: true
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "latest"

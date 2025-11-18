@@ -1,17 +1,14 @@
 import argv
 import butterbee
-import butterbee/action
-import butterbee/by
-import butterbee/config.{Firefox}
-import butterbee/get
+import butterbee/config.{Chromium, Firefox}
 import butterbee/internal/log
-import butterbee/key
-import butterbee/node
 import gleeunit
 import palabres/level
 import pprint.{BitArraysAsString, Config, NoLabels, Styled}
 
 pub const timeout = 30.0
+
+pub const browsers = [Chromium, Firefox]
 
 fn load_arguments() {
   case argv.load().arguments {
@@ -30,23 +27,6 @@ pub fn main() {
 
 pub type Timeout {
   Timeout(Float, fn() -> Nil)
-}
-
-pub fn minimal_example_test_() {
-  use <- Timeout(timeout)
-
-  use driver <- butterbee.run(Firefox)
-  let output =
-    driver
-    |> butterbee.goto("https://gleam.run/")
-    |> get.node(by.xpath(
-      "//div[@class='hero']//a[@href='https://tour.gleam.run/']",
-    ))
-    |> node.do(action.click(key.LeftClick))
-    |> get.node(by.css("pre.log"))
-    |> node.get(node.text())
-    |> butterbee.value()
-  assert output == Ok("Hello, Joe!\n")
 }
 
 pub fn pretty_print(value: a) -> String {

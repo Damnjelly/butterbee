@@ -26,45 +26,6 @@ pub type Empty {
   Empty
 }
 
-pub fn new() -> WebDriver(Empty) {
-  WebDriver(None, None, None, Ok(Empty))
-}
-
-pub fn with_context(
-  webdriver: WebDriver(state),
-  context: BrowsingContext,
-) -> WebDriver(state) {
-  WebDriver(..webdriver, context: Some(context))
-}
-
-pub fn with_config(
-  webdriver: WebDriver(state),
-  config: config.ButterbeeConfig,
-) -> WebDriver(state) {
-  WebDriver(..webdriver, config: Some(config))
-}
-
-pub fn with_state(
-  webdriver: WebDriver(state),
-  state: Result(new_state, error.ButterbeeError),
-) -> WebDriver(new_state) {
-  WebDriver(..webdriver, state: state)
-}
-
-pub fn map_state(
-  state: Result(new_state, error.ButterbeeError),
-  webdriver: WebDriver(state),
-) -> WebDriver(new_state) {
-  WebDriver(..webdriver, state:)
-}
-
-pub fn with_socket(
-  webdriver: WebDriver(state),
-  socket: WebDriverSocket,
-) -> WebDriver(state) {
-  WebDriver(..webdriver, socket: Some(socket))
-}
-
 pub fn get_socket(
   driver: WebDriver(state),
 ) -> Result(WebDriverSocket, error.ButterbeeError) {
@@ -98,7 +59,53 @@ pub fn get_state(
   webdriver.state
 }
 
+@internal
+pub fn new() -> WebDriver(Empty) {
+  WebDriver(None, None, None, Ok(Empty))
+}
+
+@internal
+pub fn with_context(
+  webdriver: WebDriver(state),
+  context: BrowsingContext,
+) -> WebDriver(state) {
+  WebDriver(..webdriver, context: Some(context))
+}
+
+@internal
+pub fn with_config(
+  webdriver: WebDriver(state),
+  config: config.ButterbeeConfig,
+) -> WebDriver(state) {
+  WebDriver(..webdriver, config: Some(config))
+}
+
+@internal
+pub fn with_state(
+  webdriver: WebDriver(state),
+  state: Result(new_state, error.ButterbeeError),
+) -> WebDriver(new_state) {
+  WebDriver(..webdriver, state: state)
+}
+
+@internal
+pub fn with_socket(
+  webdriver: WebDriver(state),
+  socket: WebDriverSocket,
+) -> WebDriver(state) {
+  WebDriver(..webdriver, socket: Some(socket))
+}
+
+@internal
+pub fn map_state(
+  state: Result(new_state, error.ButterbeeError),
+  webdriver: WebDriver(state),
+) -> WebDriver(new_state) {
+  WebDriver(..webdriver, state:)
+}
+
 /// Perform an action using the webdriver and update the webdriver state
+@internal
 pub fn do(webdriver: WebDriver(state), action: fn(_) -> WebDriver(new_state)) {
   action(webdriver)
 }

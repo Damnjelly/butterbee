@@ -19,18 +19,18 @@ import gleam/result
 import gleam/string
 import gleam/uri
 import palabres as logger
+import simplifile
 
 /// Initialize butterbee,
 /// Call this in the main function of your test, before calling gleeunit.main.
-/// Then call [`butterbee.new`](file:///home/gelei/Documents/butterbee/butterbee/build/dev/docs/butterbee/butterbee.html#new) in your test
+/// Then call [`butterbee.run`](file:///home/gelei/Documents/butterbee/butterbee/build/dev/docs/butterbee/butterbee.html#run) in your test
 /// to start using butterbee.
 pub fn init() {
   logger.debug("Initializing butterbee")
   |> logger.log
   logger.debug("Deleting data_dir")
   |> logger.log
-  //TODO: actually delete data_dir instead of hardcoding it
-  // let _ = simplifile.delete("/tmp/butterbee")
+  let _ = simplifile.delete("/tmp/butterbee")
 
   Nil
 }
@@ -38,29 +38,30 @@ pub fn init() {
 /// Start a new webdriver session connect to the browser session, 
 /// using the configuration in the gleam.toml file.
 ///  WebDriver holds the browsing context info in its state
-pub fn run(browser: config.BrowserType, run: fn(WebDriver(Info)) -> a) -> a {
+pub fn run(
+  browsers: List(config.BrowserType),
+  run: fn(WebDriver(Info)) -> a,
+) -> Nil {
   let config = case config.parse_config("gleam.toml") {
     Ok(config) -> config
     Error(error) -> {
-      logger.error("Failed to parse gleam.toml")
+      logger.info("could not parse gleam.toml")
       |> logger.string("error", string.inspect(error))
       |> logger.log
       config.default_config
     }
   }
 
-  new_with_config(browser, config, run)
+  run_with_config(browsers, config, run)
 }
 
 /// Start a new webdriver session connect to the browser session, using the ButterbeeConfig type
-pub fn new_with_config(
-  browser_type: config.BrowserType,
+pub fn run_with_config(
+  browsers: List(config.BrowserType),
   config: config.ButterbeeConfig,
   run: fn(WebDriver(Info)) -> a,
-) -> a {
-  logger.info("Starting webdriver session with config")
-  |> logger.string("config", string.inspect(config))
-  |> logger.log
+) -> Nil {
+  use browser_type <- list.each(browsers)
 
   // Create webdriver type
   let driver =
@@ -70,7 +71,8 @@ pub fn new_with_config(
   let session = case driver.config {
     None -> Error(error.DriverDoesNotHaveConfig)
     Some(config) -> {
-      logger.debug("Starting browser")
+      logger.info("Starting browser")
+      |> logger.string("browser", config.browser_type_to_string(browser_type))
       |> logger.log
       use browser <- result.try({ runner.new(browser_type, config) })
 

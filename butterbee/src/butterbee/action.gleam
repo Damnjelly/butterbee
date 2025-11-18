@@ -9,8 +9,8 @@
 //// This example performs a click on the node with the css selector `a.logo`:
 ////
 //// ```gleam
-//// let example = driver.new(browser.Firefox)
-////   |> driver.goto("https://gleam.run/")
+//// let example = butterbee.new([config.Firefox])
+////   |> butterbee.goto("https://gleam.run/")
 ////   |> get.node(by.css("a.logo"))
 ////   |> node.do(action.click(key.LeftClick))
 //// ```
@@ -100,6 +100,7 @@ pub fn enter_keys(
 }
 
 /// A helper function that moves the mouse to the given node.
+@internal
 pub fn move_to_element(
   shared_id: String,
 ) -> List(perform_actions.PointerSourceAction) {
@@ -117,6 +118,7 @@ pub fn move_to_element(
 
 /// A helper function that simulates a full click action.
 /// Shorthand for pressing a mouse button, then releasing it.
+@internal
 pub fn click_action(
   mouse_button: Int,
 ) -> List(perform_actions.PointerSourceAction) {
@@ -128,6 +130,7 @@ pub fn click_action(
 
 /// A helper function to convert a list of keysactions that simulates the user pressing the keys.
 /// Shorthand for clicking in a key, letting it go, and pressing the next key.
+@internal
 pub fn enter_keys_action(keys: String) -> List(perform_actions.KeySourceAction) {
   let keys = string.split(keys, "")
   list.map(keys, fn(key) {
@@ -159,11 +162,13 @@ pub fn enter_keys_action(keys: String) -> List(perform_actions.KeySourceAction) 
 /// The example below performs a custom action on a node
 ///
 /// ```gleam
-/// let example = driver.new()
-///   |> driver.goto("https://packages.gleam.run/")
-///   |> query.node(by.css("input[aria-label='Package name, to search']"))
+/// let example = 
+///   driver
+///   |> butterbee.goto("https://packages.gleam.run/")
+///   |> get.node(by.css("input[aria-label='Package name, to search']"))
 ///   |> node.do(action.perform(params))
 /// ```
+@internal
 pub fn perform(
   driver: WebDriver(remote_value.NodeRemoteValue),
   params: perform_actions.PerformActionsParameters,

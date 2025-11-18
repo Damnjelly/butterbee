@@ -1,6 +1,5 @@
 import butterbee
 import butterbee/action
-import butterbee/config.{Firefox}
 import butterbee/element.{Cell, Item, Row}
 import butterbee/internal/test_page
 import butterbee/key
@@ -11,7 +10,7 @@ import gleam/string
 pub fn navigation_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let assert Ok(first_url) =
     driver
     |> butterbee.url()
@@ -29,7 +28,7 @@ pub fn navigation_test_() {
 pub fn enter_keys_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let comment =
     driver
     |> test_page.goto()
@@ -42,7 +41,7 @@ pub fn enter_keys_test_() {
 pub fn select_navigation_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let country =
     driver
     |> test_page.goto()
@@ -55,7 +54,7 @@ pub fn select_navigation_test_() {
 pub fn select_key_navigation_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let country =
     driver
     |> test_page.goto()
@@ -70,7 +69,7 @@ pub fn select_key_navigation_test_() {
 pub fn button_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let has_style =
     driver
     |> test_page.goto()
@@ -83,7 +82,7 @@ pub fn button_test_() {
 pub fn table_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let table =
     driver
     |> test_page.goto()
@@ -98,7 +97,7 @@ pub fn table_test_() {
 pub fn table_row_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let driver =
     driver
     |> test_page.goto()
@@ -119,7 +118,7 @@ pub fn table_row_test_() {
 pub fn table_cell_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let driver =
     driver
     |> test_page.goto()
@@ -167,7 +166,7 @@ pub fn table_cell_test_() {
 pub fn list_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let list =
     driver
     |> test_page.goto()
@@ -182,7 +181,7 @@ pub fn list_test_() {
 pub fn list_item_test_() {
   use <- butterbee_test.Timeout(timeout)
 
-  use driver <- butterbee.run(Firefox)
+  use driver <- butterbee.run(butterbee_test.browsers)
   let driver =
     driver
     |> test_page.goto()

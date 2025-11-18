@@ -5,7 +5,7 @@ Page modules provide a structured, reusable way to organize your web automation 
 Without page modules, tests require inline locators and element definitions, making them verbose and harder to maintain:
 
 ```gleam
-use driver <- butterbee.run(Firefox)
+use driver <- butterbee.run([Firefox])
 let assert Ok(output) =
   driver
   |> butterbee.goto("https://gleam.run/")
@@ -21,10 +21,10 @@ let assert Ok(output) =
 With page modules, the same test becomes more readable and the locators can be reused:
 
 ```gleam
-use driver <- butterbee.run(Firefox)
+use driver <- butterbee.run([Firefox])
 let assert Ok(output) =
   driver
-  |> butterbee.goto("https://gleam.run/")
+  |> gleam_page.goto()
   |> gleam_page.tour_button(action.click(key.LeftClick))
   |> gleam_page.log_output(node.text())
   |> butterbee.close()

@@ -145,6 +145,14 @@ pub type ButterbeeConfig {
   )
 }
 
+/// The default config.
+/// See the toml representation of the default configuration above
+pub const default_config: ButterbeeConfig = ButterbeeConfig(
+  default_driver_config,
+  None,
+  None,
+)
+
 pub fn with_driver_config(
   config: ButterbeeConfig,
   driver: DriverConfig,
@@ -203,14 +211,6 @@ fn butterbee_config_decoder() -> decode.Decoder(ButterbeeConfig) {
   decode.success(ButterbeeConfig(driver:, capabilities:, browser_config:))
 }
 
-/// The default config.
-/// See the toml representation of the default configuration above
-pub const default_config: ButterbeeConfig = ButterbeeConfig(
-  default_driver_config,
-  None,
-  None,
-)
-
 @internal
 pub type Error {
   ReadError(simplifile.FileError)
@@ -227,6 +227,7 @@ pub fn parse_config(path: String) -> Result(ButterbeeConfig, Error) {
   parse_config_string(path)
 }
 
+@internal
 pub fn parse_config_string(toml: String) -> Result(ButterbeeConfig, Error) {
   use config <- result.try({ tom.parse(toml) |> result.map_error(ParseError) })
 
@@ -332,6 +333,14 @@ pub fn default_browser_config() -> Dict(BrowserType, BrowserConfig) {
 pub type BrowserType {
   Firefox
   Chromium
+}
+
+@internal
+pub fn browser_type_to_string(browser_type: BrowserType) -> String {
+  case browser_type {
+    Firefox -> "firefox"
+    Chromium -> "chromium"
+  }
 }
 
 /// Returns the default browser type, firefox

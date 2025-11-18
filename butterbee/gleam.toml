@@ -20,11 +20,6 @@ path = "page-modules.html"
 source = "docs/page-modules.md"
 
 [[documentation.pages]]
-title = "test runners"
-path = "test-runners.html"
-source = "docs/test-runners.md"
-
-[[documentation.pages]]
 title = "github actions"
 path = "github-actions.html"
 source = "docs/github-actions.md"
@@ -41,18 +36,15 @@ gleam_erlang = ">= 1.2.0 and < 2.0.0"
 shellout = ">= 1.7.0 and < 2.0.0"
 gleam_otp = ">= 1.0.0 and < 2.0.0"
 grom_stratus = ">= 1.0.2 and < 2.0.0"
-gleam_http = ">= 4.1.1 and < 5.0.0"
 gleam_json = ">= 3.0.2 and < 4.0.0"
-gleam_httpc = ">= 5.0.0 and < 6.0.0"
 glam = ">= 2.0.3 and < 3.0.0"
 tom = ">= 2.0.0 and < 3.0.0"
 simplifile = ">= 2.3.0 and < 3.0.0"
 gleam_time = ">= 1.4.0 and < 2.0.0"
-gleam_javascript = ">= 1.0.0 and < 2.0.0"
 stratocumulus = ">= 0.1.0 and < 1.0.0"
 palabres = ">= 1.0.2 and < 2.0.0"
 exception = ">= 2.1.0 and < 3.0.0"
-operating_system = ">= 1.0.1 and < 2.0.0"
+gleam_http = ">= 4.3.0 and < 5.0.0"
 
 [dev-dependencies]
 argv = ">= 1.0.2 and < 2.0.0"
@@ -65,4 +57,4 @@ flags = ["-headless"]
 
 [tools.butterbee.capabilities.always_match]
 webSocketUrl = true
-"goog:chromeOptions" = { args = ["--headless=new"] }
+"goog:chromeOptions" = { args = ["--headless=new", "--no-sandbox"] }

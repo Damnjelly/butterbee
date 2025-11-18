@@ -24,7 +24,7 @@ Getting started with butterbee is easy! make sure Firefox is on your $PATH, add 
 import butterbee
 import butterbee/action
 import butterbee/by
-import butterbee/config.{Firefox}
+import butterbee/config
 import butterbee/get
 import butterbee/key
 import butterbee/node
@@ -40,8 +40,9 @@ pub type Timeout {
 }
 
 pub fn minimal_example_test_() {
-  use <- Timeout(timeout)
-  use driver <- butterbee.run(Firefox)
+  use <- Timeout(30.0)
+
+  use driver <- butterbee.run([config.Firefox])
   let output =
     driver
     |> butterbee.goto("https://gleam.run/")

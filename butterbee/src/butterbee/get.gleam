@@ -17,7 +17,7 @@
 //// let example =
 ////   driver
 ////   // navigate to a page
-////   |> driver.goto("https://gleam.run/")
+////   |> butterbee.goto("https://gleam.run/")
 ////   // get the node matching the css selector `a.logo` 
 ////   // and adds it to the state of the webdriver
 ////   |> get.node(by.css("a.logo"))

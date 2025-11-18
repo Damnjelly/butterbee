@@ -16,10 +16,16 @@ jobs:
         working-directory: ./butterbee
     steps:
       - uses: actions/checkout@v4
+      - name: Remove pre-installed Chrome
+        run: |
+          sudo apt-get remove -y google-chrome-stable
+          sudo apt-get autoremove -y
       - uses: browser-actions/setup-firefox@v1
         with:
           firefox-version: "latest"
-      - uses: nanasess/setup-chromedriver@v2
+      - uses: browser-actions/setup-chrome@v1
+        with:
+          install-chromedriver: true
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "latest"

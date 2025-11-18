@@ -3,7 +3,10 @@
 //// Example:
 ////
 //// ```gleam
+//// import butterbee
+//// import butterbee/by
 //// import butterbee/element.{type NodeList, type NodeTable}
+//// import butterbee/webdriver.{type WebDriver}
 ////
 //// pub fn submit_button(
 ////   driver: WebDriver(state),

@@ -16,7 +16,7 @@
 //// ```gleam
 //// let text =
 ////   driver
-////   |> driver.goto("https://gleam.run/")
+////   |> butterbee.goto("https://gleam.run/")
 ////   |> get.node(by.css("a.logo"))
 ////   // perform an action on the node, without updating the state
 ////   |> node.do(action.click(key.LeftClick))

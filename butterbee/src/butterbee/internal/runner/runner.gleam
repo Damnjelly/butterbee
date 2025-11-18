@@ -1,5 +1,5 @@
-import butterbee/browser.{type Browser}
 import butterbee/config
+import butterbee/internal/browser.{type Browser}
 import butterbee/internal/error
 import butterbee/internal/runner/chromium
 import butterbee/internal/runner/firefox
@@ -9,7 +9,6 @@ import gleam/list
 import gleam/option
 import gleam/result
 import gleam/string
-import operating_system
 import palabres as logger
 import shellout
 import simplifile
@@ -98,24 +97,8 @@ fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
 
 fn do_run(cmd: String, flags: List(String), profile_dir: String) {
   process.spawn(fn() {
-    let browser = list.prepend(flags, cmd)
-    let wrapper_cmd = case operating_system.name() {
-      "linux" | "darwin" -> "runner.sh"
-      "windows_nt" -> "runner.ps1"
-      _ -> {
-        logger.error("Unsupported operating system")
-        |> logger.string("error", operating_system.name())
-        |> logger.log
-        "runner.sh"
-      }
-    }
     let _ = case
-      shellout.command(
-        run: "src/butterbee/internal/runner/" <> wrapper_cmd,
-        with: browser,
-        in: ".",
-        opt: [],
-      )
+      shellout.command(run: cmd, with: flags, in: profile_dir, opt: [])
     {
       Ok(_) -> Nil
       Error(error) -> {
@@ -127,6 +110,7 @@ fn do_run(cmd: String, flags: List(String), profile_dir: String) {
 
     // INFO: This run after the browser  closes
     logger.debug("Cleaning up profile directory")
+    |> logger.string("profile dir", profile_dir)
     |> logger.log
     let _ = case simplifile.delete(profile_dir) {
       Ok(_) -> Ok(Nil)
