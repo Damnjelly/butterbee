@@ -1,5 +1,5 @@
 name = "butterbee"
-version = "1.0.0"
+version = "2.0.0"
 description = "A webdriver bidi client written in Gleam, for Gleam."
 licences = ["Apache-2.0"]
 

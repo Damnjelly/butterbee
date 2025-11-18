@@ -3,6 +3,14 @@
 butterbee can be used in Github Actions to run tests in a browser. For this to work, you need
 to have the browsers to the runner and run gleam test via xvfb.
 
+NOTE: to use chromium in github actions, you need to add the following to your `gleam.toml` file:
+
+```toml
+[tools.butterbee.capabilities.always_match]
+webSocketUrl = true
+"goog:chromeOptions" = { args = ["--no-sandbox"] }
+```
+
 ### github actions example
 ```yml
 name: test

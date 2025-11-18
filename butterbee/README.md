@@ -18,7 +18,7 @@ gleam add --dev butterbee
 
 ### Example
 
-Getting started with butterbee is easy! make sure Firefox is on your $PATH, add the code below to your test and run `gleam test`.
+Getting started with butterbee is easy! make sure Firefox is on your $PATH, replace the contents of the gleam file in your test folder and run `gleam test`.
 
 ```gleam
 import butterbee
@@ -56,8 +56,6 @@ pub fn minimal_example_test_() {
   assert output == Ok("Hello, Joe!\n")
 }
 ```
-
-NOTE: Because of test runner limitations, butterbee does not close the browser automatically when the test panics. If tests start randomly failing, check for any open browser processes in your system manager.
 
 ### Guides
 
