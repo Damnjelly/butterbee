@@ -22,6 +22,7 @@ pub type WebDriver(state) {
 }
 
 /// Signals that the webdriver session holds no state
+@internal
 pub type Empty {
   Empty
 }

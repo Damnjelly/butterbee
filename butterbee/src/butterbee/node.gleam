@@ -71,7 +71,7 @@ pub fn do_all(
 
 /// Get text from a node, tries different methods to get the text from a node. 
 /// First tries `textContent`, then `innerText`, then `value`.
-/// Returns null if no text is found.
+/// Returns "null" if no text is found.
 pub fn text() -> fn(WebDriver(remote_value.NodeRemoteValue)) ->
   WebDriver(String) {
   let function =
