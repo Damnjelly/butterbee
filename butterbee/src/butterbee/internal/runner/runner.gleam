@@ -102,7 +102,13 @@ fn do_run(cmd: String, flags: List(String), profile_dir: String) {
     {
       Ok(_) -> Nil
       Error(error) -> {
-        logger.error("Error running browser command")
+        let err = case cmd {
+          "chromedriver" -> "do you have chromedriver or chromium installed?"
+          "firefox" -> "do you have firefox installed?"
+          _ -> "do you have the browser or driver installed?"
+        }
+        logger.error("Error running browser command, " <> err)
+        |> logger.string("command", string.inspect(cmd))
         |> logger.string("error", error.1)
         |> logger.log
       }
