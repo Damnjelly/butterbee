@@ -48,9 +48,9 @@ pub fn get_tree(
         #("params", get_tree_parameters_to_json(params)),
       ]),
     )
-  use socket <- result.try({ webdriver.get_socket(driver) })
-
-  use response <- result.try({ socket.send_request(socket, request, command) })
+  use response <- result.try({
+    socket.send_request(driver.socket, request, command)
+  })
 
   case response.result {
     definition.BrowsingContextResult(result) ->
@@ -88,9 +88,9 @@ pub fn locate_nodes(
       ]),
     )
 
-  use socket <- result.try({ webdriver.get_socket(driver) })
-
-  use response <- result.try({ socket.send_request(socket, request, command) })
+  use response <- result.try({
+    socket.send_request(driver.socket, request, command)
+  })
 
   case response.result {
     definition.BrowsingContextResult(result) ->
@@ -140,9 +140,9 @@ pub fn navigate(
       ]),
     )
 
-  use socket <- result.try({ webdriver.get_socket(driver) })
-
-  use response <- result.try({ socket.send_request(socket, request, command) })
+  use response <- result.try({
+    socket.send_request(driver.socket, request, command)
+  })
 
   case response.result {
     definition.BrowsingContextResult(result) ->

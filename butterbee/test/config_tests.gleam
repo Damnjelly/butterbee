@@ -1,6 +1,7 @@
 import birdie
 import butterbee/config
-import butterbee_test.{pretty_print, timeout}
+import butterbee_test.{timeout}
+import utils.{pretty_print}
 
 pub fn driver_max_filled_test_() {
   use <- butterbee_test.Timeout(timeout)

@@ -1,11 +1,11 @@
 import butterbee
 import butterbee/action
 import butterbee/element.{Cell, Item, Row}
-import butterbee/internal/test_page
 import butterbee/key
 import butterbee/node
 import butterbee_test.{timeout}
 import gleam/string
+import test_page
 
 pub fn navigation_test_() {
   use <- butterbee_test.Timeout(timeout)

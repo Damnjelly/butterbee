@@ -5,7 +5,7 @@ import butterbee/get
 import butterbee/internal/error.{type ButterbeeError}
 import butterbee/internal/function
 import butterbee/webdriver
-import butterbee_test.{pretty_print, timeout}
+import butterbee_test.{timeout}
 import butterbidi/script/types/evaluate_result.{
   type EvaluateResult, EvaluateResultSuccess, SuccessResult,
 }
@@ -13,6 +13,7 @@ import butterbidi/script/types/local_value.{type LocalValue}
 import butterbidi/script/types/remote_value.{NodeRemote, NodeRemoteValue}
 import gleam/option.{None, Some}
 import gleam/result
+import utils.{pretty_print}
 
 pub fn evaluate_result_error_test_() {
   use <- butterbee_test.Timeout(timeout)

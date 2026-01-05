@@ -1,8 +1,6 @@
 ////
 //// [w3c link](https://w3c.github.io/webdriver-bidi/#type-script-RemoteValue)
 ////
-//// Todo: Handle type, internal_id type
-////
 
 import butterbidi/script/types/primitive_protocol_value.{
   type PrimitiveProtocolValue, BigInt, BigIntValue, Boolean, BooleanValue, Null,

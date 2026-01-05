@@ -16,9 +16,9 @@ pub fn abstract(
   arguments: List(LocalValue),
   function: String,
 ) -> Result(EvaluateResult, error.ButterbeeError) {
-  case webdriver.get_context(driver) {
-    Error(error) -> Error(error)
-    Ok(context) -> {
+  case driver.context {
+    None -> Error(error.DriverDoesNotHaveContext)
+    Some(context) -> {
       let target = target.new_context_target(context)
 
       let params =

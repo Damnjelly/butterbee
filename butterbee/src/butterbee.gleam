@@ -69,93 +69,76 @@ pub fn run_with_config(
   use browser_type <- list.each(browsers)
 
   // Create webdriver type
+  logger.info("Starting browser")
+  |> logger.string("browser", config.browser_type_to_string(browser_type))
+  |> logger.log
+  use browser <- result.try({ runner.new(browser_type, config) })
+
+  logger.debug("Getting capabilities")
+  |> logger.log
+
+  let capabilities =
+    config.capabilities
+    |> option.unwrap(config.default_capabilities_config())
+
+  logger.debug("Getting request")
+  |> logger.log
+
+  use request <- result.try({
+    browser.request
+    |> option.to_result(error.BrowserDoesNotHaveRequest)
+  })
+
+  logger.debug("Checking if browser is ready")
+  |> logger.log
+
+  use _ <- result.try(retry.until_ok(fn() { session.status(request) }))
+
+  logger.debug("Starting webdriver session")
+  |> logger.log
+
+  use #(socket, new) <- result.try({ session.new(request, capabilities) })
+
   let driver =
-    webdriver.new()
-    |> webdriver.with_config(config)
+    webdriver.new(socket, config, browser)
+    |> webdriver.with_state(Ok(new))
 
-  let session = case driver.config {
-    None -> Error(error.DriverDoesNotHaveConfig)
-    Some(config) -> {
-      logger.info("Starting browser")
-      |> logger.string("browser", config.browser_type_to_string(browser_type))
-      |> logger.log
-      use browser <- result.try({ runner.new(browser_type, config) })
+  // Get initial browsing context
+  let get_tree_parameters =
+    get_tree.default
+    |> get_tree.with_max_depth(1)
 
-      logger.debug("Getting capabilities")
-      |> logger.log
+  let get_tree =
+    retry.until_ok(fn() {
+      browsing_context.get_tree(driver, get_tree_parameters)
+    })
 
-      let capabilities =
-        config.capabilities
-        |> option.unwrap(config.default_capabilities_config())
-
-      logger.debug("Getting request")
-      |> logger.log
-
-      use request <- result.try({
-        browser.request
-        |> option.to_result(error.BrowserDoesNotHaveRequest)
-      })
-
-      logger.debug("Checking if browser is ready")
-      |> logger.log
-
-      use _ <- result.try(retry.until_ok(fn() { session.status(request) }))
-
-      logger.debug("Starting webdriver session")
-      |> logger.log
-
-      session.new(request, capabilities)
-    }
-  }
-
-  let driver = case session {
-    Error(error) -> {
-      logger.error("Failed to create webdriver session")
-      |> logger.string("error", string.inspect(error))
-      |> logger.log
-      webdriver.with_state(driver, Error(error))
-    }
-    Ok(new) -> {
-      let #(socket, session) = new
-      let driver =
-        driver
-        |> webdriver.with_socket(socket)
-        |> webdriver.with_state(Ok(session))
-
-      // Get initial browsing context
-      let get_tree_parameters =
-        get_tree.default
-        |> get_tree.with_max_depth(1)
-
-      let get_tree =
-        retry.until_ok(fn() {
-          browsing_context.get_tree(driver, get_tree_parameters)
-        })
-
-      let info = case get_tree {
-        Error(error) -> Error(error)
-        Ok(get_tree) -> {
-          case get_tree.contexts.list {
-            [info] -> Ok(info)
-            _ -> Error(error.NoBrowsingContexts)
-          }
-        }
-      }
-
-      case info {
-        Ok(info) ->
-          webdriver.with_context(driver, info.context)
-          |> webdriver.with_state(Ok(info))
-        Error(error) -> webdriver.with_state(driver, Error(error))
+  let info = case get_tree {
+    Error(error) -> Error(error)
+    Ok(get_tree) -> {
+      case get_tree.contexts.list {
+        [info] -> Ok(info)
+        _ -> Error(error.NoBrowsingContexts)
       }
     }
   }
 
-  use <- exception.defer(fn() { close(driver) })
+  let driver = case info {
+    Ok(info) ->
+      webdriver.with_context(driver, info.context)
+      |> webdriver.with_state(Ok(info))
+    Error(error) -> webdriver.with_state(driver, Error(error))
+  }
+
+  use <- exception.defer(fn() {
+    logger.debug("Test cleanup")
+    |> logger.log
+    close(driver)
+  })
 
   logger.info("Starting test")
   |> logger.log
-  run(driver)
+  Ok(run(driver))
 }
 
 /// Navigates to the given url
@@ -174,12 +157,15 @@ pub fn goto(
         Error(error) -> Error(error)
         Ok(uri) -> {
           let url = uri.to_string(uri)
-          use context <- result.try({ webdriver.get_context(driver) })
-          let params =
-            navigate.default(context, url)
-            |> navigate.with_wait(readiness_state.Interactive)
-
-          browsing_context.navigate(driver, params)
+          case driver.context {
+            None -> Error(error.DriverDoesNotHaveContext)
+            Some(context) -> {
+              let params =
+                navigate.default(context, url)
+                |> navigate.with_wait(readiness_state.Interactive)
+              browsing_context.navigate(driver, params)
+            }
+          }
         }
       }
     }
@@ -214,8 +200,7 @@ pub fn close(driver: WebDriver(state)) {
   logger.info("Closing webdriver session")
   |> logger.log
   let _ = browser.close(driver)
-  use socket <- result.try({ webdriver.get_socket(driver) })
-  let _ = socket.close(socket)
+  let _ = socket.close(driver.socket)
   driver.state
 }
 

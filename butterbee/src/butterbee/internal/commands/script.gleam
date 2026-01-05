@@ -14,7 +14,6 @@ import butterbidi/script/commands/call_function.{
 }
 import butterbidi/script/definition as script_definition
 import butterbidi/script/types/evaluate_result.{type EvaluateResult}
-import gleam/result
 
 /// Calls a function on the page with the given arguments.
 ///
@@ -40,9 +39,7 @@ pub fn call_function(
       ]),
     )
 
-  use socket <- result.try({ webdriver.get_socket(driver) })
-
-  case socket.send_request(socket, request, command) {
+  case socket.send_request(driver.socket, request, command) {
     Error(error) -> Error(error)
     Ok(response) -> {
       case response.result {

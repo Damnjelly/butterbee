@@ -6,7 +6,7 @@ import butterbee/internal/runner/firefox
 import gleam/dict
 import gleam/erlang/process
 import gleam/list
-import gleam/option
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 import palabres as logger
@@ -90,12 +90,12 @@ fn run(browser: Browser) -> Result(Browser, error.ButterbeeError) {
   |> logger.string("profile_dir", profile_dir)
   |> logger.log
 
-  do_run(cmd, flags, profile_dir)
+  let pid = do_run(cmd, flags, profile_dir)
 
-  Ok(browser)
+  Ok(browser.with_pid(browser, pid))
 }
 
-fn do_run(cmd: String, flags: List(String), profile_dir: String) {
+fn do_run(cmd: String, flags: List(String), profile_dir: String) -> process.Pid {
   process.spawn(fn() {
     let _ = case
       shellout.command(run: cmd, with: flags, in: profile_dir, opt: [])
@@ -123,6 +123,6 @@ fn do_run(cmd: String, flags: List(String), profile_dir: String) {
       Error(error) -> Error(error.CouldNotDeleteProfileDir(error))
     }
 
-    option.Some("Done")
+    Some("Done")
   })
 }

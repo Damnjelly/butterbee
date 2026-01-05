@@ -26,7 +26,7 @@ import butterbidi/input/commands/perform_actions
 import butterbidi/script/types/remote_reference
 import butterbidi/script/types/remote_value
 import gleam/list
-import gleam/option.{None}
+import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 
@@ -44,25 +44,28 @@ pub fn click(
           |> option.to_result(error.NodeDoesNotHaveSharedId)
         })
 
-        use context <- result.try({ webdriver.get_context(driver) })
-
-        let params =
-          perform_actions.default(context)
-          |> perform_actions.with_actions([
-            perform_actions.with_pointer_actions(
-              "mouse action",
-              list.new()
-                |> list.append(move_to_element(shared_id))
-                |> list.append(
-                  click_action(key.mouse_button_to_int(mouse_button)),
+        case driver.context {
+          None -> Error(error.DriverDoesNotHaveContext)
+          Some(context) -> {
+            let params =
+              perform_actions.default(context)
+              |> perform_actions.with_actions([
+                perform_actions.with_pointer_actions(
+                  "mouse action",
+                  list.new()
+                    |> list.append(move_to_element(shared_id))
+                    |> list.append(
+                      click_action(key.mouse_button_to_int(mouse_button)),
+                    ),
                 ),
-            ),
-          ])
+              ])
 
-        // Scroll node into view before clicking to avoid
-        // Getting the 'out of bounds of viewport dimensions' error
-        node.do(driver, node.scroll_into_view())
-        perform(driver, params)
+            // Scroll node into view before clicking to avoid
+            // Getting the 'out of bounds of viewport dimensions' error
+            node.do(driver, node.scroll_into_view())
+            perform(driver, params)
+          }
+        }
       }
     }
     |> webdriver.map_state(driver)
@@ -80,9 +83,9 @@ pub fn enter_keys(
   fn(driver: WebDriver(remote_value.NodeRemoteValue)) {
     let _ = webdriver.do(driver, click(key.LeftClick))
 
-    case webdriver.get_context(driver) {
-      Error(error) -> Error(error)
-      Ok(context) -> {
+    case driver.context {
+      None -> Error(error.DriverDoesNotHaveContext)
+      Some(context) -> {
         let params =
           perform_actions.default(context)
           |> perform_actions.with_actions([
@@ -173,10 +176,5 @@ pub fn perform(
   driver: WebDriver(remote_value.NodeRemoteValue),
   params: perform_actions.PerformActionsParameters,
 ) -> Result(definition.CommandResponse, error.ButterbeeError) {
-  case webdriver.get_socket(driver) {
-    Error(error) -> Error(error)
-    Ok(socket) -> {
-      retry.until_ok(fn() { input.perform_actions(socket, params).1 })
-    }
-  }
+  retry.until_ok(fn() { input.perform_actions(driver.socket, params).1 })
 }

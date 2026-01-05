@@ -4,6 +4,7 @@
 import butterbee/config
 import butterbee/internal/error
 import butterbee/internal/id
+import gleam/erlang/process
 import gleam/http.{Http}
 import gleam/http/request.{type Request}
 import gleam/int
@@ -25,6 +26,7 @@ pub type Browser {
     profile_name: Option(String),
     /// The directory where the profile is located.
     profile_dir: Option(String),
+    pid: Option(process.Pid),
   )
 }
 
@@ -34,6 +36,7 @@ pub const default: Browser = Browser(
   request: None,
   profile_name: None,
   profile_dir: None,
+  pid: None,
 )
 
 pub fn new(browser_to_run: config.BrowserType) -> Browser {
@@ -43,6 +46,7 @@ pub fn new(browser_to_run: config.BrowserType) -> Browser {
     request: None,
     profile_name: None,
     profile_dir: None,
+    pid: None,
   )
 }
 
@@ -60,6 +64,10 @@ pub fn with_profile_name(browser: Browser, profile_name: String) -> Browser {
 
 pub fn with_profile_dir(browser: Browser, profile_dir: String) -> Browser {
   Browser(..browser, profile_dir: Some(profile_dir))
+}
+
+pub fn with_pid(browser: Browser, pid: process.Pid) -> Browser {
+  Browser(..browser, pid: Some(pid))
 }
 
 pub fn get_request(port: Int, host: String) -> Request(String) {

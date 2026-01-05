@@ -38,7 +38,7 @@ import butterbidi/browsing_context/types/locator.{type Locator}
 import butterbidi/script/types/remote_reference
 import butterbidi/script/types/remote_value
 import gleam/list
-import gleam/option
+import gleam/option.{None, Some}
 import gleam/result
 
 /// Finds a node matching the given locator. 
@@ -93,24 +93,27 @@ pub fn from_node(
       |> option.to_result(error.NodeDoesNotHaveSharedId)
     })
 
-    use context <- result.try({ webdriver.get_context(driver) })
+    case driver.context {
+      None -> Error(error.DriverDoesNotHaveContext)
+      Some(context) -> {
+        let params =
+          locate_nodes.new(context, locator)
+          |> locate_nodes.with_start_nodes([
+            remote_reference.shared_reference_from_id(shared_id),
+          ])
 
-    let params =
-      locate_nodes.new(context, locator)
-      |> locate_nodes.with_start_nodes([
-        remote_reference.shared_reference_from_id(shared_id),
-      ])
+        use locate_nodes <- result.try({ locate_nodes(driver, params) })
 
-    use locate_nodes <- result.try({ locate_nodes(driver, params) })
-
-    let nodes = locate_nodes.nodes
-    case list.length(nodes) {
-      1 ->
-        case list.first(nodes) {
-          Ok(node) -> Ok(node)
-          Error(_) -> Error(error.NoNodeFound)
+        let nodes = locate_nodes.nodes
+        case list.length(nodes) {
+          1 ->
+            case list.first(nodes) {
+              Ok(node) -> Ok(node)
+              Error(_) -> Error(error.NoNodeFound)
+            }
+          _ -> Error(error.MoreThanOneNodeFound)
         }
-      _ -> Error(error.MoreThanOneNodeFound)
+      }
     }
   })
   |> webdriver.map_state(driver)
@@ -127,16 +130,19 @@ pub fn nodes_from_node(
       |> option.to_result(error.NodeDoesNotHaveSharedId)
     })
 
-    use context <- result.try({ webdriver.get_context(driver) })
+    case driver.context {
+      None -> Error(error.DriverDoesNotHaveContext)
+      Some(context) -> {
+        let params =
+          locate_nodes.new(context, locator)
+          |> locate_nodes.with_start_nodes([
+            remote_reference.shared_reference_from_id(shared_id),
+          ])
 
-    let params =
-      locate_nodes.new(context, locator)
-      |> locate_nodes.with_start_nodes([
-        remote_reference.shared_reference_from_id(shared_id),
-      ])
-
-    locate_nodes(driver, params)
-    |> result.map(fn(locate_nodes) { locate_nodes.nodes })
+        locate_nodes(driver, params)
+        |> result.map(fn(locate_nodes) { locate_nodes.nodes })
+      }
+    }
   })
   |> webdriver.map_state(driver)
 }

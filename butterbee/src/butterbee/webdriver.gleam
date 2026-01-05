@@ -1,6 +1,7 @@
 //// The webdriver module contains the WebDriver type and functions to create and configure webdriver sessions.
 
 import butterbee/config
+import butterbee/internal/browser
 import butterbee/internal/error
 import butterbee/internal/socket.{type WebDriverSocket}
 import butterbidi/browsing_context/types/browsing_context.{type BrowsingContext} as _
@@ -10,14 +11,15 @@ import gleam/option.{type Option, None, Some}
 pub type WebDriver(state) {
   WebDriver(
     /// The socket to the webdriver server
-    socket: Option(WebDriverSocket),
+    socket: WebDriverSocket,
     /// The browsing context of the webdriver session
     context: Option(BrowsingContext),
     /// The config used during the webdriver session
-    config: Option(config.ButterbeeConfig),
+    config: config.ButterbeeConfig,
     /// Some state that is returned from a command (e.g. `node.value()` fills state with 
     ///Result(String, error.ButterbeeError))
     state: Result(state, error.ButterbeeError),
+    browser: browser.Browser,
   )
 }
 
@@ -27,42 +29,27 @@ pub type Empty {
   Empty
 }
 
-pub fn get_socket(
-  driver: WebDriver(state),
-) -> Result(WebDriverSocket, error.ButterbeeError) {
-  case driver.socket {
-    None -> Error(error.DriverDoesNotHaveSocket)
-    Some(socket) -> Ok(socket)
-  }
-}
-
-pub fn get_context(
-  driver: WebDriver(state),
-) -> Result(BrowsingContext, error.ButterbeeError) {
-  case driver.context {
-    None -> Error(error.DriverDoesNotHaveContext)
-    Some(context) -> Ok(context)
-  }
-}
-
-pub fn get_config(
-  driver: WebDriver(state),
-) -> Result(config.ButterbeeConfig, error.ButterbeeError) {
-  case driver.config {
-    None -> Error(error.DriverDoesNotHaveConfig)
-    Some(config) -> Ok(config)
-  }
-}
-
-pub fn get_state(
-  webdriver: WebDriver(state),
-) -> Result(state, error.ButterbeeError) {
-  webdriver.state
+@internal
+pub fn new(
+  socket: WebDriverSocket,
+  config: config.ButterbeeConfig,
+  browser: browser.Browser,
+) -> WebDriver(Empty) {
+  WebDriver(
+    socket: socket,
+    context: None,
+    config: config,
+    state: Ok(Empty),
+    browser: browser,
+  )
 }
 
 @internal
-pub fn new() -> WebDriver(Empty) {
-  WebDriver(None, None, None, Ok(Empty))
+pub fn with_socket(
+  webdriver: WebDriver(state),
+  socket: WebDriverSocket,
+) -> WebDriver(state) {
+  WebDriver(..webdriver, socket: socket)
 }
 
 @internal
@@ -78,7 +65,7 @@ pub fn with_config(
   webdriver: WebDriver(state),
   config: config.ButterbeeConfig,
 ) -> WebDriver(state) {
-  WebDriver(..webdriver, config: Some(config))
+  WebDriver(..webdriver, config: config)
 }
 
 @internal
@@ -90,11 +77,11 @@ pub fn with_state(
 }
 
 @internal
-pub fn with_socket(
+pub fn with_browser(
   webdriver: WebDriver(state),
-  socket: WebDriverSocket,
+  browser: browser.Browser,
 ) -> WebDriver(state) {
-  WebDriver(..webdriver, socket: Some(socket))
+  WebDriver(..webdriver, browser: browser)
 }
 
 @internal

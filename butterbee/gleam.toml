@@ -53,8 +53,8 @@ gleeunit = ">= 1.6.1 and < 2.0.0"
 pprint = ">= 1.0.6 and < 2.0.0"
 
 [tools.butterbee.browser.firefox]
-flags = ["-headless"]
+# flags = ["-headless"]
 
 [tools.butterbee.capabilities.always_match]
 webSocketUrl = true
-"goog:chromeOptions" = { args = ["--headless=new", "--no-sandbox"] }
+# "goog:chromeOptions" = { args = ["--headless=new", "--no-sandbox"] }

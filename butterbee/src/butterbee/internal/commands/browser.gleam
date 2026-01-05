@@ -10,7 +10,6 @@ import butterbee/internal/socket
 import butterbee/webdriver
 import butterbidi/browser/definition as browser_definition
 import butterbidi/definition
-import gleam/result
 
 /// Closes the current browser.
 /// 
@@ -26,7 +25,5 @@ pub fn close(
       ]),
     )
 
-  use socket <- result.try({ webdriver.get_socket(driver) })
-
-  socket.send_request(socket, request, command)
+  socket.send_request(driver.socket, request, command)
 }

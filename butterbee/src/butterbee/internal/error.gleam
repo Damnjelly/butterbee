@@ -32,7 +32,6 @@ pub type ButterbeeError {
   CreatePortDirError(simplifile.FileError)
   CreateProfileDirError(simplifile.FileError)
   CreateUserPrefsError(simplifile.FileError)
-  DriverDoesNotHaveConfig
   DriverDoesNotHaveContext
   DriverDoesNotHaveSocket
   DriverDoesNotHaveState
