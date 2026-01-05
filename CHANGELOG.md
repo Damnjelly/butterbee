@@ -7,6 +7,7 @@
 - Added support for running tests in multiple browsers
 - The browser now more consistently closes after a test panics, preventing lingering browser processes
 - Added a chromium browser to the github action runner example
+- By default filters out the `WebSocket handshake failed` error message
 
 ### Changed
 

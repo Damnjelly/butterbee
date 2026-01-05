@@ -3,6 +3,7 @@ import butterbee/internal/commands/browser
 import butterbee/internal/commands/browsing_context
 import butterbee/internal/commands/session
 import butterbee/internal/error
+import butterbee/internal/log
 import butterbee/internal/retry
 import butterbee/internal/runner/runner
 import butterbee/internal/socket
@@ -25,13 +26,17 @@ import simplifile
 /// Call this in the main function of your test, before calling gleeunit.main.
 /// Then call [`butterbee.run`](file:///home/gelei/Documents/butterbee/butterbee/build/dev/docs/butterbee/butterbee.html#run) in your test
 /// to start using butterbee.
+///
+/// Note: Adds a log filter for `WebSocket handshake failed: Sock(Econnrefused)`
 pub fn init() {
   logger.debug("Initializing butterbee")
   |> logger.log
+
   logger.debug("Deleting data_dir")
   |> logger.log
   let _ = simplifile.delete("/tmp/butterbee")
 
+  log.add_primary_filters(log.filters)
   Nil
 }
 
