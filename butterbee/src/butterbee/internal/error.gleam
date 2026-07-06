@@ -1,12 +1,13 @@
 import butterbidi/definition
 import gleam/json
+import gleam/otp/actor
 import simplifile
 import stratus
 
 pub type WebSocketError {
   CouldNotSendRequest(stratus.SocketReason)
   CouldNotStart(stratus.SocketReason)
-  CouldNotInit(stratus.InitializationError)
+  CouldNotInit(actor.StartError)
 }
 
 pub type PortError {
