@@ -32,7 +32,7 @@
             packages =
               let
                 dependencies = with pkgs; [
-                  erlang
+                  beamPackages.erlang
                   rebar3
                 ];
 
