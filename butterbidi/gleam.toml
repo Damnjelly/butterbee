@@ -17,7 +17,7 @@ href = "https://github.com/Damnjelly/butterbee"
 [[documentation.pages]]
 title = "changelog"
 path = "changelog.html"
-source = "../CHANGELOG.md"
+source = "CHANGELOG.md"
 
 internal-modules = ["internal/*"]
 

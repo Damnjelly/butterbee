@@ -6,7 +6,7 @@ import butterbee/internal/runner/firefox
 import gleam/dict
 import gleam/erlang/process
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{Some}
 import gleam/result
 import gleam/string
 import palabres as logger
