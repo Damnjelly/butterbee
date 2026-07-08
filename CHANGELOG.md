@@ -46,6 +46,10 @@ pub fn my_test() {
 
 # Butterbidi Changelog
 
+## [1.0.2] - 2026-07-08
+
+- Version bump
+
 ## [1.0.1] - 2025-11-11
 
 ### Changed

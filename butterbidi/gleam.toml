@@ -1,7 +1,7 @@
 name = "butterbidi"
-version = "1.0.1"
+version = "1.0.2"
 
-description = "Spec compliant webdriver bidi types, decoders and encoders for gleam"
+description = "Spec compliant webdriver bidi types, decoders, and encoders for gleam"
 
 licences = ["Apache-2.0"]
 
@@ -22,6 +22,6 @@ source = "CHANGELOG.md"
 internal-modules = ["internal/*"]
 
 [dependencies]
-gleam_stdlib = ">= 0.44.0 and < 2.0.0"
-gleam_json = ">= 3.0.2 and < 4.0.0"
-palabres = ">= 1.0.2 and < 2.0.0"
+gleam_stdlib = ">= 1.0.3 and < 2.0.0"
+gleam_json = ">= 3.1.0 and < 4.0.0"
+palabres = ">= 1.0.4 and < 2.0.0"
