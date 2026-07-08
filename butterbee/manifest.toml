@@ -9,7 +9,7 @@
 packages = [
   { name = "argv", version = "1.1.0", build_tools = ["gleam"], requirements = [], otp_app = "argv", source = "hex", outer_checksum = "3277D100448BDB4A29B6D58C0F36F631CBC349E8BDD09766C6309DF202831140" },
   { name = "birdie", version = "2.0.1", build_tools = ["gleam"], requirements = ["argv", "edit_distance", "envoy", "filepath", "glance", "gleam_community_ansi", "gleam_json", "gleam_stdlib", "global_value", "justin", "rank", "simplifile", "term_size", "tom", "trie_again"], otp_app = "birdie", source = "hex", outer_checksum = "1A7923D57DFB63885F1EFBCD5ECE3E4A805FB680F9DFFDB5E85D64A05DD3A563" },
-  { name = "butterbidi", version = "1.0.1", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib", "palabres"], otp_app = "butterbidi", source = "hex", outer_checksum = "4B438F769AD08E51384734E60DFE495C070E1761682825A133C90974F1CEA3CA" },
+  { name = "butterbidi", version = "1.0.2", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib", "palabres"], otp_app = "butterbidi", source = "hex", outer_checksum = "D9151891D715CFF75792176B2BE47CBB906E7C9EB19539C518E0A46F21CA2F22" },
   { name = "edit_distance", version = "3.0.1", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "edit_distance", source = "hex", outer_checksum = "DE588BC3483ED6DBA717211B59F3178891A5FC6F1C00D415AE8C4233EAFB94B1" },
   { name = "envoy", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "9C6FBB6BFA02A52798BEEC5977A738CAD6E4A057F4B67FD0C8061AD2502C191A" },
   { name = "exception", version = "2.1.1", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "exception", source = "hex", outer_checksum = "6BDEA95248093599391C3B5DF1835C5C6A86C353C2F99CE539B450E3432FE117" },
@@ -48,7 +48,7 @@ packages = [
 [requirements]
 argv = { version = ">= 1.0.2 and < 2.0.0" }
 birdie = { version = ">= 1.4.1 and < 3.0.0" }
-butterbidi = { version = ">= 1.0.1 and < 2.0.0" }
+butterbidi = { version = ">= 1.0.2 and < 2.0.0" }
 exception = { version = ">= 2.1.0 and < 3.0.0" }
 glam = { version = ">= 2.0.3 and < 3.0.0" }
 gleam_erlang = { version = ">= 1.2.0 and < 2.0.0" }

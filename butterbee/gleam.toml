@@ -1,5 +1,5 @@
 name = "butterbee"
-version = "2.0.0"
+version = "2.0.1"
 description = "A webdriver bidi client written in Gleam, for Gleam."
 licences = ["Apache-2.0"]
 
@@ -30,7 +30,7 @@ path = "changelog.html"
 source = "CHANGELOG.md"
 
 [dependencies]
-butterbidi = ">= 1.0.1 and < 2.0.0"
+butterbidi = ">= 1.0.2 and < 2.0.0"
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
 gleam_erlang = ">= 1.2.0 and < 2.0.0"
 shellout = ">= 1.7.0 and < 2.0.0"
